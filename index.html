@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Code Editor</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        tiffany: '#0ABAB5',
+                        tiffanyDark: '#08968d',
+                        darkBg: '#1e1e1e',
+                        darkPanel: '#2d2d2d'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['"Fira Code"', 'Consolas', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- CodeMirror CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/monokai.min.css">
+    
+    <!-- CodeMirror JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    
+    <!-- CodeMirror Modes (Language support) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
+    
+    <!-- CodeMirror Addons -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/matchbrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/selection/active-line.min.js"></script>
+
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            overflow: hidden; /* 防止整個頁面捲動 */
+        }
+        
+        /* 讓 CodeMirror 填滿剩餘高度 */
+        .CodeMirror {
+            height: 100%;
+            font-family: 'Fira Code', monospace;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        /* 淺色模式下自訂一下 CodeMirror 邊框與背景 */
+        html:not(.dark) .CodeMirror {
+            background-color: #fafafa;
+            color: #333;
+        }
+        
+        /* 自訂滾動條 */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #88888855;
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #88888888;
+        }
+
+        /* 拖曳遮罩的過渡動畫 */
+        #drag-overlay {
+            transition: opacity 0.2s ease-in-out, visibility 0.2s;
+        }
+        
+        /* Toast 訊息過渡動畫 */
+        .toast-enter {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        .toast-enter-active {
+            transform: translateY(0);
+            opacity: 1;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .toast-exit {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .toast-exit-active {
+            transform: translateY(100%);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 dark:bg-darkBg dark:text-gray-200 flex flex-col h-screen transition-colors duration-300">
+
+    <!-- 頂部導覽列 -->
+    <header class="flex-none h-14 bg-white dark:bg-darkPanel shadow-sm border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 z-10">
+        <!-- 左側：Logo 與 檔名 -->
+        <div class="flex items-center space-x-4">
+            <div class="flex items-center text-tiffany font-bold text-xl tracking-wide">
+                <i class="fa-solid fa-code mr-2"></i>
+                <span class="hidden sm:inline">WebPad++</span>
+            </div>
+            <div class="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-2"></div>
+            <div id="file-info" class="flex items-center space-x-2 text-sm">
+                <span id="file-name" class="font-mono text-gray-500 dark:text-gray-400">未命名.html</span>
+                <span id="unsaved-indicator" class="text-tiffany hidden"><i class="fa-solid fa-circle text-[8px]"></i></span>
+            </div>
+        </div>
+
+        <!-- 右側：功能按鈕 -->
+        <div class="flex items-center space-x-2 sm:space-x-3">
+            <button id="btn-open" class="px-3 py-1.5 text-sm font-medium rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors tooltip" title="開啟檔案 (Ctrl+O)">
+                <i class="fa-regular fa-folder-open sm:mr-1"></i> <span class="hidden sm:inline">開啟</span>
+            </button>
+            <button id="btn-save" class="px-3 py-1.5 text-sm font-medium bg-tiffany hover:bg-tiffanyDark text-white rounded-md shadow-sm transition-colors tooltip flex items-center" title="原地存檔 (Ctrl+S)">
+                <i class="fa-regular fa-floppy-disk sm:mr-1"></i> <span class="hidden sm:inline">存檔</span>
+            </button>
+            
+            <div class="h-5 w-px bg-gray-300 dark:bg-gray-600 mx-1"></div>
+            
+            <button id="btn-theme" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="切換主題">
+                <i class="fa-solid fa-moon dark:hidden text-gray-600"></i>
+                <i class="fa-solid fa-sun hidden dark:block text-yellow-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- 編輯器主體 -->
+    <main class="flex-grow relative h-full w-full">
+        <textarea id="code-editor"></textarea>
+        
+        <!-- 拖曳檔案時的視覺遮罩 -->
+        <div id="drag-overlay" class="absolute inset-0 z-50 bg-tiffany/10 backdrop-blur-[2px] flex items-center justify-center opacity-0 invisible border-4 border-dashed border-tiffany m-4 rounded-xl">
+            <div class="bg-white dark:bg-darkPanel p-8 rounded-2xl shadow-2xl text-center transform scale-105">
+                <i class="fa-solid fa-file-arrow-down text-6xl text-tiffany mb-4 drop-shadow-md"></i>
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">放開滑鼠即可開啟</h2>
+                <p class="text-gray-500 dark:text-gray-400">支援 .html, .js, .css, .txt 等純文字檔</p>
+                <p class="text-xs text-tiffany mt-4 font-semibold"><i class="fa-solid fa-bolt"></i> 支援原地儲存覆寫 (A 計畫)</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- 底部狀態列 (StatusBar) -->
+    <footer class="flex-none h-6 bg-gray-100 dark:bg-[#252525] border-t border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 text-xs text-gray-500 dark:text-gray-400 font-mono z-10">
+        <div>
+            <span id="cursor-position">Ln 1, Col 1</span>
+        </div>
+        <div class="flex space-x-4">
+            <span>UTF-8</span>
+            <span id="file-mode">HTML</span>
+        </div>
+    </footer>
+
+    <!-- 自訂 Toast 提示框 (取代 alert) -->
+    <div id="toast-container" class="fixed bottom-10 right-10 z-[100] flex flex-col gap-2 pointer-events-none"></div>
+
+    <script>
+        // --- 狀態變數 ---
+        let editor;
+        let currentFileHandle = null; // 儲存 File System Access API 的控制代碼
+        let isUnsaved = false;
+        
+        // --- 初始化預設內容 ---
+        const defaultCode = `<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的網頁</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        h1 { color: #0ABAB5; }
+    </style>
+</head>
+<body>
+    <h1>Hello, WebPad++ !</h1>
+    <p>試著將你電腦裡的 HTML 檔案拖曳進來吧！</p>
+</body>
+</html>`;
+
+        // --- Toast 提示系統 (不使用 alert) ---
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            // 根據類型設定顏色與圖示
+            const isError = type === 'error';
+            const bgColor = isError ? 'bg-red-500' : 'bg-tiffany';
+            const icon = isError ? 'fa-circle-xmark' : 'fa-circle-check';
+            
+            toast.className = `${bgColor} text-white px-4 py-3 rounded-lg shadow-lg flex items-center space-x-3 pointer-events-auto toast-enter`;
+            toast.innerHTML = `
+                <i class="fa-solid ${icon} text-lg"></i>
+                <span class="font-medium">${message}</span>
+            `;
+            
+            container.appendChild(toast);
+            
+            // 觸發進場動畫
+            requestAnimationFrame(() => {
+                toast.classList.remove('toast-enter');
+                toast.classList.add('toast-enter-active');
+            });
+
+            // 3秒後自動消失
+            setTimeout(() => {
+                toast.classList.remove('toast-enter-active');
+                toast.classList.add('toast-exit-active');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // --- 更新 UI 狀態 ---
+        function updateUI(fileName) {
+            document.getElementById('file-name').textContent = fileName;
+            document.getElementById('unsaved-indicator').classList.add('hidden');
+            isUnsaved = false;
+            
+            // 根據副檔名切換語法高亮
+            const ext = fileName.split('.').pop().toLowerCase();
+            let mode = "htmlmixed";
+            let modeName = "HTML";
+            if (ext === 'js') { mode = "javascript"; modeName = "JavaScript"; }
+            else if (ext === 'css') { mode = "css"; modeName = "CSS"; }
+            else if (ext === 'json') { mode = "application/json"; modeName = "JSON"; }
+            
+            editor.setOption("mode", mode);
+            document.getElementById('file-mode').textContent = modeName;
+        }
+
+        function markUnsaved() {
+            if (!isUnsaved) {
+                isUnsaved = true;
+                document.getElementById('unsaved-indicator').classList.remove('hidden');
+            }
+        }
+
+        // --- 初始化 CodeMirror ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const textarea = document.getElementById('code-editor');
+            
+            editor = CodeMirror.fromTextArea(textarea, {
+                lineNumbers: true,
+                mode: "htmlmixed",
+                theme: document.documentElement.classList.contains('dark') ? 'monokai' : 'default',
+                indentUnit: 4,
+                tabSize: 4,
+                indentWithTabs: false,
+                matchBrackets: true,
+                autoCloseBrackets: true,
+                styleActiveLine: true,
+                lineWrapping: true
+            });
+
+            editor.setValue(defaultCode);
+            
+            // 監聽內容變更
+            editor.on('change', () => { markUnsaved(); });
+            
+            // 監聽游標位置
+            editor.on('cursorActivity', () => {
+                const pos = editor.getCursor();
+                document.getElementById('cursor-position').textContent = `Ln ${pos.line + 1}, Col ${pos.ch + 1}`;
+            });
+
+            // --- 主題切換邏輯 ---
+            const btnTheme = document.getElementById('btn-theme');
+            btnTheme.addEventListener('click', () => {
+                const htmlStr = document.documentElement;
+                htmlStr.classList.toggle('dark');
+                const isDark = htmlStr.classList.contains('dark');
+                editor.setOption('theme', isDark ? 'monokai' : 'default');
+            });
+            
+            // 支援快捷鍵 Ctrl+S / Cmd+S
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                    e.preventDefault();
+                    saveFile();
+                }
+                if ((e.ctrlKey || e.metaKey) && e.key === 'o') {
+                    e.preventDefault();
+                    openFilePicker();
+                }
+            });
+        });
+
+        // --- 核心功能：開啟檔案 (按鈕方式) ---
+        async function openFilePicker() {
+            if (!window.showOpenFilePicker) {
+                showToast("您的瀏覽器不支援 File System API，請使用拖曳功能或更換 Chrome/Edge", "error");
+                return;
+            }
+            try {
+                const [fileHandle] = await window.showOpenFilePicker({
+                    types: [{
+                        description: 'Text/Code Files',
+                        accept: { 'text/*': ['.html', '.js', '.css', '.txt', '.json'] }
+                    }]
+                });
+                
+                const file = await fileHandle.getFile();
+                const contents = await file.text();
+                
+                // 記住控制代碼與更新畫面
+                currentFileHandle = fileHandle;
+                editor.setValue(contents);
+                updateUI(file.name);
+                showToast(`已開啟 ${file.name}`);
+                
+            } catch (error) {
+                // 使用者取消選取檔案不會拋出需處理的錯誤
+                if (error.name !== 'AbortError') {
+                    console.error(error);
+                    showToast("開啟檔案失敗", "error");
+                }
+            }
+        }
+
+        // --- 核心功能：原地存檔 (A 計畫) ---
+        async function saveFile() {
+            const contentToSave = editor.getValue();
+
+            // 如果已經有控制代碼 (透過拖曳或開啟按鈕取得)，直接覆寫
+            if (currentFileHandle) {
+                try {
+                    // 要求寫入權限，如果使用者尚未授權，瀏覽器會跳出提示
+                    const writable = await currentFileHandle.createWritable();
+                    await writable.write(contentToSave);
+                    await writable.close();
+                    
+                    isUnsaved = false;
+                    document.getElementById('unsaved-indicator').classList.add('hidden');
+                    showToast("儲存成功！(已原地覆寫)", "success");
+                } catch (error) {
+                    console.error(error);
+                    showToast("儲存失敗，可能被拒絕權限", "error");
+                }
+            } else {
+                // (B 計畫) 如果沒有控制代碼（例如一開始預設的未命名檔案），觸發傳統下載
+                downloadFallback(contentToSave);
+            }
+        }
+
+        // 傳統下載備案
+        function downloadFallback(content) {
+            const blob = new Blob([content], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = document.getElementById('file-name').textContent || 'untitled.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            isUnsaved = false;
+            document.getElementById('unsaved-indicator').classList.add('hidden');
+            showToast("已下載儲存為新檔案", "success");
+        }
+
+        // 按鈕事件綁定
+        document.getElementById('btn-open').addEventListener('click', openFilePicker);
+        document.getElementById('btn-save').addEventListener('click', saveFile);
+
+        // --- 拖曳檔案處理邏輯 (Drag & Drop) ---
+        const dragOverlay = document.getElementById('drag-overlay');
+        let dragCounter = 0; // 防止子元素拖曳閃爍的計數器
+
+        // 當檔案拖曳進視窗
+        window.addEventListener('dragenter', (e) => {
+            e.preventDefault();
+            dragCounter++;
+            if (dragCounter === 1) {
+                dragOverlay.classList.remove('opacity-0', 'invisible');
+                dragOverlay.classList.add('opacity-100', 'visible');
+            }
+        });
+
+        // 當檔案在視窗內移動
+        window.addEventListener('dragover', (e) => {
+            e.preventDefault(); // 必須 preventDefault 才能觸發 drop
+        });
+
+        // 當檔案離開視窗
+        window.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dragCounter--;
+            if (dragCounter === 0) {
+                dragOverlay.classList.remove('opacity-100', 'visible');
+                dragOverlay.classList.add('opacity-0', 'invisible');
+            }
+        });
+
+        // 當檔案放下 (Drop)
+        window.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            dragCounter = 0; // 重置計數器
+            dragOverlay.classList.remove('opacity-100', 'visible');
+            dragOverlay.classList.add('opacity-0', 'invisible');
+
+            if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+                const item = e.dataTransfer.items[0];
+                
+                // 確認是檔案類型
+                if (item.kind === 'file') {
+                    try {
+                        // 【黑科技核心】嘗試取得 FileSystemHandle，為了未來的原地存檔
+                        if (item.getAsFileSystemHandle) {
+                            const handle = await item.getAsFileSystemHandle();
+                            if (handle.kind === 'file') {
+                                currentFileHandle = handle; // 記住它！
+                                const file = await handle.getFile();
+                                loadFileContent(file);
+                                return;
+                            }
+                        }
+                        
+                        // 備案：如果瀏覽器不支援 getAsFileSystemHandle，回退一般讀取 (無法原地存檔)
+                        const file = item.getAsFile();
+                        currentFileHandle = null; // 失去原地存檔能力
+                        loadFileContent(file);
+
+                    } catch (error) {
+                        console.error("處理拖曳檔案失敗:", error);
+                        showToast("無法讀取檔案", "error");
+                    }
+                }
+            }
+        });
+
+        // 讀取檔案內容並寫入編輯器
+        function loadFileContent(file) {
+            // 簡單檢查一下是不是純文字檔 (避免讀入巨大的圖片檔崩潰)
+            // HTML, JS, CSS 都可以，或者沒有 type (某些作業系統行為)
+            const validTypes = ['text/', 'application/json', 'application/javascript'];
+            const isValid = !file.type || validTypes.some(t => file.type.startsWith(t)) || file.name.endsWith('.html');
+            
+            if (!isValid) {
+                showToast("請拖曳文字或程式碼檔案", "error");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                editor.setValue(e.target.result);
+                updateUI(file.name);
+                showToast(`成功載入 ${file.name}`);
+                
+                if (currentFileHandle) {
+                    // 如果有 Handle，提示使用者這支援 A 計畫
+                    setTimeout(() => showToast("💡 此檔案支援按下 Ctrl+S 原地存檔！"), 1000);
+                }
+            };
+            reader.onerror = () => showToast("讀取檔案失敗", "error");
+            reader.readAsText(file);
+        }
+
+    </script>
+</body>
+</html>
