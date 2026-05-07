@@ -118,15 +118,18 @@
     <!-- 頂部導覽列 -->
     <header class="flex-none h-14 bg-white dark:bg-darkPanel shadow-sm border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 z-10">
         <!-- 左側：Logo 與 檔名 -->
-        <div class="flex items-center space-x-4">
-            <div class="flex items-center text-tiffany font-bold text-xl tracking-wide">
+        <div class="flex items-center space-x-4 flex-1 min-w-0 pr-4">
+            <div class="flex items-center text-tiffany font-bold text-xl tracking-wide flex-shrink-0">
                 <i class="fa-solid fa-code mr-2"></i>
                 <span class="hidden sm:inline">WebPad++</span>
             </div>
-            <div class="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-2"></div>
-            <div id="file-info" class="flex items-center space-x-2 text-sm">
-                <span id="file-name" class="font-mono text-gray-500 dark:text-gray-400">未命名.html</span>
-                <span id="unsaved-indicator" class="text-tiffany hidden"><i class="fa-solid fa-circle text-[8px]"></i></span>
+            <div class="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-2 flex-shrink-0"></div>
+            <div id="file-info" class="flex items-center space-x-2 text-sm min-w-0">
+                <span id="file-name" class="font-mono text-gray-500 dark:text-gray-400 truncate max-w-[150px] sm:max-w-xs">未命名.html</span>
+                <span id="unsaved-indicator" class="text-tiffany hidden flex-shrink-0"><i class="fa-solid fa-circle text-[8px]"></i></span>
+                <span id="sync-badge" class="hidden px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-700 border border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800 flex-shrink-0" title="支援原地覆寫存檔">
+                    <i class="fa-solid fa-link mr-1"></i>已連結本機
+                </span>
             </div>
         </div>
 
@@ -246,6 +249,14 @@
             document.getElementById('unsaved-indicator').classList.add('hidden');
             isUnsaved = false;
             
+            // 更新原地存檔的視覺提示 Badge
+            const syncBadge = document.getElementById('sync-badge');
+            if (currentFileHandle) {
+                syncBadge.classList.remove('hidden');
+            } else {
+                syncBadge.classList.add('hidden');
+            }
+
             // 根據副檔名切換語法高亮
             const ext = fileName.split('.').pop().toLowerCase();
             let mode = "htmlmixed";
@@ -393,71 +404,77 @@
         document.getElementById('btn-open').addEventListener('click', openFilePicker);
         document.getElementById('btn-save').addEventListener('click', saveFile);
 
-        // --- 拖曳檔案處理邏輯 (Drag & Drop) ---
+        // --- 拖曳檔案處理邏輯 (Drag & Drop) 強化版 ---
         const dragOverlay = document.getElementById('drag-overlay');
         let dragCounter = 0; // 防止子元素拖曳閃爍的計數器
 
-        // 當檔案拖曳進視窗
-        window.addEventListener('dragenter', (e) => {
-            e.preventDefault();
-            dragCounter++;
-            if (dragCounter === 1) {
-                dragOverlay.classList.remove('opacity-0', 'invisible');
-                dragOverlay.classList.add('opacity-100', 'visible');
-            }
+        // 【關鍵修復】全面在捕獲階段阻擋瀏覽器預設行為，防止瀏覽器直接跳轉開啟檔案
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            document.addEventListener(eventName, (e) => {
+                if (e.dataTransfer && e.dataTransfer.types && Array.from(e.dataTransfer.types).includes('Files')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }, { capture: true });
         });
 
-        // 當檔案在視窗內移動
-        window.addEventListener('dragover', (e) => {
-            e.preventDefault(); // 必須 preventDefault 才能觸發 drop
-        });
+        // 當檔案拖曳進視窗
+        document.addEventListener('dragenter', (e) => {
+            if (e.dataTransfer && e.dataTransfer.types && Array.from(e.dataTransfer.types).includes('Files')) {
+                dragCounter++;
+                if (dragCounter === 1) {
+                    dragOverlay.classList.remove('opacity-0', 'invisible');
+                    dragOverlay.classList.add('opacity-100', 'visible');
+                }
+            }
+        }, { capture: true });
 
         // 當檔案離開視窗
-        window.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            dragCounter--;
-            if (dragCounter === 0) {
-                dragOverlay.classList.remove('opacity-100', 'visible');
-                dragOverlay.classList.add('opacity-0', 'invisible');
+        document.addEventListener('dragleave', (e) => {
+            if (e.dataTransfer && e.dataTransfer.types && Array.from(e.dataTransfer.types).includes('Files')) {
+                dragCounter--;
+                if (dragCounter === 0) {
+                    dragOverlay.classList.remove('opacity-100', 'visible');
+                    dragOverlay.classList.add('opacity-0', 'invisible');
+                }
             }
-        });
+        }, { capture: true });
 
         // 當檔案放下 (Drop)
-        window.addEventListener('drop', async (e) => {
-            e.preventDefault();
-            dragCounter = 0; // 重置計數器
-            dragOverlay.classList.remove('opacity-100', 'visible');
-            dragOverlay.classList.add('opacity-0', 'invisible');
+        document.addEventListener('drop', async (e) => {
+            if (e.dataTransfer && e.dataTransfer.types && Array.from(e.dataTransfer.types).includes('Files')) {
+                dragCounter = 0; // 重置計數器
+                dragOverlay.classList.remove('opacity-100', 'visible');
+                dragOverlay.classList.add('opacity-0', 'invisible');
 
-            if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
-                const item = e.dataTransfer.items[0];
-                
-                // 確認是檔案類型
-                if (item.kind === 'file') {
-                    try {
-                        // 【黑科技核心】嘗試取得 FileSystemHandle，為了未來的原地存檔
-                        if (item.getAsFileSystemHandle) {
-                            const handle = await item.getAsFileSystemHandle();
-                            if (handle.kind === 'file') {
-                                currentFileHandle = handle; // 記住它！
-                                const file = await handle.getFile();
-                                loadFileContent(file);
-                                return;
+                if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+                    const item = e.dataTransfer.items[0];
+                    
+                    if (item.kind === 'file') {
+                        try {
+                            if (item.getAsFileSystemHandle) {
+                                const handle = await item.getAsFileSystemHandle();
+                                if (handle.kind === 'file') {
+                                    currentFileHandle = handle; // 記住它！
+                                    const file = await handle.getFile();
+                                    loadFileContent(file);
+                                    return;
+                                }
                             }
-                        }
-                        
-                        // 備案：如果瀏覽器不支援 getAsFileSystemHandle，回退一般讀取 (無法原地存檔)
-                        const file = item.getAsFile();
-                        currentFileHandle = null; // 失去原地存檔能力
-                        loadFileContent(file);
+                            
+                            // 備案
+                            const file = item.getAsFile();
+                            currentFileHandle = null; 
+                            loadFileContent(file);
 
-                    } catch (error) {
-                        console.error("處理拖曳檔案失敗:", error);
-                        showToast("無法讀取檔案", "error");
+                        } catch (error) {
+                            console.error("處理拖曳檔案失敗:", error);
+                            showToast("無法讀取檔案", "error");
+                        }
                     }
                 }
             }
-        });
+        }, { capture: true });
 
         // 讀取檔案內容並寫入編輯器
         function loadFileContent(file) {
@@ -476,11 +493,6 @@
                 editor.setValue(e.target.result);
                 updateUI(file.name);
                 showToast(`成功載入 ${file.name}`);
-                
-                if (currentFileHandle) {
-                    // 如果有 Handle，提示使用者這支援 A 計畫
-                    setTimeout(() => showToast("💡 此檔案支援按下 Ctrl+S 原地存檔！"), 1000);
-                }
             };
             reader.onerror = () => showToast("讀取檔案失敗", "error");
             reader.readAsText(file);
