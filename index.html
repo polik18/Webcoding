@@ -9,35 +9,34 @@
     <script>
         tailwind.config = { darkMode: 'class' }
     </script>
-    <!-- FontAwesome (提供工具列的圖示) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- CodeMirror 核心與樣式 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    
+    <!-- CodeMirror 語言支援 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
     
+    <!-- CodeMirror Lint 擴充與外部除錯引擎 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/lint/lint.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/lint/lint.min.js"></script>
     
-    <!-- JS, CSS, HTML 外部除錯引擎 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jshint/2.13.6/jshint.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/lint/javascript-lint.min.js"></script>
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/csslint/1.0.5/csslint.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/lint/css-lint.min.js"></script>
-    
     <script src="https://cdn.jsdelivr.net/npm/htmlhint@0.9.13/lib/htmlhint.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/lint/html-lint.min.js"></script>
 
     <style>
-        /* 讓 CodeMirror 填滿容器 */
-        .CodeMirror { height: 100% !important; font-family: 'Fira Code', monospace; font-size: 15px; }
+        /* 讓 CodeMirror 填滿容器並支援 flex 佈局的伸縮 */
+        .CodeMirror { position: absolute; top: 0; bottom: 0; left: 0; right: 0; height: 100% !important; font-family: 'Fira Code', monospace; font-size: 15px; z-index: 10; }
         
         /* 滾動條美化 */
         ::-webkit-scrollbar { width: 10px; height: 10px; }
@@ -56,6 +55,7 @@
             font-family: 'Inter', sans-serif;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             opacity: 1 !important;
+            z-index: 100;
         }
 
         #drop-overlay {
@@ -63,11 +63,13 @@
             backdrop-filter: blur(4px);
             z-index: 50;
         }
+
+        /* 自訂底色用於終端機 */
+        .term-bg { background-color: #1e1e1e; }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 h-screen flex flex-col overflow-hidden transition-colors duration-200">
     
-    <!-- 頂部導覽列 -->
     <nav class="flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm z-10 flex-shrink-0">
         <div class="flex items-center gap-4">
             <h1 class="text-xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent flex items-center gap-2">
@@ -75,12 +77,16 @@
             </h1>
             
             <div class="flex items-center gap-2">
-                <button onclick="openFile()" class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition" title="開啟檔案 (Ctrl+O)">
+                <button onclick="openFile()" class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition" title="開啟檔案">
                     <i class="fa-regular fa-folder-open"></i> 開啟
                 </button>
-                <button onclick="saveFile()" class="px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded transition flex items-center gap-1 shadow-sm" title="儲存檔案 (Ctrl+S)">
+                <button onclick="saveFile()" class="px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded transition flex items-center gap-1 shadow-sm" title="儲存檔案">
                     <i class="fa-regular fa-floppy-disk"></i> 儲存
                     <span id="unsaved-indicator" class="hidden w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span>
+                </button>
+                <!-- 新增：執行按鈕 -->
+                <button onclick="runCode()" class="px-3 py-1.5 text-sm bg-green-600 hover:bg-green-700 text-white rounded transition flex items-center gap-1 shadow-sm" title="執行程式 (Ctrl+Enter)">
+                    <i class="fa-solid fa-play"></i> 執行
                 </button>
             </div>
         </div>
@@ -96,7 +102,11 @@
         </div>
 
         <div class="flex items-center gap-3">
-            <span id="file-name" class="text-sm text-gray-500 dark:text-gray-400 max-w-[150px] truncate">未命名檔案.html</span>
+            <!-- 可點擊修改的檔名 -->
+            <div onclick="renameFile()" class="group flex items-center gap-2 px-2 py-1 rounded cursor-pointer border border-transparent hover:border-blue-300 hover:bg-blue-50 dark:hover:border-blue-700 dark:hover:bg-blue-900/30 transition-all" title="點擊修改檔名">
+                <span id="file-name" class="text-sm font-medium text-gray-600 dark:text-gray-300 max-w-[150px] truncate group-hover:text-blue-600 dark:group-hover:text-blue-400">未命名檔案.html</span>
+                <i class="fa-solid fa-pen text-xs text-gray-400 group-hover:text-blue-500"></i>
+            </div>
             <button onclick="toggleTheme()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition">
                 <i id="theme-icon" class="fa-solid fa-moon"></i>
             </button>
@@ -105,10 +115,36 @@
 
     <main class="flex-grow flex relative overflow-hidden">
         
-        <!-- 左側/主體：CodeMirror 程式碼編輯器 -->
+        <!-- 左側/主體：CodeMirror 程式碼編輯器與底部 IDE 面板 -->
         <div id="editor-container" class="w-full h-full flex flex-col">
-            <textarea id="code-editor"></textarea>
+            <!-- 程式碼編輯器容器 (需設為 relative 以便 CodeMirror 絕對定位填滿) -->
+            <div class="flex-grow relative w-full">
+                <textarea id="code-editor"></textarea>
+            </div>
             
+            <!-- 新增：IDE 面板 (問題與終端機) -->
+            <div id="ide-panel" class="hidden h-[250px] flex-shrink-0 flex-col term-bg border-t border-gray-700 font-mono text-sm shadow-[0_-4px_15px_rgba(0,0,0,0.15)] z-20">
+                <!-- 面板標籤列 -->
+                <div class="flex items-center bg-[#252526] text-gray-400 border-b border-gray-700 px-2">
+                    <button onclick="switchPanelTab('problems')" id="tab-problems" class="px-4 py-2 border-b-2 border-blue-500 text-white hover:text-gray-200 transition-colors flex items-center gap-2">
+                        問題 <span id="problem-count" class="bg-blue-600/30 text-blue-400 px-1.5 py-0.5 rounded-full text-xs">0</span>
+                    </button>
+                    <button onclick="switchPanelTab('console')" id="tab-console" class="px-4 py-2 border-b-2 border-transparent hover:text-gray-200 transition-colors flex items-center gap-2">
+                        終端機 (Console)
+                    </button>
+                    <div class="flex-grow"></div>
+                    <button onclick="clearConsole()" class="px-3 py-2 hover:bg-white/10 transition-colors" title="清除終端機"><i class="fa-solid fa-eraser"></i></button>
+                    <button onclick="closePanel()" class="px-3 py-2 hover:bg-white/10 transition-colors" title="關閉面板"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <!-- 面板內容區 -->
+                <div class="flex-grow overflow-y-auto relative">
+                    <div id="panel-problems" class="absolute inset-0 p-3 overflow-y-auto">
+                        <div class="text-green-400 mt-2 p-2"><i class="fa-solid fa-check"></i> 程式碼看起來很完美，沒有發現語法錯誤！</div>
+                    </div>
+                    <div id="panel-console" class="hidden absolute inset-0 p-3 overflow-y-auto whitespace-pre-wrap font-mono"></div>
+                </div>
+            </div>
+
             <!-- 狀態列 -->
             <div class="flex-shrink-0 flex items-center justify-between px-3 py-1 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">
                 <div class="flex gap-4">
@@ -124,7 +160,6 @@
 
         <!-- 右側/隱藏：視覺化編輯模式 -->
         <div id="visual-container" class="hidden w-full h-full flex-col bg-gray-100 dark:bg-gray-800">
-            <!-- 視覺化工具列 (確保圖示顯示) -->
             <div class="flex flex-wrap items-center gap-1 p-2 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm flex-shrink-0">
                 <button onclick="execCmd('bold')" class="p-2 w-8 h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="粗體"><i class="fa-solid fa-bold"></i></button>
                 <button onclick="execCmd('italic')" class="p-2 w-8 h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="斜體"><i class="fa-solid fa-italic"></i></button>
@@ -140,7 +175,9 @@
                 
                 <button onclick="execCmd('formatBlock', 'H1')" class="p-2 font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="大標題">H1</button>
                 <button onclick="execCmd('formatBlock', 'H2')" class="p-2 font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="中標題">H2</button>
-                <input type="color" onchange="execCmd('foreColor', this.value)" class="w-8 h-8 p-0 border-0 rounded cursor-pointer ml-1" title="文字顏色">
+                
+                <!-- 選色器 (附帶防失焦事件) -->
+                <input type="color" onmousedown="saveVisualSelection()" onchange="applyTextColor(this.value)" class="w-8 h-8 p-0 border-0 rounded cursor-pointer ml-1" title="文字顏色">
                 
                 <div class="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1"></div>
                 
@@ -149,27 +186,41 @@
                 
                 <div class="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1"></div>
                 
+                <!-- 表格工具區 -->
                 <button onclick="insertTablePrompt()" class="py-1 px-3 flex items-center gap-2 text-sm font-medium bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-800/50 rounded transition-colors border border-blue-200 dark:border-blue-800" title="插入預設 3x3 表格"><i class="fa-solid fa-table"></i> 插入表格</button>
-                
-                <!-- 增刪表格列與欄的專屬工具 -->
                 <div class="flex items-center text-xs font-bold text-gray-600 dark:text-gray-300 gap-1 ml-2 bg-gray-100 dark:bg-gray-800 p-1 rounded border border-gray-200 dark:border-gray-700">
-                    <span class="mr-1 text-gray-500 px-1 font-normal hidden md:inline">操作表格:</span>
-                    <button onclick="addTableRow()" class="px-2 py-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors border border-transparent hover:border-gray-300 dark:hover:border-gray-600" title="向下新增一列">+列</button>
-                    <button onclick="addTableColumn()" class="px-2 py-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors border border-transparent hover:border-gray-300 dark:hover:border-gray-600" title="向右新增一欄">+欄</button>
-                    <button onclick="removeTableRow()" class="px-2 py-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded text-red-600 dark:text-red-400 transition-colors border border-transparent hover:border-red-200" title="刪除目前游標所在的列">-列</button>
-                    <button onclick="removeTableColumn()" class="px-2 py-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded text-red-600 dark:text-red-400 transition-colors border border-transparent hover:border-red-200" title="刪除目前游標所在的欄">-欄</button>
+                    <button onclick="addTableRow()" class="px-2 py-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="向下新增一列">+列</button>
+                    <button onclick="addTableColumn()" class="px-2 py-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="向右新增一欄">+欄</button>
+                    <button onclick="removeTableRow()" class="px-2 py-1 hover:bg-red-100 text-red-500 rounded transition-colors" title="刪除目前游標所在的列">-列</button>
+                    <button onclick="removeTableColumn()" class="px-2 py-1 hover:bg-red-100 text-red-500 rounded transition-colors" title="刪除目前游標所在的欄">-欄</button>
                 </div>
             </div>
             
-            <!-- 視覺化編輯區 (IFrame) -->
             <iframe id="visual-frame" class="w-full flex-grow bg-white border-none"></iframe>
         </div>
-        
     </main>
 
+    <!-- 拖曳遮罩 -->
     <div id="drop-overlay" class="hidden absolute inset-0 flex items-center justify-center flex-col text-white">
         <i class="fa-solid fa-file-arrow-up text-6xl mb-4 animate-bounce"></i>
         <h2 class="text-3xl font-bold">放開以開啟檔案</h2>
+    </div>
+
+    <!-- 客製化防封鎖對話框 (Modal) -->
+    <div id="custom-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden transform transition-all scale-95 opacity-0" id="custom-modal-content">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white" id="custom-modal-title">標題</h3>
+            </div>
+            <div class="px-6 py-4">
+                <p class="text-sm text-gray-600 dark:text-gray-300 mb-3" id="custom-modal-message">訊息</p>
+                <input type="text" id="custom-modal-input" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm" autocomplete="off">
+            </div>
+            <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex justify-end gap-3 rounded-b-lg">
+                <button id="custom-modal-cancel" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 transition-colors">取消</button>
+                <button id="custom-modal-confirm" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 shadow-sm transition-colors">確定</button>
+            </div>
+        </div>
     </div>
 
     <div id="toast-container" class="absolute bottom-10 right-4 flex flex-col gap-2 z-50"></div>
@@ -177,60 +228,37 @@
     <script>
         const MAX_FILE_SIZE = 2 * 1024 * 1024; // 限制 2MB
         let editor;
-        let currentFileHandle = null;
         let isUnsaved = false;
         let pyodideInstance = null;
         let currentMode = 'code';
 
-        // 預設說明文件 (包含置底的 CSS)
-        const defaultCode = `<!-- 這裡是一般的網頁內容，你可以自由修改或切換到「視覺化」模式直接編輯！ -->
+        const defaultCode = `<!-- 在此處貼上你的內容 -->
 <div class="content-wrapper">
-    <h1>歡迎使用 WebPad++ <span style="font-size: 0.5em; color: #888;">(進階整合版)</span></h1>
+    <h1>歡迎使用 WebPad++ <span style="font-size: 0.5em; color: #888;">(IDE 進階版)</span></h1>
     <p>這是一個運行在瀏覽器端的強大編輯器，完全不需要後端伺服器。</p>
 
-    <h2>✨ 本次更新亮點</h2>
+    <h2>✨ 本次終極更新亮點</h2>
     <ul>
-        <li><strong>真正所見即所得</strong>：點擊上方「視覺化」按鈕，像 Word 一樣排版。</li>
-        <li><strong>表格操作支援</strong>：在視覺化模式中，可以輕鬆插入表格並動態增減行列。</li>
-        <li><strong>即時除錯引擎</strong>：內建 HTML、JS 甚至 Python 的語法錯誤提示（打錯字會有紅線標註）。</li>
-        <li><strong>樣式置底</strong>：繁雜的 CSS 已經移到檔案最下方，不會干擾你閱讀 HTML 內容。</li>
+        <li><strong><span style="color:#2563eb">全新 IDE 面板</span></strong>：故意打錯字（例如把 HTML 標籤刪掉一半），底下會自動彈出「問題清單」面板！</li>
+        <li><strong><span style="color:#16a34a">執行功能 (Run)</span></strong>：點擊上方綠色的「執行」按鈕，可以立刻跑出 JavaScript 與 Python 的結果。</li>
+        <li><strong>修改檔名防呆</strong>：點擊畫面上方的檔名（<i class="fa-solid fa-pen"></i>），可以隨時修改檔案與副檔名，編輯器會自動切換對應語法。</li>
+        <li><strong>真正所見即所得</strong>：點擊上方「視覺化」按鈕，像 Word 一樣排版，還能直接插入表格！</li>
     </ul>
 
     <div class="highlight-box">
         💡 <strong>防呆機制測試</strong>：試著在這裡打幾個字，然後直接重新整理網頁，瀏覽器會跳出警告阻擋你！
     </div>
-
-    <h2>🧪 來測試一下表格功能吧：</h2>
-    <table style="width:100%; border-collapse: collapse; margin-bottom: 24px;">
-        <tbody>
-            <tr>
-                <td style="border: 1px solid #e2e8f0; padding: 10px 12px; background:#f8fafc; font-weight:bold;">點我一下</td>
-                <td style="border: 1px solid #e2e8f0; padding: 10px 12px;">然後點擊上方的</td>
-                <td style="border: 1px solid #e2e8f0; padding: 10px 12px;">「+欄」或「+列」</td>
-            </tr>
-            <tr>
-                <td style="border: 1px solid #e2e8f0; padding: 10px 12px;">表格會</td>
-                <td style="border: 1px solid #e2e8f0; padding: 10px 12px;">自動</td>
-                <td style="border: 1px solid #e2e8f0; padding: 10px 12px;">長大！</td>
-            </tr>
-        </tbody>
-    </table>
 </div>
 
 <!-- ========================================== -->
-<!-- 為了保持上方 HTML 乾淨，所有樣式宣告都放在檔案最底部 -->
-<!-- ========================================== -->
+<!-- 為了保持上方 HTML 乾淨，所有樣式宣告都移到檔案最底部 -->
 <style>
     body {
         margin: 0; padding: 2rem;
         font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        line-height: 1.7;
-        color: #334155;
-        background-color: #ffffff;
+        line-height: 1.7; color: #334155; background-color: #ffffff;
     }
-    .content-wrapper {
-        max-width: 800px; margin: 0 auto;
-    }
+    .content-wrapper { max-width: 800px; margin: 0 auto; }
     h1 {
         font-size: 2.25rem; font-weight: 800; color: #0f172a;
         border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; margin-bottom: 1.5rem;
@@ -244,21 +272,15 @@
     ul { padding-left: 1.5rem; list-style-type: disc; }
     li { margin-bottom: 0.5rem; }
     strong { color: #0f172a; font-weight: 600; }
-    
     .highlight-box {
-        background-color: #eff6ff;
-        border: 1px solid #bfdbfe;
-        border-radius: 8px;
-        padding: 1rem 1.25rem;
-        color: #1d4ed8;
-        font-size: 0.95rem;
+        background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px;
+        padding: 1rem 1.25rem; color: #1d4ed8; font-size: 0.95rem;
     }
     table td { transition: background-color 0.2s; }
     table td:hover { background-color: #f1f5f9; cursor: text; }
 </style>
 `;
 
-        // 初始化編輯器
         document.addEventListener('DOMContentLoaded', () => {
             editor = CodeMirror.fromTextArea(document.getElementById('code-editor'), {
                 lineNumbers: true,
@@ -269,7 +291,7 @@
                 matchBrackets: true,
                 autoCloseTags: true,
                 gutters: ["CodeMirror-lint-markers"],
-                lint: true // 啟用 lint 除錯
+                lint: true // 預設開啟
             });
 
             editor.setValue(defaultCode);
@@ -282,28 +304,30 @@
                     updateUI();
                 }
                 updateStatus();
-                // 如果在雙向模式，當 Code 改變時同步回 Visual
-                if (currentMode === 'visual') {
-                    syncCodeToVisual();
-                }
+                if (currentMode === 'visual') syncCodeToVisual();
             });
 
             editor.on('cursorActivity', updateStatus);
             updateStatus();
-            
-            // 初始化 IFrame
             initVisualFrame();
 
-            // 防呆：防止未存檔意外關閉網頁
+            // 關閉視窗防呆
             window.addEventListener('beforeunload', (e) => {
                 if (isUnsaved) {
                     e.preventDefault();
                     e.returnValue = ''; 
                 }
             });
+
+            // 快捷鍵: 執行程式 (Ctrl+Enter)
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key === 'Enter') {
+                    e.preventDefault();
+                    runCode();
+                }
+            });
         });
 
-        // --- STREAMING_CHUNK:雙向視覺化編輯切換邏輯 ---
         function initVisualFrame() {
             const frame = document.getElementById('visual-frame');
             const doc = frame.contentDocument || frame.contentWindow.document;
@@ -311,67 +335,51 @@
             doc.write('<html><head></head><body style="padding: 20px; font-family: sans-serif;" contenteditable="true"></body></html>');
             doc.close();
             
-            // 當在 iframe 中打字時，同步回 CodeMirror
             frame.contentWindow.document.body.addEventListener('input', () => {
-                if (currentMode === 'visual') {
-                    syncVisualToCode();
-                }
+                if (currentMode === 'visual') syncVisualToCode();
             });
         }
 
         function switchToCode() {
             currentMode = 'code';
-            
-            // 更新按鈕樣式
             document.getElementById('mode-code-btn').classList.add('bg-blue-600', 'text-white');
             document.getElementById('mode-code-btn').classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
             document.getElementById('mode-visual-btn').classList.remove('bg-blue-600', 'text-white');
             document.getElementById('mode-visual-btn').classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
 
-            // 切換容器顯示 (這是一定能正確隱藏/顯示 flex 的做法)
             document.getElementById('visual-container').classList.add('hidden');
             document.getElementById('visual-container').classList.remove('flex');
 
             const editorContainer = document.getElementById('editor-container');
             editorContainer.classList.remove('hidden');
-            editorContainer.classList.add('flex'); // 確保恢復為 flex
+            editorContainer.classList.add('flex');
 
-            // 將視覺化的結果拉回 CodeMirror
             syncVisualToCode();
-            
-            if (editor) {
-                setTimeout(() => editor.refresh(), 10);
-            }
+            if (editor) setTimeout(() => editor.refresh(), 10);
         }
 
         function switchToVisual() {
             currentMode = 'visual';
-            
-            // 更新按鈕樣式
             document.getElementById('mode-visual-btn').classList.add('bg-blue-600', 'text-white');
             document.getElementById('mode-visual-btn').classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
             document.getElementById('mode-code-btn').classList.remove('bg-blue-600', 'text-white');
             document.getElementById('mode-code-btn').classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
 
-            // 切換容器顯示
             const editorContainer = document.getElementById('editor-container');
             editorContainer.classList.add('hidden');
-            editorContainer.classList.remove('flex'); // 徹底移除 flex，確保隱藏
+            editorContainer.classList.remove('flex'); 
 
             const visualContainer = document.getElementById('visual-container');
             visualContainer.classList.remove('hidden');
-            visualContainer.classList.add('flex'); // 添加 flex，讓內部排版正常
+            visualContainer.classList.add('flex'); 
 
-            // 將 CodeMirror 的結果推到視覺化 IFrame
             syncCodeToVisual();
         }
 
-        // 同步函數
         function syncCodeToVisual() {
             const frame = document.getElementById('visual-frame');
             const doc = frame.contentDocument || frame.contentWindow.document;
             doc.open();
-            // 包裝 contenteditable 以啟動編輯功能
             doc.write(editor.getValue());
             doc.close();
             doc.body.contentEditable = true;
@@ -379,17 +387,14 @@
 
         let syncTimeout = null;
         function syncVisualToCode() {
-            // 使用 debounce 避免過度頻繁更新
             clearTimeout(syncTimeout);
             syncTimeout = setTimeout(() => {
                 const frame = document.getElementById('visual-frame');
                 const doc = frame.contentDocument || frame.contentWindow.document;
                 const htmlContent = doc.documentElement.innerHTML;
                 
-                // 清理掉 contenteditable 屬性再存回 CodeMirror
                 const cleanHTML = '<!DOCTYPE html>\n<html>\n' + htmlContent.replace(/ contenteditable="true"/g, '') + '\n</html>';
                 
-                // 暫時關閉 change 事件監聽，避免無限迴圈
                 const cursorPos = editor.getCursor();
                 editor.setValue(cleanHTML);
                 editor.setCursor(cursorPos);
@@ -401,24 +406,68 @@
             }, 300);
         }
 
-        // --- STREAMING_CHUNK:視覺化工具列與表格操作指令 ---
+        let modalCallback = null;
+
+        function showCustomPrompt(title, message, defaultValue, callback) {
+            const modal = document.getElementById('custom-modal');
+            const content = document.getElementById('custom-modal-content');
+            
+            document.getElementById('custom-modal-title').textContent = title;
+            document.getElementById('custom-modal-message').textContent = message;
+            
+            const inputEl = document.getElementById('custom-modal-input');
+            inputEl.value = defaultValue || '';
+            modalCallback = callback;
+            
+            modal.classList.remove('hidden');
+            // 觸發重繪以執行動畫
+            void modal.offsetWidth;
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+            
+            inputEl.focus();
+            if (defaultValue) inputEl.select();
+        }
+
+        function closeCustomModal() {
+            const modal = document.getElementById('custom-modal');
+            const content = document.getElementById('custom-modal-content');
+            
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modalCallback = null;
+            }, 200);
+        }
+
+        document.getElementById('custom-modal-cancel').addEventListener('click', closeCustomModal);
+        
+        document.getElementById('custom-modal-confirm').addEventListener('click', () => {
+            const val = document.getElementById('custom-modal-input').value;
+            if (modalCallback) modalCallback(val);
+            closeCustomModal();
+        });
+        
+        document.getElementById('custom-modal-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); document.getElementById('custom-modal-confirm').click(); }
+            if (e.key === 'Escape') { e.preventDefault(); closeCustomModal(); }
+        });
+
         function execCmd(command, value = null) {
             const frame = document.getElementById('visual-frame');
-            // 強制使用現代 CSS 標籤進行排版 (如 span style="...")
             frame.contentDocument.execCommand('styleWithCSS', false, true);
             frame.contentDocument.execCommand(command, false, value);
             frame.contentWindow.focus();
             syncVisualToCode();
         }
 
-        // 處理顏色選擇器的焦點遺失問題
         let visualSelectionRange = null;
-
         function saveVisualSelection() {
             const frame = document.getElementById('visual-frame');
             const sel = frame.contentWindow.getSelection();
             if (sel.rangeCount > 0) {
-                // 在選色器開啟前，記住游標或反白的範圍
                 visualSelectionRange = sel.getRangeAt(0).cloneRange();
             }
         }
@@ -426,43 +475,45 @@
         function applyTextColor(color) {
             const frame = document.getElementById('visual-frame');
             const win = frame.contentWindow;
+            win.focus(); 
             
-            win.focus(); // 把焦點還給編輯區
-            
-            // 如果有記住的範圍，先還原回去
+            // 恢復游標位置
             if (visualSelectionRange) {
                 const sel = win.getSelection();
                 sel.removeAllRanges();
                 sel.addRange(visualSelectionRange);
             }
             
+            // 強制使用 style="color:..." 讓新打的字也能套用
             win.document.execCommand('styleWithCSS', false, true);
             win.document.execCommand('foreColor', false, color);
             syncVisualToCode();
         }
 
-        function showPrompt(title, text, callback) {
-            const result = prompt(`${title}\n${text}`);
-            if (result) callback(result);
+        function insertImagePrompt() { 
+            showCustomPrompt("插入圖片", "請輸入圖片網址 (URL):", "", (url) => { if(url) execCmd('insertImage', url); }); 
         }
-
-        function insertImagePrompt() { showPrompt("插入圖片", "請輸入圖片網址 (URL)", (url) => execCmd('insertImage', url)); }
-        function insertLinkPrompt() { showPrompt("插入連結", "請輸入網址 (URL)", (url) => execCmd('createLink', url)); }
+        function insertLinkPrompt() { 
+            showCustomPrompt("插入連結", "請輸入網址 (URL):", "https://", (url) => { if(url) execCmd('createLink', url); }); 
+        }
 
         function insertTablePrompt() {
-            let tableHTML = '<table style="width:100%; border-collapse: collapse; margin-bottom: 24px;"><tbody>';
-            for (let i = 0; i < 3; i++) {
-                tableHTML += '<tr>';
-                for (let j = 0; j < 3; j++) {
-                    tableHTML += `<td style="border: 1px solid #e2e8f0; padding: 10px 12px; min-width: 50px;">${i===0 && j===0 ? '儲存格' : '<br>'}</td>`;
+            showCustomPrompt("插入表格", "確認要插入預設的 3x3 表格嗎？(請輸入 ok 或直接按確定)", "ok", (res) => {
+                if(res) {
+                    let tableHTML = '<table style="width:100%; border-collapse: collapse; margin-bottom: 24px;"><tbody>';
+                    for (let i = 0; i < 3; i++) {
+                        tableHTML += '<tr>';
+                        for (let j = 0; j < 3; j++) {
+                            tableHTML += `<td style="border: 1px solid #e2e8f0; padding: 10px 12px; min-width: 50px;">${i===0 && j===0 ? '儲存格' : '<br>'}</td>`;
+                        }
+                        tableHTML += '</tr>';
+                    }
+                    tableHTML += '</tbody></table><p><br></p>';
+                    execCmd('insertHTML', tableHTML);
                 }
-                tableHTML += '</tr>';
-            }
-            tableHTML += '</tbody></table><p><br></p>';
-            execCmd('insertHTML', tableHTML);
+            });
         }
 
-        // 取得目前 IFrame 內的游標節點
         function getSelectedNode() {
             const frame = document.getElementById('visual-frame');
             const doc = frame.contentDocument || frame.contentWindow.document;
@@ -471,10 +522,9 @@
             return null;
         }
 
-        // 向上尋找最接近的指定標籤 (用於找 TR 或 TD)
         function getClosestTableElement(tagName) {
             let node = getSelectedNode();
-            if (node && node.nodeType === 3) node = node.parentNode; // 如果是文字節點，找父節點
+            if (node && node.nodeType === 3) node = node.parentNode; // 文字節點
             while (node && node.nodeName !== 'BODY') {
                 if (node.nodeName === tagName.toUpperCase()) return node;
                 node = node.parentNode;
@@ -486,39 +536,13 @@
             const tr = getClosestTableElement('TR');
             if (tr) {
                 const newTr = tr.cloneNode(true);
-                Array.from(newTr.cells).forEach(cell => cell.innerHTML = '<br>'); // 清空內容
-                tr.parentNode.insertBefore(newTr, tr.nextSibling); // 插入到下一行
+                Array.from(newTr.cells).forEach(cell => cell.innerHTML = '<br>');
+                tr.parentNode.insertBefore(newTr, tr.nextSibling);
                 syncVisualToCode();
-            } else showToast("請先將游標點擊在表格的任一格內", "error");
+            } else showToast("請先將游標點擊在表格內", "error");
         }
 
         function addTableColumn() {
-            const td = getClosestTableElement('TD') || getClosestTableElement('TH');
-            if (td) {
-                const tr = td.parentNode;
-                const index = Array.from(tr.cells).indexOf(td); // 找出目前是第幾個欄位
-                const table = getClosestTableElement('TABLE');
-                if (table) {
-                    // 幫表格中的每一列都在相同位置插入一格
-                    Array.from(table.rows).forEach(row => {
-                        const newCell = row.cells[index].cloneNode(true);
-                        newCell.innerHTML = '<br>';
-                        row.insertBefore(newCell, row.cells[index].nextSibling);
-                    });
-                    syncVisualToCode();
-                }
-            } else showToast("請先將游標點擊在表格的任一格內", "error");
-        }
-
-        function removeTableRow() {
-            const tr = getClosestTableElement('TR');
-            if (tr) {
-                tr.parentNode.removeChild(tr);
-                syncVisualToCode();
-            } else showToast("請先將游標點擊在表格的任一格內", "error");
-        }
-
-        function removeTableColumn() {
             const td = getClosestTableElement('TD') || getClosestTableElement('TH');
             if (td) {
                 const tr = td.parentNode;
@@ -526,22 +550,41 @@
                 const table = getClosestTableElement('TABLE');
                 if (table) {
                     Array.from(table.rows).forEach(row => {
-                        if (row.cells[index]) row.removeChild(row.cells[index]);
+                        const newCell = row.cells[index].cloneNode(true);
+                        newCell.innerHTML = '<br>';
+                        row.insertBefore(newCell, row.cells[index].nextSibling);
                     });
                     syncVisualToCode();
                 }
-            } else showToast("請先將游標點擊在表格的任一格內", "error");
+            } else showToast("請先將游標點擊在表格內", "error");
         }
 
-        // --- STREAMING_CHUNK:Python Lint 與核心檔案操作 ---
+        function removeTableRow() {
+            const tr = getClosestTableElement('TR');
+            if (tr) { tr.parentNode.removeChild(tr); syncVisualToCode(); } 
+            else showToast("請先將游標點擊在表格內", "error");
+        }
+
+        function removeTableColumn() {
+            const td = getClosestTableElement('TD') || getClosestTableElement('TH');
+            if (td) {
+                const index = Array.from(td.parentNode.cells).indexOf(td);
+                const table = getClosestTableElement('TABLE');
+                if (table) {
+                    Array.from(table.rows).forEach(row => { if (row.cells[index]) row.removeChild(row.cells[index]); });
+                    syncVisualToCode();
+                }
+            } else showToast("請先將游標點擊在表格內", "error");
+        }
+
         async function lintPython(text) {
             if (!pyodideInstance) {
-                showToast("正在背景載入 Python 除錯引擎...", "info");
+                showToast("背景載入 Python 引擎中...", "info");
                 try {
                     pyodideInstance = await loadPyodide();
-                    showToast("Python 引擎已就緒", "success");
+                    showToast("Python 引擎已就緒！", "success");
                 } catch (e) {
-                    return [{ message: "無法載入 Python 引擎", severity: "error", from: CodeMirror.Pos(0, 0), to: CodeMirror.Pos(0, 1) }];
+                    return [{ message: "無法載入 Python", severity: "error", from: CodeMirror.Pos(0, 0), to: CodeMirror.Pos(0, 1) }];
                 }
             }
             try {
@@ -549,8 +592,7 @@
                 return []; 
             } catch (err) {
                 const lines = err.message.split('\n');
-                let lineNum = 1;
-                let msg = "Syntax Error";
+                let lineNum = 1, msg = "Syntax Error";
                 for (let line of lines) {
                     if (line.includes('File "<exec>", line')) {
                         const match = line.match(/line (\d+)/);
@@ -558,116 +600,250 @@
                     }
                     if (line.includes('Error:')) msg = line.trim();
                 }
-                return [{
-                    message: msg,
-                    severity: "error",
-                    from: CodeMirror.Pos(lineNum - 1, 0),
-                    to: CodeMirror.Pos(lineNum - 1, 100)
-                }];
+                return [{ message: msg, severity: "error", from: CodeMirror.Pos(lineNum - 1, 0), to: CodeMirror.Pos(lineNum - 1, 100) }];
+            }
+        }
+        CodeMirror.registerHelper("lint", "python", function(text) { return new Promise(resolve => lintPython(text).then(resolve)); });
+
+        let currentPanelTab = 'problems';
+
+        function openPanel(tab) {
+            document.getElementById('ide-panel').classList.remove('hidden');
+            document.getElementById('ide-panel').classList.add('flex');
+            if (tab) switchPanelTab(tab);
+            setTimeout(() => editor.refresh(), 50); // 重新計算編輯器高度
+        }
+
+        function closePanel() {
+            document.getElementById('ide-panel').classList.add('hidden');
+            document.getElementById('ide-panel').classList.remove('flex');
+            setTimeout(() => editor.refresh(), 50);
+        }
+
+        function switchPanelTab(tab) {
+            currentPanelTab = tab;
+            document.getElementById('tab-problems').classList.remove('border-blue-500', 'text-white');
+            document.getElementById('tab-console').classList.remove('border-blue-500', 'text-white');
+            document.getElementById('panel-problems').classList.add('hidden');
+            document.getElementById('panel-console').classList.add('hidden');
+
+            document.getElementById(`tab-${tab}`).classList.add('border-blue-500', 'text-white');
+            document.getElementById(`panel-${tab}`).classList.remove('hidden');
+        }
+
+        function updateProblemsPanel(annotations) {
+            if (!annotations || !Array.isArray(annotations)) return;
+            
+            const count = annotations.length;
+            document.getElementById('problem-count').textContent = count;
+            
+            // 自動彈出面板 (如果有錯誤且原本是關閉的)
+            if (count > 0 && document.getElementById('ide-panel').classList.contains('hidden')) {
+                openPanel('problems');
+            }
+
+            const container = document.getElementById('panel-problems');
+            container.innerHTML = '';
+
+            if (count === 0) {
+                container.innerHTML = '<div class="text-green-400 mt-2 p-2"><i class="fa-solid fa-check"></i> 程式碼看起來很完美，沒有發現語法錯誤！</div>';
+                return;
+            }
+
+            annotations.forEach(ann => {
+                if (!ann) return;
+                
+                const div = document.createElement('div');
+                const isError = ann.severity === 'error';
+                div.className = `p-2 mb-2 rounded border-l-4 cursor-pointer transition-colors bg-white/5 hover:bg-white/10 ${isError ? 'border-red-500' : 'border-yellow-500'}`;
+                
+                // 安全讀取位置資訊 (防呆：某些 Linter 報錯可能沒有具體的 line)
+                const fromLine = (ann.from && typeof ann.from.line !== 'undefined') ? ann.from.line + 1 : '未知';
+                const fromCh = (ann.from && typeof ann.from.ch !== 'undefined') ? ann.from.ch : 0;
+                const targetLine = fromLine !== '未知' ? fromLine - 1 : 0;
+                
+                const icon = isError ? '<i class="fa-solid fa-circle-xmark text-red-400"></i>' : '<i class="fa-solid fa-triangle-exclamation text-yellow-400"></i>';
+                div.innerHTML = `
+                    <div class="flex items-start gap-2">
+                        <div class="mt-0.5">${icon}</div>
+                        <div>
+                            <div class="font-bold ${isError ? 'text-red-400' : 'text-yellow-400'}">第 ${fromLine} 行</div>
+                            <div class="text-gray-300 mt-1">${ann.message || '未知錯誤'}</div>
+                        </div>
+                    </div>
+                `;
+                // 點擊後安全地跳轉游標
+                div.onclick = () => { editor.setCursor(targetLine, fromCh); editor.focus(); };
+                container.appendChild(div);
+            });
+        }
+
+        function printConsole(text, type = 'log') {
+            const container = document.getElementById('panel-console');
+            const div = document.createElement('div');
+            let colorClass = 'text-gray-300';
+            if (type === 'error') colorClass = 'text-red-400 font-bold';
+            else if (type === 'system') colorClass = 'text-green-400';
+            else if (type === 'yellow') colorClass = 'text-yellow-400'; // 新增黃色警告顏色
+            
+            div.className = `mb-1 ${colorClass}`;
+            div.textContent = text;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function clearConsole() { document.getElementById('panel-console').innerHTML = ''; }
+
+        async function runCode() {
+            if (currentMode === 'visual') return showToast("視覺化模式下無法執行指令，請先切換至程式碼模式", "error");
+            
+            const mode = editor.getOption('mode');
+            const code = editor.getValue();
+            
+            // 升級 1：HTML 網頁真正的預覽 (開新分頁無沙盒限制)
+            if (mode === 'htmlmixed') {
+                try {
+                    const blob = new Blob([code], { type: 'text/html;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const newWin = window.open(url, '_blank');
+                    if (newWin) {
+                        showToast("已在新分頁開啟網頁預覽！", "success");
+                        openPanel('console');
+                        printConsole(`\n--- 執行開始 (${new Date().toLocaleTimeString()}) ---\n`, 'system');
+                        printConsole("已將 HTML 網頁部署至新分頁進行完整預覽。\n(提示：若無反應，請檢查瀏覽器右上角是否阻擋了彈出視窗)", 'log');
+                    } else {
+                        showToast("瀏覽器阻擋了新分頁，請允許彈出視窗", "error");
+                    }
+                } catch (err) {
+                    showToast("預覽失敗", "error");
+                }
+                return;
+            }
+
+            openPanel('console');
+            printConsole(`\n--- 執行開始 (${new Date().toLocaleTimeString()}) ---\n`, 'system');
+
+            if (mode === 'javascript') {
+                try {
+                    const originalLog = console.log;
+                    const originalError = console.error;
+                    const originalWarn = console.warn;
+                    
+                    console.log = (...args) => { printConsole(args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' '), 'log'); originalLog(...args); };
+                    console.error = (...args) => { printConsole(args.join(' '), 'error'); originalError(...args); };
+                    console.warn = (...args) => { printConsole(args.join(' '), 'yellow'); if(originalWarn) originalWarn(...args); };
+                    
+                    // 升級 2：使用 AsyncFunction 讓使用者可以寫 top-level await，並擷取最後的回傳值
+                    const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+                    const result = await new AsyncFunction(code)();
+                    
+                    if (result !== undefined) {
+                        printConsole(`<- ${typeof result === 'object' ? JSON.stringify(result) : result}`, 'log');
+                    }
+                    
+                    console.log = originalLog;
+                    console.error = originalError;
+                    console.warn = originalWarn;
+                } catch (err) { printConsole(err.toString(), 'error'); }
+            } else if (mode === 'python') {
+                if (!pyodideInstance) { printConsole("⏳ Python 引擎尚未載入完成，請稍候再試...", 'error'); return; }
+                try {
+                    await pyodideInstance.runPythonAsync(`import sys; import io; sys.stdout = io.StringIO(); sys.stderr = io.StringIO()`);
+                    await pyodideInstance.runPythonAsync(code);
+                    const stdout = await pyodideInstance.runPythonAsync(`sys.stdout.getvalue()`);
+                    const stderr = await pyodideInstance.runPythonAsync(`sys.stderr.getvalue()`);
+                    if (stdout) printConsole(stdout, 'log');
+                    if (stderr) printConsole(stderr, 'error');
+                } catch (err) { printConsole(err.toString(), 'error'); }
+            } else {
+                printConsole(`目前不支援直接執行 ${mode} 格式。\n提示：點擊上方檔名改為 .js 或 .py 即可啟用執行引擎。`, 'error');
             }
         }
 
-        CodeMirror.registerHelper("lint", "python", function(text) {
-            return new Promise(resolve => {
-                lintPython(text).then(resolve);
+        function renameFile() {
+            let currentName = document.getElementById('file-name').textContent;
+            showCustomPrompt("重新命名檔案", "請輸入檔案名稱 (包含副檔名，例如: test.srt, script.py):", currentName, (newName) => {
+                if (newName && newName.trim() !== "") {
+                    document.getElementById('file-name').textContent = newName.trim();
+                    if (currentName !== newName.trim()) { isUnsaved = true; }
+                    updateUI();
+                    showToast(`檔名已更改為: ${newName}`, 'success');
+                }
             });
-        });
+        }
 
-        // 快捷鍵支援
-        document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey || e.metaKey) {
-                if (e.key === 's') { e.preventDefault(); saveFile(); }
-                if (e.key === 'o') { e.preventDefault(); openFile(); }
+        function fallbackDownload(content, filename) {
+            if (filename === '未命名檔案.html') {
+                showCustomPrompt("存檔", "請輸入存檔名稱 (包含副檔名，例如: subtitle.srt, index.html):", "index.html", (userInput) => {
+                    if (!userInput || userInput.trim() === "") { showToast('已取消存檔', 'info'); return; }
+                    executeDownload(content, userInput.trim());
+                });
+            } else {
+                executeDownload(content, filename);
             }
-        });
+        }
+
+        function executeDownload(content, filename) {
+            document.getElementById('file-name').textContent = filename;
+            updateUI();
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            isUnsaved = false;
+            updateUI();
+            showToast('已下載檔案', 'success');
+        }
 
         async function openFile() {
-            try {
-                const [fileHandle] = await window.showOpenFilePicker({
-                    types: [{
-                        description: 'Text Files',
-                        accept: {
-                            'text/*': ['.txt', '.html', '.css', '.js', '.json', '.md', '.py'],
-                        }
-                    }],
-                });
-                await loadFileContent(fileHandle);
-            } catch (err) {
-                if (err.name !== 'AbortError') {
-                    showToast('開啟檔案失敗: ' + err.message, 'error');
-                }
-            }
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.onchange = e => {
+                const file = e.target.files[0];
+                if (!file) return;
+                loadFileContent(file);
+            };
+            input.click();
         }
 
-        async function loadFileContent(fileHandle) {
-            try {
-                const file = await fileHandle.getFile();
-                
-                if (file.size > MAX_FILE_SIZE) {
-                    showToast(`檔案過大 (${(file.size/1024/1024).toFixed(1)}MB)，限制為 2MB 以內`, 'error');
-                    return;
-                }
-
-                const contents = await file.text();
-                
-                currentFileHandle = fileHandle;
-                editor.setValue(contents);
-                isUnsaved = false;
-                
+        function loadFileContent(file) {
+            if (file.size > MAX_FILE_SIZE) { showToast(`檔案過大 (${(file.size/1024/1024).toFixed(1)}MB)，限制 2MB`, 'error'); return; }
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                editor.setValue(event.target.result);
                 document.getElementById('file-name').textContent = file.name;
+                isUnsaved = false;
                 updateUI();
                 showToast(`已載入: ${file.name}`, 'success');
-            } catch (err) {
-                showToast('讀取檔案失敗: ' + err.message, 'error');
-            }
+            };
+            reader.readAsText(file);
         }
 
         async function saveFile() {
             const content = editor.getValue();
-
-            if (!currentFileHandle) {
-                try {
-                    currentFileHandle = await window.showSaveFilePicker({
-                        types: [{
-                            description: 'Text Document',
-                            accept: { 'text/plain': ['.txt'], 'text/html': ['.html'], 'text/javascript': ['.js'], 'text/css': ['.css'], 'text/x-python': ['.py'] },
-                        }],
-                    });
-                } catch (err) {
-                    if (err.name !== 'AbortError') showToast('取消儲存', 'info');
-                    return;
-                }
-            }
-
-            try {
-                const writable = await currentFileHandle.createWritable();
-                await writable.write(content);
-                await writable.close();
-                
-                const file = await currentFileHandle.getFile();
-                document.getElementById('file-name').textContent = file.name;
-                
-                isUnsaved = false;
-                updateUI();
-                showToast('存檔成功！', 'success');
-            } catch (err) {
-                showToast('存檔失敗: ' + err.message, 'error');
-            }
+            let currentFileName = document.getElementById('file-name').textContent;
+            fallbackDownload(content, currentFileName);
         }
 
-        // --- STREAMING_CHUNK:UI 更新與拖曳功能支援 ---
         function updateUI() {
             const indicator = document.getElementById('unsaved-indicator');
             if (isUnsaved) {
                 indicator.classList.remove('hidden');
-                document.getElementById('file-name').classList.add('italic', 'font-bold');
+                document.getElementById('file-name').classList.add('italic');
             } else {
                 indicator.classList.add('hidden');
-                document.getElementById('file-name').classList.remove('italic', 'font-bold');
+                document.getElementById('file-name').classList.remove('italic');
             }
 
-            if (currentFileHandle) {
-                const name = currentFileHandle.name.toLowerCase();
+            const currentName = document.getElementById('file-name').textContent;
+            
+            if (currentName !== '未命名檔案.html') {
+                const name = currentName.toLowerCase();
                 let mode = 'htmlmixed';
                 let lintType = true;
 
@@ -682,38 +858,52 @@
                         document.head.appendChild(script);
                     }
                 }
-                else if (name.endsWith('.txt') || name.endsWith('.md')) { lintType = false; }
+                else if (name.endsWith('.txt') || name.endsWith('.md') || name.endsWith('.srt')) { 
+                    mode = 'null'; 
+                    lintType = false; 
+                }
                 
                 editor.setOption('mode', mode);
-                editor.setOption('lint', lintType);
-                document.getElementById('language-mode').textContent = mode.toUpperCase().split('/')[0];
+                
+                // 動態設定 Lint 並攔截結果傳給面板
+                if (lintType) {
+                    editor.setOption('lint', {
+                        onUpdateLinting: function(annotationsNotSorted, annotations, editor) {
+                            if (typeof updateProblemsPanel === 'function') updateProblemsPanel(annotations);
+                        }
+                    });
+                } else {
+                    editor.setOption('lint', false);
+                    updateProblemsPanel([]);
+                }
+                
+                let ext = name.split('.').pop().toUpperCase();
+                document.getElementById('language-mode').textContent = ext;
+            } else {
+                // 預設為 HTML
+                editor.setOption('lint', {
+                    onUpdateLinting: function(a, annotations) { updateProblemsPanel(annotations); }
+                });
             }
         }
 
         function updateStatus() {
             const cursor = editor.getCursor();
             document.getElementById('cursor-pos').textContent = `Ln ${cursor.line + 1}, Col ${cursor.ch + 1}`;
-            
-            const content = editor.getValue();
-            const bytes = new Blob([content]).size;
-            let sizeStr = bytes + ' Bytes';
-            if (bytes > 1024) sizeStr = (bytes / 1024).toFixed(1) + ' KB';
-            document.getElementById('file-size').textContent = sizeStr;
+            const bytes = new Blob([editor.getValue()]).size;
+            document.getElementById('file-size').textContent = bytes > 1024 ? (bytes / 1024).toFixed(1) + ' KB' : bytes + ' Bytes';
         }
 
         function toggleTheme() {
             const html = document.documentElement;
             const icon = document.getElementById('theme-icon');
-            
             if (html.classList.contains('dark')) {
                 html.classList.remove('dark');
-                icon.classList.remove('fa-sun');
-                icon.classList.add('fa-moon');
+                icon.classList.replace('fa-sun', 'fa-moon');
                 editor.setOption('theme', 'default');
             } else {
                 html.classList.add('dark');
-                icon.classList.remove('fa-moon');
-                icon.classList.add('fa-sun');
+                icon.classList.replace('fa-moon', 'fa-sun');
                 editor.setOption('theme', 'dracula');
             }
         }
@@ -723,77 +913,30 @@
             if (container.children.length >= 3) container.removeChild(container.firstChild);
 
             const toast = document.createElement('div');
-            let bgColor = 'bg-gray-800 dark:bg-gray-700';
-            let icon = '<i class="fa-solid fa-circle-info text-blue-400"></i>';
-            
-            if (type === 'success') {
-                bgColor = 'bg-green-800 dark:bg-green-900';
-                icon = '<i class="fa-solid fa-circle-check text-green-400"></i>';
-            } else if (type === 'error') {
-                bgColor = 'bg-red-800 dark:bg-red-900';
-                icon = '<i class="fa-solid fa-circle-xmark text-red-400"></i>';
-            }
+            let bgColor = type === 'success' ? 'bg-green-800 dark:bg-green-900' : (type === 'error' ? 'bg-red-800 dark:bg-red-900' : 'bg-gray-800 dark:bg-gray-700');
+            let icon = type === 'success' ? '<i class="fa-solid fa-circle-check text-green-400"></i>' : (type === 'error' ? '<i class="fa-solid fa-circle-xmark text-red-400"></i>' : '<i class="fa-solid fa-circle-info text-blue-400"></i>');
 
             toast.className = `${bgColor} text-white px-4 py-3 rounded shadow-lg flex items-center gap-3 transform transition-all duration-300 translate-y-10 opacity-0`;
             toast.innerHTML = `${icon} <span>${message}</span>`;
             
             container.appendChild(toast);
-            
-            requestAnimationFrame(() => {
-                toast.classList.remove('translate-y-10', 'opacity-0');
-            });
+            requestAnimationFrame(() => toast.classList.remove('translate-y-10', 'opacity-0'));
 
-            setTimeout(() => {
-                toast.classList.add('opacity-0');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
+            setTimeout(() => { toast.classList.add('opacity-0'); setTimeout(() => toast.remove(), 300); }, 3000);
         }
 
-        // 拖曳檔案處理
         let dragCounter = 0;
         const overlay = document.getElementById('drop-overlay');
 
-        window.addEventListener('dragenter', (e) => {
-            e.preventDefault();
-            dragCounter++;
-            if (dragCounter === 1) overlay.classList.remove('hidden');
-        });
-
-        window.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            dragCounter--;
-            if (dragCounter === 0) overlay.classList.add('hidden');
-        });
-
+        window.addEventListener('dragenter', (e) => { e.preventDefault(); dragCounter++; if (dragCounter === 1) overlay.classList.remove('hidden'); });
+        window.addEventListener('dragleave', (e) => { e.preventDefault(); dragCounter--; if (dragCounter === 0) overlay.classList.add('hidden'); });
         window.addEventListener('dragover', (e) => e.preventDefault());
-
         window.addEventListener('drop', async (e) => {
-            e.preventDefault();
-            dragCounter = 0;
-            overlay.classList.add('hidden');
-
+            e.preventDefault(); dragCounter = 0; overlay.classList.add('hidden');
             const item = e.dataTransfer.items[0];
-            if (item.kind === 'file') {
-                try {
-                    const fileHandle = await item.getAsFileSystemHandle();
-                    if (fileHandle.kind === 'file') await loadFileContent(fileHandle);
-                } catch (err) {
-                    const file = item.getAsFile();
-                    if (file.size > MAX_FILE_SIZE) {
-                        showToast(`檔案過大限制為 2MB 以內`, 'error');
-                        return;
-                    }
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        editor.setValue(e.target.result);
-                        currentFileHandle = null;
-                        document.getElementById('file-name').textContent = file.name;
-                        isUnsaved = true;
-                        updateUI();
-                        showToast(`已載入: ${file.name} (無存檔權限，請另存)`, 'info');
-                    };
-                    reader.readAsText(file);
-                }
+            if (item && item.kind === 'file') {
+                const file = item.getAsFile();
+                if (file) loadFileContent(file);
             }
         });
     </script>
