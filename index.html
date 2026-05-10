@@ -26,6 +26,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/sql/sql.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/rust/rust.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/go/go.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/markdown/markdown.min.js"></script>
     
     <!-- IntelliSense & Auto-Complete -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/show-hint.min.css">
@@ -164,6 +165,9 @@
             <button onclick="toggleTheme()" class="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition flex-shrink-0">
                 <i id="theme-icon" class="fa-solid fa-moon"></i>
             </button>
+            <button onclick="resetAll()" class="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-full text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 transition flex-shrink-0" title="Reset All" data-i18n-title="nav.resetAllTitle">
+                <i class="fa-solid fa-rotate-left"></i>
+            </button>
         </div>
     </nav>
 
@@ -182,16 +186,19 @@
     </div>
 
     <main class="flex-grow flex relative overflow-hidden">
+        <!-- Mobile sidebar overlay -->
+        <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
         
         <!-- Sidebar Explorer -->
-        <div id="sidebar" class="w-64 bg-gray-100 dark:bg-gray-800 border-e border-gray-300 dark:border-gray-700 flex flex-col flex-shrink-0 transition-all duration-300">
+        <div id="sidebar" class="w-64 bg-gray-100 dark:bg-gray-800 border-e border-gray-300 dark:border-gray-700 flex flex-col flex-shrink-0">
             <div class="px-3 py-2 flex items-center justify-between text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 border-b border-gray-300 dark:border-gray-700 uppercase tracking-wider">
                 <span data-i18n="nav.explorer">EXPLORER</span>
                 <div class="flex gap-2">
-                    <button onclick="fileSystem.createNodePrompt('file')" class="text-gray-500 hover:text-blue-500 transition-colors" title="New File" data-i18n-title="nav.newFile"><i class="fa-solid fa-file-circle-plus"></i></button>
-                    <button onclick="fileSystem.createNodePrompt('folder')" class="text-gray-500 hover:text-blue-500 transition-colors" title="New Folder" data-i18n-title="nav.newFolder"><i class="fa-solid fa-folder-plus"></i></button>
-                    <button onclick="fileSystem.deleteSelectedNode()" class="text-gray-500 hover:text-red-500 transition-colors" title="Delete" data-i18n-title="nav.deleteNode"><i class="fa-solid fa-trash-can"></i></button>
-                    <button onclick="fileSystem.exportZip()" class="text-gray-500 hover:text-green-500 transition-colors" title="Export ZIP" data-i18n-title="nav.exportZip"><i class="fa-solid fa-file-zipper"></i></button>
+                    <button onclick="window.fileSystem.createNodePrompt('file')" class="text-gray-500 hover:text-blue-500 transition-colors" title="New File" data-i18n-title="nav.newFile"><i class="fa-solid fa-file-circle-plus"></i></button>
+                    <button onclick="window.fileSystem.createNodePrompt('folder')" class="text-gray-500 hover:text-blue-500 transition-colors" title="New Folder" data-i18n-title="nav.newFolder"><i class="fa-solid fa-folder-plus"></i></button>
+                    <button onclick="window.fileSystem.renameSelectedNode()" class="text-gray-500 hover:text-yellow-500 transition-colors" title="Rename" data-i18n-title="nav.renameNode"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button onclick="window.fileSystem.deleteSelectedNode()" class="text-gray-500 hover:text-red-500 transition-colors" title="Delete" data-i18n-title="nav.deleteNode"><i class="fa-solid fa-trash-can"></i></button>
+                    <button onclick="window.fileSystem.exportZip()" class="text-gray-500 hover:text-green-500 transition-colors" title="Export ZIP" data-i18n-title="nav.exportZip"><i class="fa-solid fa-file-zipper"></i></button>
                 </div>
             </div>
             <div id="file-tree" class="flex-grow overflow-y-auto p-2 text-sm text-gray-700 dark:text-gray-300 hide-scrollbar select-none">
@@ -202,7 +209,7 @@
         <!-- Resizer -->
         <div id="sidebar-resizer" class="w-1 cursor-col-resize bg-gray-200 dark:bg-gray-700 hover:bg-blue-500 transition-colors flex-shrink-0 relative z-10"></div>
 
-        <div id="editor-container" class="flex-grow flex flex-col min-w-0 h-full transition-all duration-300">
+        <div id="editor-container" class="flex-grow flex flex-col min-w-0 h-full transition-all duration-300" style="min-width:200px">
             <div class="flex-grow relative w-full"><textarea id="code-editor"></textarea></div>
             
             <div id="ide-panel" class="hidden h-[250px] flex-shrink-0 flex-col term-bg border-t border-gray-700 font-mono text-sm shadow-[0_-4px_15px_rgba(0,0,0,0.15)] z-20">
@@ -236,7 +243,10 @@
             </div>
         </div>
 
-        <div id="visual-container" class="hidden w-full flex-grow h-full flex-col bg-gray-100 dark:bg-gray-800 transition-all duration-300">
+        <!-- Split-view resizer -->
+        <div id="split-resizer" class="hidden w-1.5 cursor-col-resize bg-gray-300 dark:bg-gray-600 hover:bg-blue-500 dark:hover:bg-blue-500 transition-colors flex-shrink-0 z-10"></div>
+
+        <div id="visual-container" class="hidden flex-col bg-white dark:bg-gray-900 transition-all duration-300" style="min-width:200px; overflow:hidden">
             <div class="flex items-center p-1.5 sm:p-2 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm flex-shrink-0 overflow-x-auto whitespace-nowrap hide-scrollbar">
                 <button onclick="execCmd('bold')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Bold" data-i18n-title="visual.bold"><i class="fa-solid fa-bold"></i></button>
                 <button onclick="execCmd('italic')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Italic" data-i18n-title="visual.italic"><i class="fa-solid fa-italic"></i></button>
