@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebPad++</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/php/php.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/sql/sql.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/rust/rust.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/go/go.min.js"></script>
+    
+    <!-- IntelliSense & Auto-Complete -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/show-hint.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/show-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/anyword-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/javascript-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/css-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/html-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/sql-hint.min.js"></script>
+    
+    <!-- Editing Helpers -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/matchbrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/closetag.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/lint/lint.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/lint/lint.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jshint/2.13.6/jshint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/lint/javascript-lint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/csslint/1.0.5/csslint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/lint/css-lint.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/htmlhint@0.9.13/lib/htmlhint.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/lint/html-lint.min.js"></script>
+
+    <!-- CodeMirror Search & Sublime Keymap -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/dialog/dialog.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/search/searchcursor.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/search/search.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/dialog/dialog.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/search/jump-to-line.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/keymap/sublime.min.js"></script>
+
+    <!-- JS Beautify for Formatting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.9/beautify.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.9/beautify-css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.9/beautify-html.min.js"></script>
+
+    <!-- localForage for IndexedDB -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
+
+    <!-- JSZip for Exporting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <!-- CodeMirror Merge Addon & diff-match-patch -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/merge/merge.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/diff_match_patch/20121119/diff_match_patch.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/merge/merge.min.js"></script>
+
+    <!-- i18next Libraries -->
+    <script src="https://unpkg.com/i18next@23.10.1/dist/umd/i18next.min.js"></script>
+    <script src="https://unpkg.com/i18next-http-backend@2.5.0/i18nextHttpBackend.min.js"></script>
+
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 h-screen flex flex-col overflow-hidden transition-colors duration-200">
+    
+    <nav class="flex flex-wrap items-center justify-between px-2 sm:px-4 py-2 sm:py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm z-10 flex-shrink-0 gap-2">
+        <div class="flex items-center gap-2 sm:gap-4">
+            <h1 class="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent flex items-center gap-1 sm:gap-2">
+                <i class="fa-solid fa-code"></i> <span class="hidden sm:inline">WebPad++</span>
+            </h1>
+            
+            <div class="flex items-center gap-1 sm:gap-2">
+                <button onclick="toggleSidebar()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition" title="Toggle Explorer" data-i18n-title="nav.toggleExplorer">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                <button onclick="openFile()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition" title="Open" data-i18n-title="nav.openTitle">
+                    <i class="fa-regular fa-folder-open"></i> <span class="hidden sm:inline" data-i18n="nav.openBtn"></span>
+                </button>
+                <button onclick="saveFile()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-blue-600 hover:bg-blue-700 text-white rounded transition shadow-sm relative" title="Save" data-i18n-title="nav.saveTitle">
+                    <i class="fa-regular fa-floppy-disk"></i> <span class="hidden sm:inline" data-i18n="nav.saveBtn"></span>
+                    <span id="unsaved-indicator" class="hidden absolute -top-1 -end-1 w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse border-2 border-white dark:border-gray-800"></span>
+                </button>
+                <button onclick="formatCode()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-purple-600 hover:bg-purple-700 text-white rounded transition shadow-sm" title="Format" data-i18n-title="nav.formatTitle">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> <span class="hidden sm:inline" data-i18n="nav.formatBtn"></span>
+                </button>
+                <button onclick="runCode()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-green-600 hover:bg-green-700 text-white rounded transition shadow-sm" title="Run" data-i18n-title="nav.runTitle">
+                    <i class="fa-solid fa-play"></i> <span class="hidden sm:inline" data-i18n="nav.runBtn"></span>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex items-center bg-gray-100 dark:bg-gray-900 p-1 rounded-lg border border-gray-200 dark:border-gray-700 w-full sm:w-auto justify-center order-last sm:order-none mt-1 sm:mt-0">
+            <button id="mode-code-btn" onclick="switchToCode()" class="px-3 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-md bg-blue-600 text-white shadow-sm transition-all duration-200 flex items-center gap-1 sm:gap-2">
+                <i class="fa-solid fa-code"></i> <span data-i18n="nav.modeCode"></span>
+            </button>
+            <button id="mode-split-btn" onclick="switchToSplit()" class="px-3 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 transition-all duration-200 flex items-center gap-1 sm:gap-2">
+                <i class="fa-solid fa-table-columns"></i> <span data-i18n="nav.modeSplit"></span>
+            </button>
+            <button id="mode-visual-btn" onclick="switchToVisual()" class="px-3 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 transition-all duration-200 flex items-center gap-1 sm:gap-2">
+                <i class="fa-solid fa-pen-nib"></i> <span data-i18n="nav.modeVisual"></span>
+            </button>
+        </div>
+
+        <div class="flex items-center gap-2 sm:gap-3">
+            <div onclick="renameFile()" class="group flex items-center gap-1 sm:gap-2 px-1 sm:px-2 py-1 rounded cursor-pointer border border-transparent hover:border-blue-300 hover:bg-blue-50 dark:hover:border-blue-700 dark:hover:bg-blue-900/30 transition-all" title="Rename" data-i18n-title="nav.renameTitle">
+                <span id="file-name" data-is-default="true" class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 max-w-[100px] sm:max-w-[150px] truncate group-hover:text-blue-600 dark:group-hover:text-blue-400"></span>
+                <i class="fa-solid fa-pen text-[10px] sm:text-xs text-gray-400 group-hover:text-blue-500"></i>
+            </div>
+            
+            <select id="lang-select" onchange="changeLanguage(this.value)" class="custom-select text-xs font-bold h-7 sm:h-8 ps-2 pe-6 py-0 rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm border border-gray-300 dark:border-gray-600 appearance-none bg-no-repeat cursor-pointer outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="en">English</option>
+                <option value="zh-TW">繁體中文</option>
+                <option value="zh-CN">简体中文</option>
+                <option value="ja">日本語</option>
+                <option value="ko">한국어</option>
+                <option value="es">Español</option>
+                <option value="fr">Français</option>
+                <option value="de">Deutsch</option>
+                <option value="it">Italiano</option>
+                <option value="pt">Português</option>
+                <option value="ru">Русский</option>
+                <option value="ar">العربية</option>
+                <option value="hi">हिन्दी</option>
+                <option value="bn">বাংলা</option>
+                <option value="id">Bahasa Indonesia</option>
+                <option value="tr">Türkçe</option>
+                <option value="vi">Tiếng Việt</option>
+                <option value="th">ไทย</option>
+                <option value="pl">Polski</option>
+                <option value="nl">Nederlands</option>
+                <option value="sv">Svenska</option>
+                <option value="da">Dansk</option>
+                <option value="fi">Suomi</option>
+                <option value="no">Norsk</option>
+                <option value="cs">Čeština</option>
+                <option value="el">Ελληνικά</option>
+                <option value="he">עברית</option>
+                <option value="ro">Română</option>
+                <option value="hu">Magyar</option>
+                <option value="uk">Українська</option>
+            </select>
+
+            <button onclick="toggleTheme()" class="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition flex-shrink-0">
+                <i id="theme-icon" class="fa-solid fa-moon"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Tab Bar -->
+    <div id="tab-bar" class="flex items-center overflow-x-auto bg-gray-200 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700 hide-scrollbar flex-shrink-0 min-h-[36px]">
+        <div id="tabs-container" class="flex items-center h-full">
+            <!-- Tabs will be injected here -->
+        </div>
+        <button onclick="tabManager.createNewTab()" class="px-3 py-1.5 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition" title="New Tab" data-i18n-title="nav.newTabTitle">
+            <i class="fa-solid fa-plus"></i>
+        </button>
+        <div class="flex-grow"></div>
+        <button onclick="openCompareModal()" class="px-3 py-1 text-xs text-gray-600 hover:text-blue-600 border-l border-gray-300 dark:border-gray-600 dark:text-gray-400 transition whitespace-nowrap" title="Compare" data-i18n-title="nav.compareTitle">
+            <i class="fa-solid fa-code-compare"></i> <span data-i18n="nav.compareBtn">Compare</span>
+        </button>
+    </div>
+
+    <main class="flex-grow flex relative overflow-hidden">
+        
+        <!-- Sidebar Explorer -->
+        <div id="sidebar" class="w-64 bg-gray-100 dark:bg-gray-800 border-e border-gray-300 dark:border-gray-700 flex flex-col flex-shrink-0 transition-all duration-300">
+            <div class="px-3 py-2 flex items-center justify-between text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 border-b border-gray-300 dark:border-gray-700 uppercase tracking-wider">
+                <span data-i18n="nav.explorer">EXPLORER</span>
+                <div class="flex gap-2">
+                    <button onclick="fileSystem.createNodePrompt('file')" class="text-gray-500 hover:text-blue-500 transition-colors" title="New File" data-i18n-title="nav.newFile"><i class="fa-solid fa-file-circle-plus"></i></button>
+                    <button onclick="fileSystem.createNodePrompt('folder')" class="text-gray-500 hover:text-blue-500 transition-colors" title="New Folder" data-i18n-title="nav.newFolder"><i class="fa-solid fa-folder-plus"></i></button>
+                    <button onclick="fileSystem.deleteSelectedNode()" class="text-gray-500 hover:text-red-500 transition-colors" title="Delete" data-i18n-title="nav.deleteNode"><i class="fa-solid fa-trash-can"></i></button>
+                    <button onclick="fileSystem.exportZip()" class="text-gray-500 hover:text-green-500 transition-colors" title="Export ZIP" data-i18n-title="nav.exportZip"><i class="fa-solid fa-file-zipper"></i></button>
+                </div>
+            </div>
+            <div id="file-tree" class="flex-grow overflow-y-auto p-2 text-sm text-gray-700 dark:text-gray-300 hide-scrollbar select-none">
+                <!-- Tree nodes will be injected here -->
+            </div>
+        </div>
+        
+        <!-- Resizer -->
+        <div id="sidebar-resizer" class="w-1 cursor-col-resize bg-gray-200 dark:bg-gray-700 hover:bg-blue-500 transition-colors flex-shrink-0 relative z-10"></div>
+
+        <div id="editor-container" class="flex-grow flex flex-col min-w-0 h-full transition-all duration-300">
+            <div class="flex-grow relative w-full"><textarea id="code-editor"></textarea></div>
+            
+            <div id="ide-panel" class="hidden h-[250px] flex-shrink-0 flex-col term-bg border-t border-gray-700 font-mono text-sm shadow-[0_-4px_15px_rgba(0,0,0,0.15)] z-20">
+                <div class="flex items-center bg-[#252526] text-gray-400 border-b border-gray-700 px-2">
+                    <button onclick="switchPanelTab('problems')" id="tab-problems" class="px-4 py-2 border-b-2 border-blue-500 text-white hover:text-gray-200 transition-colors flex items-center gap-2">
+                        <span data-i18n="panel.probTab"></span> <span id="problem-count" class="bg-blue-600/30 text-blue-400 px-1.5 py-0.5 rounded-full text-xs">0</span>
+                    </button>
+                    <button onclick="switchPanelTab('console')" id="tab-console" class="px-4 py-2 border-b-2 border-transparent hover:text-gray-200 transition-colors flex items-center gap-2" data-i18n="panel.consoleTab"></button>
+                    <div class="flex-grow"></div>
+                    <button onclick="clearConsole()" class="px-3 py-2 hover:bg-white/10 transition-colors" title="Clear" data-i18n-title="panel.clearConsole"><i class="fa-solid fa-eraser"></i></button>
+                    <button onclick="closePanel()" class="px-3 py-2 hover:bg-white/10 transition-colors" title="Close" data-i18n-title="panel.closePanel"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="flex-grow overflow-y-auto relative">
+                    <div id="panel-problems" class="absolute inset-0 p-3 overflow-y-auto"></div>
+                    <div id="panel-console" class="hidden absolute inset-0 p-3 overflow-y-auto whitespace-pre-wrap font-mono"></div>
+                </div>
+            </div>
+
+            <div class="flex-shrink-0 flex items-center justify-between px-2 sm:px-3 py-1 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
+                <div class="flex gap-2 sm:gap-4"><span id="cursor-pos">Ln 1, Col 1</span><span id="file-size" class="hidden sm:inline">0 Bytes</span></div>
+                <div class="flex gap-2 sm:gap-4">
+                    <button id="eol-toggle" onclick="toggleEOL()" class="hover:text-blue-500 dark:hover:text-blue-400 transition-colors font-medium">LF</button>
+                    <select id="encoding-select" onchange="changeEncoding(this.value)" class="bg-transparent border-none outline-none cursor-pointer hover:text-blue-500 dark:hover:text-blue-400 transition-colors text-inherit font-inherit appearance-none">
+                        <option value="utf-8">UTF-8</option>
+                        <option value="windows-1252">Windows-1252</option>
+                        <option value="shift-jis">Shift-JIS</option>
+                        <option value="big5">Big5</option>
+                    </select>
+                    <span id="language-mode" class="font-bold sm:font-normal text-blue-500 sm:text-gray-500">HTML</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="visual-container" class="hidden w-full flex-grow h-full flex-col bg-gray-100 dark:bg-gray-800 transition-all duration-300">
+            <div class="flex items-center p-1.5 sm:p-2 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm flex-shrink-0 overflow-x-auto whitespace-nowrap hide-scrollbar">
+                <button onclick="execCmd('bold')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Bold" data-i18n-title="visual.bold"><i class="fa-solid fa-bold"></i></button>
+                <button onclick="execCmd('italic')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Italic" data-i18n-title="visual.italic"><i class="fa-solid fa-italic"></i></button>
+                <button onclick="execCmd('underline')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Underline" data-i18n-title="visual.underline"><i class="fa-solid fa-underline"></i></button>
+                
+                <div class="w-px h-5 sm:h-6 bg-gray-300 dark:bg-gray-600 mx-1 flex-shrink-0"></div>
+                
+                <button onclick="execCmd('justifyLeft')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Align Left" data-i18n-title="visual.alignLeft"><i class="fa-solid fa-align-left"></i></button>
+                <button onclick="execCmd('justifyCenter')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Align Center" data-i18n-title="visual.alignCenter"><i class="fa-solid fa-align-center"></i></button>
+                <button onclick="execCmd('justifyRight')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Align Right" data-i18n-title="visual.alignRight"><i class="fa-solid fa-align-right"></i></button>
+                
+                <div class="w-px h-5 sm:h-6 bg-gray-300 dark:bg-gray-600 mx-1 flex-shrink-0"></div>
+                
+                <button onclick="execCmd('formatBlock', 'H1')" class="p-1 sm:p-2 flex-shrink-0 font-bold text-sm sm:text-base text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="H1" data-i18n-title="visual.h1">H1</button>
+                <button onclick="execCmd('formatBlock', 'H2')" class="p-1 sm:p-2 flex-shrink-0 font-bold text-sm sm:text-base text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="H2" data-i18n-title="visual.h2">H2</button>
+                <input type="color" onmousedown="saveVisualSelection()" onchange="applyTextColor(this.value)" class="w-6 h-6 sm:w-8 sm:h-8 p-0 border-0 rounded cursor-pointer ms-1 flex-shrink-0" title="Text Color" data-i18n-title="visual.textColor">
+                
+                <div class="w-px h-5 sm:h-6 bg-gray-300 dark:bg-gray-600 mx-1 flex-shrink-0"></div>
+                
+                <button onclick="insertImagePrompt()" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Insert Image" data-i18n-title="visual.insertImg"><i class="fa-regular fa-image"></i></button>
+                <button onclick="insertLinkPrompt()" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Insert Link" data-i18n-title="visual.insertLink"><i class="fa-solid fa-link"></i></button>
+                
+                <div class="w-px h-5 sm:h-6 bg-gray-300 dark:bg-gray-600 mx-1 flex-shrink-0"></div>
+                
+                <button onclick="insertTablePrompt()" class="py-1 px-2 flex-shrink-0 flex items-center gap-1 sm:gap-2 text-[11px] sm:text-sm font-medium bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-800/50 rounded transition-colors border border-blue-200 dark:border-blue-800" title="Table" data-i18n-title="visual.insertTableTitle"><i class="fa-solid fa-table"></i> <span class="hidden sm:inline" data-i18n="visual.insertTable"></span></button>
+                <div class="flex items-center text-[10px] sm:text-xs font-bold text-gray-600 dark:text-gray-300 gap-0.5 sm:gap-1 ms-1 bg-gray-100 dark:bg-gray-800 p-0.5 sm:p-1 rounded border border-gray-200 dark:border-gray-700 flex-shrink-0">
+                    <button onclick="addTableRow()" class="px-1.5 py-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="+Row" data-i18n-title="visual.rowAddTitle" data-i18n="visual.rowAdd"></button>
+                    <button onclick="addTableColumn()" class="px-1.5 py-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="+Col" data-i18n-title="visual.colAddTitle" data-i18n="visual.colAdd"></button>
+                    <button onclick="removeTableRow()" class="px-1.5 py-1 hover:bg-red-100 text-red-500 rounded transition-colors" title="-Row" data-i18n-title="visual.rowDelTitle" data-i18n="visual.rowDel"></button>
+                    <button onclick="removeTableColumn()" class="px-1.5 py-1 hover:bg-red-100 text-red-500 rounded transition-colors" title="-Col" data-i18n-title="visual.colDelTitle" data-i18n="visual.colDel"></button>
+                </div>
+            </div>
+            <iframe id="visual-frame" class="w-full flex-grow bg-white border-none"></iframe>
+        </div>
+
+        <div id="merge-container" class="hidden w-full h-full flex-col">
+            <div class="flex justify-between items-center bg-gray-100 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700 px-4 py-2 text-sm flex-shrink-0">
+                <span class="font-bold text-gray-700 dark:text-gray-300"><i class="fa-solid fa-code-compare"></i> <span data-i18n="nav.compareTitle">Compare Mode</span></span>
+                <button onclick="exitCompareMode()" class="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-xs transition-colors shadow-sm" data-i18n="messages.exitCompare">Exit Compare</button>
+            </div>
+            <div id="merge-view-wrapper" class="flex-grow w-full relative overflow-hidden"></div>
+        </div>
+    </main>
+
+    <div id="drop-overlay" class="hidden absolute inset-0 flex items-center justify-center flex-col text-white">
+        <i class="fa-solid fa-file-arrow-up text-6xl mb-4 animate-bounce"></i>
+        <h2 class="text-3xl font-bold" data-i18n="messages.dropText"></h2>
+    </div>
+
+    <div id="custom-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden transform transition-all scale-95 opacity-0" id="custom-modal-content">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700"><h3 class="text-lg font-semibold text-gray-900 dark:text-white" id="custom-modal-title"></h3></div>
+            <div class="px-6 py-4">
+                <p class="text-sm text-gray-600 dark:text-gray-300 mb-3" id="custom-modal-message"></p>
+                <input type="text" id="custom-modal-input" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm" autocomplete="off">
+            </div>
+            <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex justify-end gap-3 rounded-b-lg">
+                <button id="custom-modal-cancel" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 transition-colors" data-i18n="messages.cancel"></button>
+                <button id="custom-modal-confirm" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 shadow-sm transition-colors" data-i18n="messages.confirm"></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="compare-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden transform transition-all scale-95 opacity-0" id="compare-modal-content">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700"><h3 class="text-lg font-semibold text-gray-900 dark:text-white" data-i18n="nav.compareTitle"></h3></div>
+            <div class="px-6 py-4">
+                <p class="text-sm text-gray-600 dark:text-gray-300 mb-3" data-i18n="messages.selectCompareTab">Select a tab to compare with:</p>
+                <select id="compare-tab-select" class="custom-select w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm appearance-none">
+                </select>
+            </div>
+            <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex justify-end gap-3 rounded-b-lg">
+                <button onclick="closeCompareModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 transition-colors" data-i18n="messages.cancel"></button>
+                <button onclick="executeCompare()" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 shadow-sm transition-colors" data-i18n="messages.confirm"></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="absolute bottom-10 end-4 flex flex-col gap-2 z-50"></div>
+
+    <!-- Core Scripts -->
+    <script src="js/i18n.js"></script>
+    <script src="js/filesystem.js"></script>
+    <script src="js/editor.js"></script>
+</body>
+</html>
