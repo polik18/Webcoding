@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebPad++ Integrated</title>
+    <title>WebPad++</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -20,7 +21,25 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/php/php.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/sql/sql.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/rust/rust.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/go/go.min.js"></script>
     
+    <!-- IntelliSense & Auto-Complete -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/show-hint.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/show-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/anyword-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/javascript-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/css-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/html-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/hint/sql-hint.min.js"></script>
+    
+    <!-- Editing Helpers -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/matchbrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/closetag.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/lint/lint.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/lint/lint.min.js"></script>
     
@@ -31,21 +50,36 @@
     <script src="https://cdn.jsdelivr.net/npm/htmlhint@0.9.13/lib/htmlhint.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/lint/html-lint.min.js"></script>
 
-    <style>
-        .CodeMirror { position: absolute; top: 0; bottom: 0; left: 0; right: 0; height: 100% !important; font-family: 'Fira Code', monospace; font-size: 15px; z-index: 10; }
-        ::-webkit-scrollbar { width: 10px; height: 10px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 5px; }
-        .dark ::-webkit-scrollbar-thumb { background: #475569; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        .CodeMirror-lint-tooltip {
-            background-color: #1e293b !important; color: #f8fafc !important; border: 1px solid #475569 !important; border-radius: 6px; padding: 8px 12px; font-family: 'Inter', sans-serif; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); opacity: 1 !important; z-index: 100;
-        }
-        #drop-overlay { background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); z-index: 50; }
-        .term-bg { background-color: #1e1e1e; }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    </style>
+    <!-- CodeMirror Search & Sublime Keymap -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/dialog/dialog.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/search/searchcursor.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/search/search.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/dialog/dialog.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/search/jump-to-line.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/keymap/sublime.min.js"></script>
+
+    <!-- JS Beautify for Formatting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.9/beautify.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.9/beautify-css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.9/beautify-html.min.js"></script>
+
+    <!-- localForage for IndexedDB -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
+
+    <!-- JSZip for Exporting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <!-- CodeMirror Merge Addon & diff-match-patch -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/merge/merge.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/diff_match_patch/20121119/diff_match_patch.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/merge/merge.min.js"></script>
+
+    <!-- i18next Libraries -->
+    <script src="https://unpkg.com/i18next@23.10.1/dist/umd/i18next.min.js"></script>
+    <script src="https://unpkg.com/i18next-http-backend@2.5.0/i18nextHttpBackend.min.js"></script>
+
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 h-screen flex flex-col overflow-hidden transition-colors duration-200">
     
@@ -56,40 +90,75 @@
             </h1>
             
             <div class="flex items-center gap-1 sm:gap-2">
-                <button onclick="openFile()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition" title="開啟檔案" data-i18n-title="openTitle">
-                    <i class="fa-regular fa-folder-open"></i> <span class="hidden sm:inline" data-i18n="openBtn">開啟</span>
+                <button onclick="toggleSidebar()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition" title="Toggle Explorer" data-i18n-title="nav.toggleExplorer">
+                    <i class="fa-solid fa-bars"></i>
                 </button>
-                <button onclick="saveFile()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-blue-600 hover:bg-blue-700 text-white rounded transition shadow-sm relative" title="儲存檔案" data-i18n-title="saveTitle">
-                    <i class="fa-regular fa-floppy-disk"></i> <span class="hidden sm:inline" data-i18n="saveBtn">儲存</span>
-                    <span id="unsaved-indicator" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse border-2 border-white dark:border-gray-800"></span>
+                <div class="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                <button onclick="openFile()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition" title="Open" data-i18n-title="nav.openTitle">
+                    <i class="fa-regular fa-folder-open"></i> <span class="hidden sm:inline" data-i18n="nav.openBtn"></span>
                 </button>
-                <button onclick="runCode()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-green-600 hover:bg-green-700 text-white rounded transition shadow-sm" title="執行程式 (Ctrl+Enter)" data-i18n-title="runTitle">
-                    <i class="fa-solid fa-play"></i> <span class="hidden sm:inline" data-i18n="runBtn">執行</span>
+                <button onclick="saveFile()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-blue-600 hover:bg-blue-700 text-white rounded transition shadow-sm relative" title="Save" data-i18n-title="nav.saveTitle">
+                    <i class="fa-regular fa-floppy-disk"></i> <span class="hidden sm:inline" data-i18n="nav.saveBtn"></span>
+                    <span id="unsaved-indicator" class="hidden absolute -top-1 -end-1 w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse border-2 border-white dark:border-gray-800"></span>
+                </button>
+                <button onclick="formatCode()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-purple-600 hover:bg-purple-700 text-white rounded transition shadow-sm" title="Format" data-i18n-title="nav.formatTitle">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> <span class="hidden sm:inline" data-i18n="nav.formatBtn"></span>
+                </button>
+                <button onclick="runCode()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-green-600 hover:bg-green-700 text-white rounded transition shadow-sm" title="Run" data-i18n-title="nav.runTitle">
+                    <i class="fa-solid fa-play"></i> <span class="hidden sm:inline" data-i18n="nav.runBtn"></span>
                 </button>
             </div>
         </div>
 
         <div class="flex items-center bg-gray-100 dark:bg-gray-900 p-1 rounded-lg border border-gray-200 dark:border-gray-700 w-full sm:w-auto justify-center order-last sm:order-none mt-1 sm:mt-0">
             <button id="mode-code-btn" onclick="switchToCode()" class="px-3 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-md bg-blue-600 text-white shadow-sm transition-all duration-200 flex items-center gap-1 sm:gap-2">
-                <i class="fa-solid fa-code"></i> <span data-i18n="code">程式碼</span>
+                <i class="fa-solid fa-code"></i> <span data-i18n="nav.modeCode"></span>
+            </button>
+            <button id="mode-split-btn" onclick="switchToSplit()" class="px-3 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 transition-all duration-200 flex items-center gap-1 sm:gap-2">
+                <i class="fa-solid fa-table-columns"></i> <span data-i18n="nav.modeSplit"></span>
             </button>
             <button id="mode-visual-btn" onclick="switchToVisual()" class="px-3 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 transition-all duration-200 flex items-center gap-1 sm:gap-2">
-                <i class="fa-solid fa-pen-nib"></i> <span data-i18n="visual">視覺化</span>
+                <i class="fa-solid fa-pen-nib"></i> <span data-i18n="nav.modeVisual"></span>
             </button>
         </div>
 
         <div class="flex items-center gap-2 sm:gap-3">
-            <div onclick="renameFile()" class="group flex items-center gap-1 sm:gap-2 px-1 sm:px-2 py-1 rounded cursor-pointer border border-transparent hover:border-blue-300 hover:bg-blue-50 dark:hover:border-blue-700 dark:hover:bg-blue-900/30 transition-all" title="點擊修改檔名" data-i18n-title="renameTitle">
-                <span id="file-name" class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 max-w-[100px] sm:max-w-[150px] truncate group-hover:text-blue-600 dark:group-hover:text-blue-400">未命名檔案.html</span>
+            <div onclick="renameFile()" class="group flex items-center gap-1 sm:gap-2 px-1 sm:px-2 py-1 rounded cursor-pointer border border-transparent hover:border-blue-300 hover:bg-blue-50 dark:hover:border-blue-700 dark:hover:bg-blue-900/30 transition-all" title="Rename" data-i18n-title="nav.renameTitle">
+                <span id="file-name" data-is-default="true" class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 max-w-[100px] sm:max-w-[150px] truncate group-hover:text-blue-600 dark:group-hover:text-blue-400"></span>
                 <i class="fa-solid fa-pen text-[10px] sm:text-xs text-gray-400 group-hover:text-blue-500"></i>
             </div>
             
-            <select id="lang-select" onchange="changeLanguage(this.value)" class="text-xs font-bold h-7 sm:h-8 pl-2 pr-6 py-0 rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm border border-gray-300 dark:border-gray-600 appearance-none bg-no-repeat cursor-pointer outline-none focus:ring-2 focus:ring-blue-500" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%236b7280%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-position: right .5rem top 50%; background-size: .65rem auto;">
+            <select id="lang-select" onchange="changeLanguage(this.value)" class="custom-select text-xs font-bold h-7 sm:h-8 ps-2 pe-6 py-0 rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm border border-gray-300 dark:border-gray-600 appearance-none bg-no-repeat cursor-pointer outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="en">English</option>
-                <option value="zh">繁體中文</option>
+                <option value="zh-TW">繁體中文</option>
+                <option value="zh-CN">简体中文</option>
+                <option value="ja">日本語</option>
+                <option value="ko">한국어</option>
                 <option value="es">Español</option>
                 <option value="fr">Français</option>
-                <option value="ja">日本語</option>
+                <option value="de">Deutsch</option>
+                <option value="it">Italiano</option>
+                <option value="pt">Português</option>
+                <option value="ru">Русский</option>
+                <option value="ar">العربية</option>
+                <option value="hi">हिन्दी</option>
+                <option value="bn">বাংলা</option>
+                <option value="id">Bahasa Indonesia</option>
+                <option value="tr">Türkçe</option>
+                <option value="vi">Tiếng Việt</option>
+                <option value="th">ไทย</option>
+                <option value="pl">Polski</option>
+                <option value="nl">Nederlands</option>
+                <option value="sv">Svenska</option>
+                <option value="da">Dansk</option>
+                <option value="fi">Suomi</option>
+                <option value="no">Norsk</option>
+                <option value="cs">Čeština</option>
+                <option value="el">Ελληνικά</option>
+                <option value="he">עברית</option>
+                <option value="ro">Română</option>
+                <option value="hu">Magyar</option>
+                <option value="uk">Українська</option>
             </select>
 
             <button onclick="toggleTheme()" class="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition flex-shrink-0">
@@ -98,20 +167,53 @@
         </div>
     </nav>
 
+    <!-- Tab Bar -->
+    <div id="tab-bar" class="flex items-center overflow-x-auto bg-gray-200 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700 hide-scrollbar flex-shrink-0 min-h-[36px]">
+        <div id="tabs-container" class="flex items-center h-full">
+            <!-- Tabs will be injected here -->
+        </div>
+        <button onclick="tabManager.createNewTab()" class="px-3 py-1.5 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition" title="New Tab" data-i18n-title="nav.newTabTitle">
+            <i class="fa-solid fa-plus"></i>
+        </button>
+        <div class="flex-grow"></div>
+        <button onclick="openCompareModal()" class="px-3 py-1 text-xs text-gray-600 hover:text-blue-600 border-l border-gray-300 dark:border-gray-600 dark:text-gray-400 transition whitespace-nowrap" title="Compare" data-i18n-title="nav.compareTitle">
+            <i class="fa-solid fa-code-compare"></i> <span data-i18n="nav.compareBtn">Compare</span>
+        </button>
+    </div>
+
     <main class="flex-grow flex relative overflow-hidden">
         
-        <div id="editor-container" class="w-full h-full flex flex-col">
+        <!-- Sidebar Explorer -->
+        <div id="sidebar" class="w-64 bg-gray-100 dark:bg-gray-800 border-e border-gray-300 dark:border-gray-700 flex flex-col flex-shrink-0 transition-all duration-300">
+            <div class="px-3 py-2 flex items-center justify-between text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 border-b border-gray-300 dark:border-gray-700 uppercase tracking-wider">
+                <span data-i18n="nav.explorer">EXPLORER</span>
+                <div class="flex gap-2">
+                    <button onclick="fileSystem.createNodePrompt('file')" class="text-gray-500 hover:text-blue-500 transition-colors" title="New File" data-i18n-title="nav.newFile"><i class="fa-solid fa-file-circle-plus"></i></button>
+                    <button onclick="fileSystem.createNodePrompt('folder')" class="text-gray-500 hover:text-blue-500 transition-colors" title="New Folder" data-i18n-title="nav.newFolder"><i class="fa-solid fa-folder-plus"></i></button>
+                    <button onclick="fileSystem.deleteSelectedNode()" class="text-gray-500 hover:text-red-500 transition-colors" title="Delete" data-i18n-title="nav.deleteNode"><i class="fa-solid fa-trash-can"></i></button>
+                    <button onclick="fileSystem.exportZip()" class="text-gray-500 hover:text-green-500 transition-colors" title="Export ZIP" data-i18n-title="nav.exportZip"><i class="fa-solid fa-file-zipper"></i></button>
+                </div>
+            </div>
+            <div id="file-tree" class="flex-grow overflow-y-auto p-2 text-sm text-gray-700 dark:text-gray-300 hide-scrollbar select-none">
+                <!-- Tree nodes will be injected here -->
+            </div>
+        </div>
+        
+        <!-- Resizer -->
+        <div id="sidebar-resizer" class="w-1 cursor-col-resize bg-gray-200 dark:bg-gray-700 hover:bg-blue-500 transition-colors flex-shrink-0 relative z-10"></div>
+
+        <div id="editor-container" class="flex-grow flex flex-col min-w-0 h-full transition-all duration-300">
             <div class="flex-grow relative w-full"><textarea id="code-editor"></textarea></div>
             
             <div id="ide-panel" class="hidden h-[250px] flex-shrink-0 flex-col term-bg border-t border-gray-700 font-mono text-sm shadow-[0_-4px_15px_rgba(0,0,0,0.15)] z-20">
                 <div class="flex items-center bg-[#252526] text-gray-400 border-b border-gray-700 px-2">
                     <button onclick="switchPanelTab('problems')" id="tab-problems" class="px-4 py-2 border-b-2 border-blue-500 text-white hover:text-gray-200 transition-colors flex items-center gap-2">
-                        <span data-i18n="probTab">問題</span> <span id="problem-count" class="bg-blue-600/30 text-blue-400 px-1.5 py-0.5 rounded-full text-xs">0</span>
+                        <span data-i18n="panel.probTab"></span> <span id="problem-count" class="bg-blue-600/30 text-blue-400 px-1.5 py-0.5 rounded-full text-xs">0</span>
                     </button>
-                    <button onclick="switchPanelTab('console')" id="tab-console" class="px-4 py-2 border-b-2 border-transparent hover:text-gray-200 transition-colors flex items-center gap-2" data-i18n="consoleTab">終端機 (Console)</button>
+                    <button onclick="switchPanelTab('console')" id="tab-console" class="px-4 py-2 border-b-2 border-transparent hover:text-gray-200 transition-colors flex items-center gap-2" data-i18n="panel.consoleTab"></button>
                     <div class="flex-grow"></div>
-                    <button onclick="clearConsole()" class="px-3 py-2 hover:bg-white/10 transition-colors" title="清除終端機" data-i18n-title="clearConsole"><i class="fa-solid fa-eraser"></i></button>
-                    <button onclick="closePanel()" class="px-3 py-2 hover:bg-white/10 transition-colors" title="關閉面板" data-i18n-title="closePanel"><i class="fa-solid fa-xmark"></i></button>
+                    <button onclick="clearConsole()" class="px-3 py-2 hover:bg-white/10 transition-colors" title="Clear" data-i18n-title="panel.clearConsole"><i class="fa-solid fa-eraser"></i></button>
+                    <button onclick="closePanel()" class="px-3 py-2 hover:bg-white/10 transition-colors" title="Close" data-i18n-title="panel.closePanel"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 <div class="flex-grow overflow-y-auto relative">
                     <div id="panel-problems" class="absolute inset-0 p-3 overflow-y-auto"></div>
@@ -121,564 +223,103 @@
 
             <div class="flex-shrink-0 flex items-center justify-between px-2 sm:px-3 py-1 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
                 <div class="flex gap-2 sm:gap-4"><span id="cursor-pos">Ln 1, Col 1</span><span id="file-size" class="hidden sm:inline">0 Bytes</span></div>
-                <div class="flex gap-2 sm:gap-4"><span class="hidden sm:inline">UTF-8</span><span id="language-mode" class="font-bold sm:font-normal text-blue-500 sm:text-gray-500">HTML</span></div>
+                <div class="flex gap-2 sm:gap-4">
+                    <button id="eol-toggle" onclick="toggleEOL()" class="hover:text-blue-500 dark:hover:text-blue-400 transition-colors font-medium">LF</button>
+                    <select id="encoding-select" onchange="changeEncoding(this.value)" class="bg-transparent border-none outline-none cursor-pointer hover:text-blue-500 dark:hover:text-blue-400 transition-colors text-inherit font-inherit appearance-none">
+                        <option value="utf-8">UTF-8</option>
+                        <option value="windows-1252">Windows-1252</option>
+                        <option value="shift-jis">Shift-JIS</option>
+                        <option value="big5">Big5</option>
+                    </select>
+                    <span id="language-mode" class="font-bold sm:font-normal text-blue-500 sm:text-gray-500">HTML</span>
+                </div>
             </div>
         </div>
 
-        <div id="visual-container" class="hidden w-full h-full flex-col bg-gray-100 dark:bg-gray-800">
+        <div id="visual-container" class="hidden w-full flex-grow h-full flex-col bg-gray-100 dark:bg-gray-800 transition-all duration-300">
             <div class="flex items-center p-1.5 sm:p-2 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm flex-shrink-0 overflow-x-auto whitespace-nowrap hide-scrollbar">
-                <button onclick="execCmd('bold')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="粗體" data-i18n-title="bold"><i class="fa-solid fa-bold"></i></button>
-                <button onclick="execCmd('italic')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="斜體" data-i18n-title="italic"><i class="fa-solid fa-italic"></i></button>
-                <button onclick="execCmd('underline')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="底線" data-i18n-title="underline"><i class="fa-solid fa-underline"></i></button>
+                <button onclick="execCmd('bold')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Bold" data-i18n-title="visual.bold"><i class="fa-solid fa-bold"></i></button>
+                <button onclick="execCmd('italic')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Italic" data-i18n-title="visual.italic"><i class="fa-solid fa-italic"></i></button>
+                <button onclick="execCmd('underline')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Underline" data-i18n-title="visual.underline"><i class="fa-solid fa-underline"></i></button>
                 
                 <div class="w-px h-5 sm:h-6 bg-gray-300 dark:bg-gray-600 mx-1 flex-shrink-0"></div>
                 
-                <button onclick="execCmd('justifyLeft')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="靠左" data-i18n-title="alignLeft"><i class="fa-solid fa-align-left"></i></button>
-                <button onclick="execCmd('justifyCenter')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="置中" data-i18n-title="alignCenter"><i class="fa-solid fa-align-center"></i></button>
-                <button onclick="execCmd('justifyRight')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="靠右" data-i18n-title="alignRight"><i class="fa-solid fa-align-right"></i></button>
+                <button onclick="execCmd('justifyLeft')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Align Left" data-i18n-title="visual.alignLeft"><i class="fa-solid fa-align-left"></i></button>
+                <button onclick="execCmd('justifyCenter')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Align Center" data-i18n-title="visual.alignCenter"><i class="fa-solid fa-align-center"></i></button>
+                <button onclick="execCmd('justifyRight')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Align Right" data-i18n-title="visual.alignRight"><i class="fa-solid fa-align-right"></i></button>
                 
                 <div class="w-px h-5 sm:h-6 bg-gray-300 dark:bg-gray-600 mx-1 flex-shrink-0"></div>
                 
-                <button onclick="execCmd('formatBlock', 'H1')" class="p-1 sm:p-2 flex-shrink-0 font-bold text-sm sm:text-base text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="大標題" data-i18n-title="h1">H1</button>
-                <button onclick="execCmd('formatBlock', 'H2')" class="p-1 sm:p-2 flex-shrink-0 font-bold text-sm sm:text-base text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="中標題" data-i18n-title="h2">H2</button>
-                <input type="color" onmousedown="saveVisualSelection()" onchange="applyTextColor(this.value)" class="w-6 h-6 sm:w-8 sm:h-8 p-0 border-0 rounded cursor-pointer ml-1 flex-shrink-0" title="文字顏色" data-i18n-title="textColor">
+                <button onclick="execCmd('formatBlock', 'H1')" class="p-1 sm:p-2 flex-shrink-0 font-bold text-sm sm:text-base text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="H1" data-i18n-title="visual.h1">H1</button>
+                <button onclick="execCmd('formatBlock', 'H2')" class="p-1 sm:p-2 flex-shrink-0 font-bold text-sm sm:text-base text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="H2" data-i18n-title="visual.h2">H2</button>
+                <input type="color" onmousedown="saveVisualSelection()" onchange="applyTextColor(this.value)" class="w-6 h-6 sm:w-8 sm:h-8 p-0 border-0 rounded cursor-pointer ms-1 flex-shrink-0" title="Text Color" data-i18n-title="visual.textColor">
                 
                 <div class="w-px h-5 sm:h-6 bg-gray-300 dark:bg-gray-600 mx-1 flex-shrink-0"></div>
                 
-                <button onclick="insertImagePrompt()" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="插入圖片" data-i18n-title="insertImg"><i class="fa-regular fa-image"></i></button>
-                <button onclick="insertLinkPrompt()" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="插入連結" data-i18n-title="insertLink"><i class="fa-solid fa-link"></i></button>
+                <button onclick="insertImagePrompt()" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Insert Image" data-i18n-title="visual.insertImg"><i class="fa-regular fa-image"></i></button>
+                <button onclick="insertLinkPrompt()" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Insert Link" data-i18n-title="visual.insertLink"><i class="fa-solid fa-link"></i></button>
                 
                 <div class="w-px h-5 sm:h-6 bg-gray-300 dark:bg-gray-600 mx-1 flex-shrink-0"></div>
                 
-                <button onclick="insertTablePrompt()" class="py-1 px-2 flex-shrink-0 flex items-center gap-1 sm:gap-2 text-[11px] sm:text-sm font-medium bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-800/50 rounded transition-colors border border-blue-200 dark:border-blue-800" title="插入預設 3x3 表格" data-i18n-title="insertTableTitle"><i class="fa-solid fa-table"></i> <span class="hidden sm:inline" data-i18n="insertTable">插入表格</span></button>
-                <div class="flex items-center text-[10px] sm:text-xs font-bold text-gray-600 dark:text-gray-300 gap-0.5 sm:gap-1 ml-1 bg-gray-100 dark:bg-gray-800 p-0.5 sm:p-1 rounded border border-gray-200 dark:border-gray-700 flex-shrink-0">
-                    <button onclick="addTableRow()" class="px-1.5 py-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="向下新增一列" data-i18n-title="rowAddTitle" data-i18n="rowAdd">+列</button>
-                    <button onclick="addTableColumn()" class="px-1.5 py-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="向右新增一欄" data-i18n-title="colAddTitle" data-i18n="colAdd">+欄</button>
-                    <button onclick="removeTableRow()" class="px-1.5 py-1 hover:bg-red-100 text-red-500 rounded transition-colors" title="刪除目前游標所在的列" data-i18n-title="rowDelTitle" data-i18n="rowDel">-列</button>
-                    <button onclick="removeTableColumn()" class="px-1.5 py-1 hover:bg-red-100 text-red-500 rounded transition-colors" title="刪除目前游標所在的欄" data-i18n-title="colDelTitle" data-i18n="colDel">-欄</button>
+                <button onclick="insertTablePrompt()" class="py-1 px-2 flex-shrink-0 flex items-center gap-1 sm:gap-2 text-[11px] sm:text-sm font-medium bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-800/50 rounded transition-colors border border-blue-200 dark:border-blue-800" title="Table" data-i18n-title="visual.insertTableTitle"><i class="fa-solid fa-table"></i> <span class="hidden sm:inline" data-i18n="visual.insertTable"></span></button>
+                <div class="flex items-center text-[10px] sm:text-xs font-bold text-gray-600 dark:text-gray-300 gap-0.5 sm:gap-1 ms-1 bg-gray-100 dark:bg-gray-800 p-0.5 sm:p-1 rounded border border-gray-200 dark:border-gray-700 flex-shrink-0">
+                    <button onclick="addTableRow()" class="px-1.5 py-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="+Row" data-i18n-title="visual.rowAddTitle" data-i18n="visual.rowAdd"></button>
+                    <button onclick="addTableColumn()" class="px-1.5 py-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="+Col" data-i18n-title="visual.colAddTitle" data-i18n="visual.colAdd"></button>
+                    <button onclick="removeTableRow()" class="px-1.5 py-1 hover:bg-red-100 text-red-500 rounded transition-colors" title="-Row" data-i18n-title="visual.rowDelTitle" data-i18n="visual.rowDel"></button>
+                    <button onclick="removeTableColumn()" class="px-1.5 py-1 hover:bg-red-100 text-red-500 rounded transition-colors" title="-Col" data-i18n-title="visual.colDelTitle" data-i18n="visual.colDel"></button>
                 </div>
             </div>
             <iframe id="visual-frame" class="w-full flex-grow bg-white border-none"></iframe>
+        </div>
+
+        <div id="merge-container" class="hidden w-full h-full flex-col">
+            <div class="flex justify-between items-center bg-gray-100 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700 px-4 py-2 text-sm flex-shrink-0">
+                <span class="font-bold text-gray-700 dark:text-gray-300"><i class="fa-solid fa-code-compare"></i> <span data-i18n="nav.compareTitle">Compare Mode</span></span>
+                <button onclick="exitCompareMode()" class="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-xs transition-colors shadow-sm" data-i18n="messages.exitCompare">Exit Compare</button>
+            </div>
+            <div id="merge-view-wrapper" class="flex-grow w-full relative overflow-hidden"></div>
         </div>
     </main>
 
     <div id="drop-overlay" class="hidden absolute inset-0 flex items-center justify-center flex-col text-white">
         <i class="fa-solid fa-file-arrow-up text-6xl mb-4 animate-bounce"></i>
-        <h2 class="text-3xl font-bold" data-i18n="dropText">放開以開啟檔案</h2>
+        <h2 class="text-3xl font-bold" data-i18n="messages.dropText"></h2>
     </div>
 
     <div id="custom-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden transform transition-all scale-95 opacity-0" id="custom-modal-content">
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700"><h3 class="text-lg font-semibold text-gray-900 dark:text-white" id="custom-modal-title">標題</h3></div>
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700"><h3 class="text-lg font-semibold text-gray-900 dark:text-white" id="custom-modal-title"></h3></div>
             <div class="px-6 py-4">
-                <p class="text-sm text-gray-600 dark:text-gray-300 mb-3" id="custom-modal-message">訊息</p>
+                <p class="text-sm text-gray-600 dark:text-gray-300 mb-3" id="custom-modal-message"></p>
                 <input type="text" id="custom-modal-input" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm" autocomplete="off">
             </div>
             <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex justify-end gap-3 rounded-b-lg">
-                <button id="custom-modal-cancel" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 transition-colors" data-i18n="cancel">取消</button>
-                <button id="custom-modal-confirm" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 shadow-sm transition-colors" data-i18n="confirm">確定</button>
+                <button id="custom-modal-cancel" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 transition-colors" data-i18n="messages.cancel"></button>
+                <button id="custom-modal-confirm" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 shadow-sm transition-colors" data-i18n="messages.confirm"></button>
             </div>
         </div>
     </div>
 
-    <div id="toast-container" class="absolute bottom-10 right-4 flex flex-col gap-2 z-50"></div>
+    <div id="compare-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden transform transition-all scale-95 opacity-0" id="compare-modal-content">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700"><h3 class="text-lg font-semibold text-gray-900 dark:text-white" data-i18n="nav.compareTitle"></h3></div>
+            <div class="px-6 py-4">
+                <p class="text-sm text-gray-600 dark:text-gray-300 mb-3" data-i18n="messages.selectCompareTab">Select a tab to compare with:</p>
+                <select id="compare-tab-select" class="custom-select w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm appearance-none">
+                </select>
+            </div>
+            <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex justify-end gap-3 rounded-b-lg">
+                <button onclick="closeCompareModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 transition-colors" data-i18n="messages.cancel"></button>
+                <button onclick="executeCompare()" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 shadow-sm transition-colors" data-i18n="messages.confirm"></button>
+            </div>
+        </div>
+    </div>
 
-    <script>
-        const dict = {
-            zh: {
-                openBtn: "開啟", saveBtn: "儲存", runBtn: "執行", code: "程式碼", visual: "視覺化",
-                openTitle: "開啟檔案", saveTitle: "儲存檔案", runTitle: "執行程式 (Ctrl+Enter)", renameTitle: "點擊修改檔名",
-                probTab: "問題", consoleTab: "終端機 (Console)", clearConsole: "清除終端機", closePanel: "關閉面板",
-                bold: "粗體", italic: "斜體", underline: "底線", alignLeft: "靠左", alignCenter: "置中", alignRight: "靠右",
-                h1: "大標題", h2: "中標題", textColor: "文字顏色", insertImg: "插入圖片", insertLink: "插入連結",
-                insertTableTitle: "插入預設 3x3 表格", insertTable: "插入表格",
-                rowAddTitle: "向下新增一列", rowAdd: "+列", colAddTitle: "向右新增一欄", colAdd: "+欄",
-                rowDelTitle: "刪除目前游標所在的列", rowDel: "-列", colDelTitle: "刪除目前游標所在的欄", colDel: "-欄",
-                dropText: "放開以開啟檔案", cancel: "取消", confirm: "確定", defaultFile: "未命名檔案.html",
-                msgPerfect: "<i class='fa-solid fa-check'></i> 程式碼看起來很完美，沒有發現語法錯誤！",
-                msgUnknownLine: "未知", msgUnknownErr: "未知錯誤", msgLine: "第", msgLineSuf: "行",
-                renamePrompt: "重新命名檔案", renameMsg: "請輸入檔案名稱 (包含副檔名，例如: test.srt, script.py):", toastRenamed: "檔名已更改為:",
-                savePrompt: "存檔", saveMsg: "請輸入存檔名稱 (包含副檔名，例如: subtitle.srt, index.html):", cancelSave: "已取消存檔", toastSaved: "已下載檔案",
-                tooBig: "檔案過大", limit: "限制 2MB", toastLoaded: "已載入:",
-                runHTML: "已在新分頁開啟網頁預覽！", runConsole: "已將 HTML 網頁部署至新分頁進行完整預覽。\n(提示：若無反應，請檢查瀏覽器右上角是否阻擋了彈出視窗)", popBlock: "瀏覽器阻擋了新分頁，請允許彈出視窗",
-                runFail: "預覽失敗", noRunVis: "視覺化模式下無法執行指令，請先切換至程式碼模式",
-                runStart: "--- 執行開始", runWait: "⏳ Python 引擎尚未載入完成，請稍候再試...",
-                runNotSup: "目前不支援直接執行", runHint: "格式。\n提示：點擊上方檔名改為 .js 或 .py 即可啟用執行引擎。",
-                promptImg: "請輸入圖片網址 (URL):", promptLink: "請輸入網址 (URL):", promptTableMsg: "確認要插入預設的 3x3 表格嗎？(請輸入 ok 或直接按確定)", tableCell: "儲存格",
-                errTable: "請先將游標點擊在表格內", pyLoad: "背景載入 Python 引擎中...", pyReady: "Python 引擎已就緒！", pyFail: "無法載入 Python"
-            },
-            en: {
-                openBtn: "Open", saveBtn: "Save", runBtn: "Run", code: "Code", visual: "Visual",
-                openTitle: "Open File", saveTitle: "Save File", runTitle: "Run Code (Ctrl+Enter)", renameTitle: "Click to rename",
-                probTab: "Problems", consoleTab: "Console", clearConsole: "Clear Console", closePanel: "Close Panel",
-                bold: "Bold", italic: "Italic", underline: "Underline", alignLeft: "Align Left", alignCenter: "Align Center", alignRight: "Align Right",
-                h1: "H1", h2: "H2", textColor: "Text Color", insertImg: "Insert Image", insertLink: "Insert Link",
-                insertTableTitle: "Insert 3x3 Table", insertTable: "Table",
-                rowAddTitle: "Add Row Below", rowAdd: "+Row", colAddTitle: "Add Col Right", colAdd: "+Col",
-                rowDelTitle: "Delete Current Row", rowDel: "-Row", colDelTitle: "Delete Current Col", colDel: "-Col",
-                dropText: "Drop to open file", cancel: "Cancel", confirm: "OK", defaultFile: "Untitled.html",
-                msgPerfect: "<i class='fa-solid fa-check'></i> Code looks perfect, no syntax errors found!",
-                msgUnknownLine: "Unknown", msgUnknownErr: "Unknown Error", msgLine: "Line", msgLineSuf: "",
-                renamePrompt: "Rename File", renameMsg: "Enter file name (with extension, e.g., test.srt, script.py):", toastRenamed: "File renamed to:",
-                savePrompt: "Save File", saveMsg: "Enter save name (with extension, e.g., subtitle.srt, index.html):", cancelSave: "Save cancelled", toastSaved: "File downloaded",
-                tooBig: "File too large", limit: "limit 2MB", toastLoaded: "Loaded:",
-                runHTML: "Web preview opened in a new tab!", runConsole: "HTML deployed to a new tab for preview.\n(Hint: Allow popups if nothing happens)", popBlock: "Popup blocked by browser, please allow",
-                runFail: "Preview failed", noRunVis: "Cannot run code in Visual Mode, switch to Code Mode first.",
-                runStart: "--- Run Started", runWait: "⏳ Python engine loading, please wait...",
-                runNotSup: "Direct execution not supported for", runHint: "format.\nHint: Rename to .js or .py to enable execution.",
-                promptImg: "Enter image URL:", promptLink: "Enter URL:", promptTableMsg: "Insert default 3x3 table? (Type ok or click OK)", tableCell: "Cell",
-                errTable: "Please click inside a table first", pyLoad: "Loading Python engine...", pyReady: "Python engine ready!", pyFail: "Failed to load Python"
-            },
-            es: {
-                openBtn: "Abrir", saveBtn: "Guardar", runBtn: "Ejecutar", code: "Código", visual: "Visual",
-                openTitle: "Abrir archivo", saveTitle: "Guardar archivo", runTitle: "Ejecutar Código (Ctrl+Enter)", renameTitle: "Clic para renombrar",
-                probTab: "Problemas", consoleTab: "Consola", clearConsole: "Limpiar Consola", closePanel: "Cerrar Panel",
-                bold: "Negrita", italic: "Cursiva", underline: "Subrayado", alignLeft: "Alinear a la Izquierda", alignCenter: "Centrar", alignRight: "Alinear a la Derecha",
-                h1: "H1", h2: "H2", textColor: "Color de Texto", insertImg: "Insertar Imagen", insertLink: "Insertar Enlace",
-                insertTableTitle: "Insertar Tabla 3x3", insertTable: "Tabla",
-                rowAddTitle: "Añadir Fila Abajo", rowAdd: "+Fila", colAddTitle: "Añadir Col. Derecha", colAdd: "+Col",
-                rowDelTitle: "Eliminar Fila Actual", rowDel: "-Fila", colDelTitle: "Eliminar Col. Actual", colDel: "-Col",
-                dropText: "Suelte para abrir", cancel: "Cancelar", confirm: "Aceptar", defaultFile: "Sin_titulo.html",
-                msgPerfect: "<i class='fa-solid fa-check'></i> ¡El código se ve perfecto, sin errores de sintaxis!",
-                msgUnknownLine: "Desconocida", msgUnknownErr: "Error desconocido", msgLine: "Línea", msgLineSuf: "",
-                renamePrompt: "Renombrar Archivo", renameMsg: "Introduzca el nombre (con extensión, ej., test.srt, script.py):", toastRenamed: "Renombrado a:",
-                savePrompt: "Guardar Archivo", saveMsg: "Introduzca el nombre a guardar (con extensión):", cancelSave: "Guardado cancelado", toastSaved: "Archivo descargado",
-                tooBig: "Archivo muy grande", limit: "límite 2MB", toastLoaded: "Cargado:",
-                runHTML: "¡Vista previa abierta en nueva pestaña!", runConsole: "HTML desplegado en nueva pestaña.\n(Pista: Permita ventanas emergentes)", popBlock: "Ventana emergente bloqueada",
-                runFail: "Fallo la vista previa", noRunVis: "No se puede ejecutar en Modo Visual, cambie a Código primero.",
-                runStart: "--- Ejecución Iniciada", runWait: "⏳ Cargando motor Python...",
-                runNotSup: "Ejecución directa no soportada para", runHint: "formato.\nPista: Renombra a .js o .py.",
-                promptImg: "URL de la imagen:", promptLink: "URL del enlace:", promptTableMsg: "¿Insertar tabla 3x3? (Escriba ok o Aceptar)", tableCell: "Celda",
-                errTable: "Haga clic dentro de una tabla primero", pyLoad: "Cargando motor Python...", pyReady: "¡Python listo!", pyFail: "Fallo al cargar Python"
-            },
-            fr: {
-                openBtn: "Ouvrir", saveBtn: "Enregistrer", runBtn: "Exécuter", code: "Code", visual: "Visuel",
-                openTitle: "Ouvrir le fichier", saveTitle: "Enregistrer le fichier", runTitle: "Exécuter le code (Ctrl+Enter)", renameTitle: "Cliquer pour renommer",
-                probTab: "Problèmes", consoleTab: "Console", clearConsole: "Effacer la console", closePanel: "Fermer le panneau",
-                bold: "Gras", italic: "Italique", underline: "Souligné", alignLeft: "Aligner à gauche", alignCenter: "Centrer", alignRight: "Aligner à droite",
-                h1: "H1", h2: "H2", textColor: "Couleur", insertImg: "Insérer une image", insertLink: "Insérer un lien",
-                insertTableTitle: "Insérer un tableau 3x3", insertTable: "Tableau",
-                rowAddTitle: "Ajouter une ligne", rowAdd: "+Ligne", colAddTitle: "Ajouter une colonne", colAdd: "+Col",
-                rowDelTitle: "Supprimer la ligne", rowDel: "-Ligne", colDelTitle: "Supprimer la colonne", colDel: "-Col",
-                dropText: "Déposer pour ouvrir", cancel: "Annuler", confirm: "OK", defaultFile: "Sans_titre.html",
-                msgPerfect: "<i class='fa-solid fa-check'></i> Le code est parfait, aucune erreur trouvée !",
-                msgUnknownLine: "Inconnue", msgUnknownErr: "Erreur inconnue", msgLine: "Ligne", msgLineSuf: "",
-                renamePrompt: "Renommer le fichier", renameMsg: "Entrez le nom du fichier (avec extension, ex: test.srt):", toastRenamed: "Renommé en :",
-                savePrompt: "Enregistrer le fichier", saveMsg: "Entrez le nom d'enregistrement (avec extension) :", cancelSave: "Enregistrement annulé", toastSaved: "Fichier téléchargé",
-                tooBig: "Fichier trop volumineux", limit: "limite 2MB", toastLoaded: "Chargé :",
-                runHTML: "Aperçu web ouvert dans un nouvel onglet !", runConsole: "HTML déployé dans un nouvel onglet.\n(Astuce : Autorisez les pop-ups)", popBlock: "Pop-up bloqué par le navigateur",
-                runFail: "Échec de l'aperçu", noRunVis: "Impossible d'exécuter en mode Visuel. Passez en mode Code.",
-                runStart: "--- Exécution commencée", runWait: "⏳ Chargement du moteur Python...",
-                runNotSup: "Exécution non prise en charge pour", runHint: "format.\nAstuce : Renommez en .js ou .py.",
-                promptImg: "URL de l'image :", promptLink: "URL du lien :", promptTableMsg: "Insérer le tableau 3x3 ? (Tapez ok)", tableCell: "Cellule",
-                errTable: "Cliquez d'abord dans un tableau", pyLoad: "Chargement de Python...", pyReady: "Python prêt !", pyFail: "Échec du chargement de Python"
-            },
-            ja: {
-                openBtn: "開く", saveBtn: "保存", runBtn: "実行", code: "コード", visual: "ビジュアル",
-                openTitle: "ファイルを開く", saveTitle: "ファイルを保存", runTitle: "コードを実行 (Ctrl+Enter)", renameTitle: "クリックして名前を変更",
-                probTab: "問題", consoleTab: "コンソール", clearConsole: "コンソールをクリア", closePanel: "パネルを閉じる",
-                bold: "太字", italic: "斜体", underline: "下線", alignLeft: "左揃え", alignCenter: "中央揃え", alignRight: "右揃え",
-                h1: "見出し1", h2: "見出し2", textColor: "文字色", insertImg: "画像を挿入", insertLink: "リンクを挿入",
-                insertTableTitle: "3x3の表を挿入", insertTable: "表を挿入",
-                rowAddTitle: "下に行を追加", rowAdd: "+行", colAddTitle: "右に列を追加", colAdd: "+列",
-                rowDelTitle: "現在の行を削除", rowDel: "-行", colDelTitle: "現在の列を削除", colDel: "-列",
-                dropText: "ドロップして開く", cancel: "キャンセル", confirm: "OK", defaultFile: "無題.html",
-                msgPerfect: "<i class='fa-solid fa-check'></i> 構文エラーは見つかりませんでした！完璧です！",
-                msgUnknownLine: "不明", msgUnknownErr: "不明なエラー", msgLine: "", msgLineSuf: "行目",
-                renamePrompt: "ファイル名を変更", renameMsg: "ファイル名を入力してください（例: test.srt, script.py）:", toastRenamed: "名前を変更しました:",
-                savePrompt: "ファイルを保存", saveMsg: "保存するファイル名を入力してください:", cancelSave: "保存をキャンセルしました", toastSaved: "ファイルをダウンロードしました",
-                tooBig: "ファイルサイズが大きすぎます", limit: "上限 2MB", toastLoaded: "読み込みました:",
-                runHTML: "新しいタブでWebプレビューを開きました！", runConsole: "HTMLを新しいタブにデプロイしました。\n（ヒント: ポップアップを許可してください）", popBlock: "ポップアップがブロックされました",
-                runFail: "プレビューの失敗", noRunVis: "ビジュアルモードでは実行できません。コードモードに切り替えてください。",
-                runStart: "--- 実行開始", runWait: "⏳ Pythonエンジンを読み込んでいます...",
-                runNotSup: "直接実行はサポートされていません: ", runHint: "形式。\nヒント: .jsまたは.pyに変更してください。",
-                promptImg: "画像のURLを入力:", promptLink: "リンクのURLを入力:", promptTableMsg: "デフォルトの3x3の表を挿入しますか？", tableCell: "セル",
-                errTable: "先に表の中をクリックしてください", pyLoad: "Pythonを読み込み中...", pyReady: "Pythonの準備が完了しました！", pyFail: "Pythonの読み込みに失敗しました"
-            }
-        };
+    <div id="toast-container" class="absolute bottom-10 end-4 flex flex-col gap-2 z-50"></div>
 
-        const defaultContent = {
-            zh: `<div class="content-wrapper">\n    <h1>歡迎使用 WebPad++ <span style="font-size: 0.5em; color: #888;">(IDE 進階版)</span></h1>\n    <p>這是一個運行在瀏覽器端的強大編輯器，完全不需要後端伺服器。</p>\n    <h2>✨ 本次終極更新亮點</h2>\n    <ul>\n        <li><strong>全新 IDE 面板</strong>：故意打錯字，底下會自動彈出「問題清單」面板！</li>\n        <li><strong>執行功能 (Run)</strong>：點擊「執行」，立刻跑出 JavaScript 與 Python 結果。</li>\n        <li><strong>點擊改檔名</strong>：點擊上方 <i class="fa-solid fa-pen"></i>，修改副檔名會自動切換語法高亮。</li>\n        <li><strong>五國語言支援</strong>：自動偵測，並支援中/英/西/法/日 自由切換！</li>\n    </ul>\n</div>`,
-            en: `<div class="content-wrapper">\n    <h1>Welcome to WebPad++ <span style="font-size: 0.5em; color: #888;">(IDE Edition)</span></h1>\n    <p>This is a powerful browser-based editor requiring zero backend.</p>\n    <h2>✨ Ultimate Update Highlights</h2>\n    <ul>\n        <li><strong>New IDE Panel</strong>: Make a typo, and the Problems panel pops up automatically!</li>\n        <li><strong>Run Code</strong>: Click "Run" to execute JS and Python instantly.</li>\n        <li><strong>Click to Rename</strong>: Click the top <i class="fa-solid fa-pen"></i> to rename. Changing the extension updates the syntax highlighter.</li>\n        <li><strong>5 Languages Support</strong>: Auto-detects and supports EN/ZH/ES/FR/JA seamlessly!</li>\n    </ul>\n</div>`,
-            es: `<div class="content-wrapper">\n    <h1>Bienvenido a WebPad++ <span style="font-size: 0.5em; color: #888;">(Edición IDE)</span></h1>\n    <p>Este es un potente editor basado en el navegador que no requiere backend.</p>\n    <h2>✨ Aspectos Destacados</h2>\n    <ul>\n        <li><strong>Nuevo Panel IDE</strong>: Cometa un error tipográfico y el panel de Problemas aparecerá.</li>\n        <li><strong>Ejecutar Código</strong>: Haga clic en "Ejecutar" para JavaScript y Python al instante.</li>\n        <li><strong>Clic para Renombrar</strong>: Haga clic en <i class="fa-solid fa-pen"></i> en la parte superior para renombrar.</li>\n        <li><strong>Soporte para 5 Idiomas</strong>: Soporta EN/ZH/ES/FR/JA!</li>\n    </ul>\n</div>`,
-            fr: `<div class="content-wrapper">\n    <h1>Bienvenue sur WebPad++ <span style="font-size: 0.5em; color: #888;">(Édition IDE)</span></h1>\n    <p>Il s'agit d'un puissant éditeur basé sur le navigateur ne nécessitant aucun backend.</p>\n    <h2>✨ Points Forts</h2>\n    <ul>\n        <li><strong>Nouveau Panneau IDE</strong>: Faites une faute de frappe, le panneau des problèmes s'affiche !</li>\n        <li><strong>Exécuter le code</strong>: Cliquez sur "Exécuter" pour JS et Python.</li>\n        <li><strong>Cliquez pour renommer</strong>: Cliquez sur <i class="fa-solid fa-pen"></i> en haut pour renommer.</li>\n        <li><strong>Support de 5 langues</strong>: Prend en charge EN/ZH/ES/FR/JA!</li>\n    </ul>\n</div>`,
-            ja: `<div class="content-wrapper">\n    <h1>WebPad++ へようこそ <span style="font-size: 0.5em; color: #888;">(IDE 版)</span></h1>\n    <p>これはバックエンドを必要としない強力なブラウザベースのエディタです。</p>\n    <h2>✨ アップデートのハイライト</h2>\n    <ul>\n        <li><strong>新しい IDE パネル</strong>: 構文を間違えると、自動的に問題パネルがポップアップします！</li>\n        <li><strong>コードの実行</strong>: 「実行」をクリックすると JS や Python が即座に実行されます。</li>\n        <li><strong>クリックで名前変更</strong>: 上部の <i class="fa-solid fa-pen"></i> をクリックして名前と拡張子を変更できます。</li>\n        <li><strong>5ヶ国語対応</strong>: 日/英/中/西/仏 に完全対応！</li>\n    </ul>\n</div>`
-        };
-
-        const defaultCSS = `\n<style>\n    body { margin: 0; padding: 2rem; font-family: 'Inter', system-ui, sans-serif; line-height: 1.7; color: #334155; background-color: #ffffff; }\n    .content-wrapper { max-width: 800px; margin: 0 auto; }\n    h1 { font-size: 2.25rem; font-weight: 800; color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; margin-bottom: 1.5rem; }\n    h2 { font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-top: 2rem; margin-bottom: 1rem; border-left: 4px solid #3b82f6; padding-left: 0.75rem; }\n    p, ul, table { margin-bottom: 1.5rem; }\n    ul { padding-left: 1.5rem; list-style-type: disc; }\n    li { margin-bottom: 0.5rem; }\n    strong { color: #0f172a; font-weight: 600; }\n    code { background: #f1f5f9; color: #db2777; padding: 0.1rem 0.3rem; border-radius: 4px; font-family: monospace; font-size: 0.9em; }\n    .highlight-box { background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 1rem 1.25rem; color: #1d4ed8; font-size: 0.95rem; }\n    table { border-collapse: collapse; width: 100%; }\n    table td { border: 1px solid #e2e8f0; padding: 10px 12px; transition: background-color 0.2s; min-width: 50px; }\n    table td:hover { background-color: #f1f5f9; cursor: text; }\n</style>`;
-
-        let currentLang = 'en';
-        const t = (key) => dict[currentLang][key] || key;
-
-        const MAX_FILE_SIZE = 2 * 1024 * 1024;
-        let editor, isUnsaved = false, pyodideInstance = null, currentMode = 'code';
-
-        function initI18n() {
-            const savedLang = localStorage.getItem('webpad_lang');
-            if (savedLang && dict[savedLang]) {
-                applyLang(savedLang); return;
-            }
-            const browserLang = (navigator.language || navigator.userLanguage).toLowerCase();
-            let targetLang = 'en';
-            if (browserLang.includes('zh')) targetLang = 'zh';
-            else if (browserLang.includes('es')) targetLang = 'es';
-            else if (browserLang.includes('fr')) targetLang = 'fr';
-            else if (browserLang.includes('ja')) targetLang = 'ja';
-            applyLang(targetLang);
-        }
-
-        function applyLang(lang) {
-            currentLang = lang;
-            localStorage.setItem('webpad_lang', lang);
-            document.getElementById('lang-select').value = lang;
-            
-            document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.getAttribute('data-i18n')); });
-            document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.getAttribute('data-i18n-title')); });
-            
-            let nameEl = document.getElementById('file-name');
-            const defaultNames = Object.values(dict).map(d => d.defaultFile);
-            if(defaultNames.includes(nameEl.textContent)) { nameEl.textContent = t('defaultFile'); }
-            
-            if(document.getElementById('problem-count').textContent === "0") {
-                document.getElementById('panel-problems').innerHTML = `<div class="text-green-400 mt-2 p-2">${t('msgPerfect')}</div>`;
-            }
-
-            if (editor) {
-                const curVal = editor.getValue();
-                const welcomeChecks = ['歡迎使用', 'Welcome to', 'Bienvenido a', 'Bienvenue sur', 'へようこそ'];
-                if (curVal === "" || welcomeChecks.some(phrase => curVal.includes(phrase))) {
-                    editor.setValue(defaultContent[currentLang] + defaultCSS);
-                    isUnsaved = false; updateUI();
-                }
-            }
-        }
-
-        function changeLanguage(lang) { applyLang(lang); }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            editor = CodeMirror.fromTextArea(document.getElementById('code-editor'), {
-                lineNumbers: true, theme: document.documentElement.classList.contains('dark') ? 'dracula' : 'default', mode: 'htmlmixed',
-                indentUnit: 4, lineWrapping: true, matchBrackets: true, autoCloseTags: true, gutters: ["CodeMirror-lint-markers"], lint: true
-            });
-
-            initI18n(); 
-
-            editor.on('change', () => { if (!isUnsaved) { isUnsaved = true; updateUI(); } updateStatus(); if (currentMode === 'visual') syncCodeToVisual(); });
-            editor.on('cursorActivity', updateStatus);
-            updateStatus(); initVisualFrame();
-
-            window.addEventListener('beforeunload', (e) => { if (isUnsaved) { e.preventDefault(); e.returnValue = ''; } });
-            document.addEventListener('keydown', (e) => { if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); runCode(); } });
-        });
-
-        function initVisualFrame() {
-            const doc = document.getElementById('visual-frame').contentWindow.document;
-            doc.open(); doc.write('<html><head></head><body style="padding: 20px; font-family: sans-serif;" contenteditable="true"></body></html>'); doc.close();
-            doc.body.addEventListener('input', () => { if (currentMode === 'visual') syncVisualToCode(); });
-        }
-
-        function switchToCode() {
-            currentMode = 'code';
-            document.getElementById('mode-code-btn').classList.replace('bg-gray-200', 'bg-blue-600');
-            document.getElementById('mode-code-btn').classList.replace('dark:bg-gray-800', 'bg-blue-600');
-            document.getElementById('mode-code-btn').classList.replace('text-gray-700', 'text-white');
-            document.getElementById('mode-code-btn').classList.replace('dark:text-gray-300', 'text-white');
-            
-            document.getElementById('mode-visual-btn').classList.replace('bg-blue-600', 'bg-gray-200');
-            document.getElementById('mode-visual-btn').classList.replace('text-white', 'text-gray-700');
-
-            document.getElementById('visual-container').classList.add('hidden');
-            document.getElementById('visual-container').classList.remove('flex');
-            document.getElementById('editor-container').classList.remove('hidden');
-            document.getElementById('editor-container').classList.add('flex');
-            
-            syncVisualToCode(); setTimeout(() => editor.refresh(), 10);
-        }
-
-        function switchToVisual() {
-            currentMode = 'visual';
-            document.getElementById('mode-visual-btn').classList.replace('bg-gray-200', 'bg-blue-600');
-            document.getElementById('mode-visual-btn').classList.replace('dark:bg-gray-800', 'bg-blue-600');
-            document.getElementById('mode-visual-btn').classList.replace('text-gray-700', 'text-white');
-            document.getElementById('mode-visual-btn').classList.replace('dark:text-gray-300', 'text-white');
-            
-            document.getElementById('mode-code-btn').classList.replace('bg-blue-600', 'bg-gray-200');
-            document.getElementById('mode-code-btn').classList.replace('text-white', 'text-gray-700');
-
-            document.getElementById('editor-container').classList.add('hidden');
-            document.getElementById('editor-container').classList.remove('flex'); 
-            document.getElementById('visual-container').classList.remove('hidden');
-            document.getElementById('visual-container').classList.add('flex'); 
-            syncCodeToVisual();
-        }
-
-        function syncCodeToVisual() {
-            const frame = document.getElementById('visual-frame');
-            const doc = frame.contentDocument || frame.contentWindow.document;
-            doc.open(); doc.write(editor.getValue()); doc.close(); doc.body.contentEditable = true;
-        }
-
-        function formatHTML(html) {
-            let formatted = ''; let pad = 0;
-            html = html.replace(/\r?\n/g, '').replace(/(>)(<)(\/*)/g, '$1\n$2$3');
-            html.split('\n').forEach(function(line) {
-                let indent = 0;
-                if (line.match(/.+<\/\w[^>]*>$/)) { indent = 0; }
-                else if (line.match(/^<\/\w/)) { if (pad !== 0) pad -= 1; }
-                else if (line.match(/^<\w([^>]*[^\/])?>.*$/)) { indent = 1; }
-                formatted += '    '.repeat(pad) + line + '\n';
-                pad += indent;
-            });
-            return formatted.trim();
-        }
-
-        let syncTimeout = null;
-        function syncVisualToCode() {
-            clearTimeout(syncTimeout);
-            syncTimeout = setTimeout(() => {
-                const doc = document.getElementById('visual-frame').contentWindow.document;
-                const htmlContent = doc.documentElement.innerHTML;
-                let cleanHTML = '<!DOCTYPE html>\n<html>\n' + htmlContent.replace(/ contenteditable="true"/g, '') + '\n</html>';
-                cleanHTML = formatHTML(cleanHTML);
-                
-                const cursorPos = editor.getCursor();
-                editor.setValue(cleanHTML); editor.setCursor(cursorPos);
-                if (!isUnsaved) { isUnsaved = true; updateUI(); }
-            }, 300);
-        }
-
-        let modalCallback = null;
-        function showCustomPrompt(title, message, defaultValue, callback) {
-            const modal = document.getElementById('custom-modal'); const content = document.getElementById('custom-modal-content');
-            document.getElementById('custom-modal-title').textContent = title; document.getElementById('custom-modal-message').textContent = message;
-            const inputEl = document.getElementById('custom-modal-input');
-            inputEl.value = defaultValue || ''; modalCallback = callback;
-            modal.classList.remove('hidden'); void modal.offsetWidth;
-            content.classList.remove('scale-95', 'opacity-0'); content.classList.add('scale-100', 'opacity-100');
-            inputEl.focus(); if (defaultValue) inputEl.select();
-        }
-
-        function closeCustomModal() {
-            const modal = document.getElementById('custom-modal'); const content = document.getElementById('custom-modal-content');
-            content.classList.remove('scale-100', 'opacity-100'); content.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => { modal.classList.add('hidden'); modalCallback = null; }, 200);
-        }
-
-        document.getElementById('custom-modal-cancel').addEventListener('click', closeCustomModal);
-        document.getElementById('custom-modal-confirm').addEventListener('click', () => {
-            if (modalCallback) modalCallback(document.getElementById('custom-modal-input').value); closeCustomModal();
-        });
-        document.getElementById('custom-modal-input').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') { e.preventDefault(); document.getElementById('custom-modal-confirm').click(); }
-            if (e.key === 'Escape') { e.preventDefault(); closeCustomModal(); }
-        });
-
-        let visualSelectionRange = null;
-        function saveVisualSelection() {
-            const sel = document.getElementById('visual-frame').contentWindow.getSelection();
-            if (sel.rangeCount > 0) visualSelectionRange = sel.getRangeAt(0).cloneRange();
-        }
-
-        function execCmd(command, value = null) {
-            const frame = document.getElementById('visual-frame');
-            frame.contentDocument.execCommand('styleWithCSS', false, true);
-            frame.contentDocument.execCommand(command, false, value);
-            frame.contentWindow.focus(); syncVisualToCode();
-        }
-
-        function applyTextColor(color) {
-            const win = document.getElementById('visual-frame').contentWindow; win.focus(); 
-            if (visualSelectionRange) { const sel = win.getSelection(); sel.removeAllRanges(); sel.addRange(visualSelectionRange); }
-            win.document.execCommand('styleWithCSS', false, true); win.document.execCommand('foreColor', false, color);
-            syncVisualToCode();
-        }
-
-        function insertImagePrompt() { showCustomPrompt(t('insertImg'), t('promptImg'), "https://", (url) => { if(url) execCmd('insertImage', url); }); }
-        function insertLinkPrompt() { showCustomPrompt(t('insertLink'), t('promptLink'), "https://", (url) => { if(url) execCmd('createLink', url); }); }
-        function insertTablePrompt() {
-            showCustomPrompt(t('insertTable'), t('promptTableMsg'), "ok", (res) => {
-                if(res) {
-                    let tableHTML = '<table style="width:100%; border-collapse: collapse; margin-bottom: 24px;"><tbody>';
-                    for (let i = 0; i < 3; i++) {
-                        tableHTML += '<tr>';
-                        for (let j = 0; j < 3; j++) tableHTML += `<td style="border: 1px solid #e2e8f0; padding: 10px 12px; min-width: 50px;">${i===0 && j===0 ? t('tableCell') : '<br>'}</td>`;
-                        tableHTML += '</tr>';
-                    }
-                    tableHTML += '</tbody></table><p><br></p>'; execCmd('insertHTML', tableHTML);
-                }
-            });
-        }
-
-        function getClosestTableElement(tagName) {
-            const sel = document.getElementById('visual-frame').contentWindow.getSelection();
-            if (sel.rangeCount === 0) return null;
-            let node = sel.getRangeAt(0).startContainer; if (node.nodeType === 3) node = node.parentNode;
-            while (node && node.nodeName !== 'BODY') { if (node.nodeName === tagName.toUpperCase()) return node; node = node.parentNode; }
-            return null;
-        }
-
-        function addTableRow() { const tr = getClosestTableElement('TR'); if (tr) { const newTr = tr.cloneNode(true); Array.from(newTr.cells).forEach(cell => cell.innerHTML = '<br>'); tr.parentNode.insertBefore(newTr, tr.nextSibling); syncVisualToCode(); } else showToast(t('errTable'), "error"); }
-        function addTableColumn() { const td = getClosestTableElement('TD') || getClosestTableElement('TH'); if (td) { const tr = td.parentNode; const idx = Array.from(tr.cells).indexOf(td); const table = getClosestTableElement('TABLE'); if (table) { Array.from(table.rows).forEach(row => { const newCell = row.cells[idx].cloneNode(true); newCell.innerHTML = '<br>'; row.insertBefore(newCell, row.cells[idx].nextSibling); }); syncVisualToCode(); } } else showToast(t('errTable'), "error"); }
-        function removeTableRow() { const tr = getClosestTableElement('TR'); if (tr) { tr.parentNode.removeChild(tr); syncVisualToCode(); } else showToast(t('errTable'), "error"); }
-        function removeTableColumn() { const td = getClosestTableElement('TD') || getClosestTableElement('TH'); if (td) { const idx = Array.from(td.parentNode.cells).indexOf(td); const table = getClosestTableElement('TABLE'); if (table) { Array.from(table.rows).forEach(row => { if (row.cells[idx]) row.removeChild(row.cells[idx]); }); syncVisualToCode(); } } else showToast(t('errTable'), "error"); }
-
-        async function lintPython(text) {
-            if (!pyodideInstance) { showToast(t('pyLoad'), "info"); try { pyodideInstance = await loadPyodide(); showToast(t('pyReady'), "success"); } catch (e) { return [{ message: t('pyFail'), severity: "error", from: CodeMirror.Pos(0, 0), to: CodeMirror.Pos(0, 1) }]; } }
-            try { pyodideInstance.runPython(`import ast\nast.parse(${JSON.stringify(text)})`); return []; } 
-            catch (err) {
-                const lines = err.message.split('\n'); let lineNum = 1, msg = "Syntax Error";
-                for (let line of lines) { if (line.includes('line')) { const m = line.match(/line (\d+)/); if (m) lineNum = parseInt(m[1]); } if (line.includes('Error:')) msg = line.trim(); }
-                return [{ message: msg, severity: "error", from: CodeMirror.Pos(lineNum - 1, 0), to: CodeMirror.Pos(lineNum - 1, 100) }];
-            }
-        }
-        CodeMirror.registerHelper("lint", "python", function(text) { return new Promise(resolve => lintPython(text).then(resolve)); });
-
-        let currentPanelTab = 'problems';
-        function openPanel(tab) { document.getElementById('ide-panel').classList.remove('hidden'); document.getElementById('ide-panel').classList.add('flex'); if (tab) switchPanelTab(tab); setTimeout(() => editor.refresh(), 50); }
-        function closePanel() { document.getElementById('ide-panel').classList.add('hidden'); document.getElementById('ide-panel').classList.remove('flex'); setTimeout(() => editor.refresh(), 50); }
-        function switchPanelTab(tab) {
-            currentPanelTab = tab; document.getElementById('tab-problems').classList.remove('border-blue-500', 'text-white'); document.getElementById('tab-console').classList.remove('border-blue-500', 'text-white');
-            document.getElementById('panel-problems').classList.add('hidden'); document.getElementById('panel-console').classList.add('hidden');
-            document.getElementById(`tab-${tab}`).classList.add('border-blue-500', 'text-white'); document.getElementById(`panel-${tab}`).classList.remove('hidden');
-        }
-
-        function updateProblemsPanel(annotations) {
-            if (!annotations || !Array.isArray(annotations)) return;
-            const count = annotations.length; document.getElementById('problem-count').textContent = count;
-            if (count > 0 && document.getElementById('ide-panel').classList.contains('hidden')) openPanel('problems');
-            const container = document.getElementById('panel-problems'); container.innerHTML = '';
-            if (count === 0) { container.innerHTML = `<div class="text-green-400 mt-2 p-2">${t('msgPerfect')}</div>`; return; }
-
-            annotations.forEach(ann => {
-                if (!ann) return;
-                const div = document.createElement('div'); const isError = ann.severity === 'error';
-                div.className = `p-2 mb-2 rounded border-l-4 cursor-pointer transition-colors bg-white/5 hover:bg-white/10 ${isError ? 'border-red-500' : 'border-yellow-500'}`;
-                
-                const fromLine = (ann.from && typeof ann.from.line !== 'undefined') ? ann.from.line + 1 : t('msgUnknownLine');
-                const fromCh = (ann.from && typeof ann.from.ch !== 'undefined') ? ann.from.ch : 0;
-                const targetLine = fromLine !== t('msgUnknownLine') ? fromLine - 1 : 0;
-                
-                const icon = isError ? '<i class="fa-solid fa-circle-xmark text-red-400"></i>' : '<i class="fa-solid fa-triangle-exclamation text-yellow-400"></i>';
-                div.innerHTML = `<div class="flex items-start gap-2"><div class="mt-0.5">${icon}</div><div><div class="font-bold ${isError ? 'text-red-400' : 'text-yellow-400'}">${t('msgLine')} ${fromLine} ${t('msgLineSuf')}</div><div class="text-gray-300 mt-1">${ann.message || t('msgUnknownErr')}</div></div></div>`;
-                div.onclick = () => { editor.setCursor(targetLine, fromCh); editor.focus(); }; container.appendChild(div);
-            });
-        }
-
-        function printConsole(text, type = 'log') {
-            const container = document.getElementById('panel-console'); const div = document.createElement('div');
-            let colorClass = 'text-gray-300';
-            if (type === 'error') colorClass = 'text-red-400 font-bold'; else if (type === 'system') colorClass = 'text-green-400'; else if (type === 'yellow') colorClass = 'text-yellow-400';
-            div.className = `mb-1 ${colorClass}`; div.textContent = text; container.appendChild(div); container.scrollTop = container.scrollHeight;
-        }
-        function clearConsole() { document.getElementById('panel-console').innerHTML = ''; }
-
-        async function runCode() {
-            if (currentMode === 'visual') return showToast(t('noRunVis'), "error");
-            const mode = editor.getOption('mode'); const code = editor.getValue();
-            
-            if (mode === 'htmlmixed') {
-                try {
-                    const blob = new Blob([code], { type: 'text/html;charset=utf-8' }); const url = URL.createObjectURL(blob); const newWin = window.open(url, '_blank');
-                    if (newWin) { showToast(t('runHTML'), "success"); openPanel('console'); printConsole(`\n${t('runStart')} (${new Date().toLocaleTimeString()}) ---\n`, 'system'); printConsole(t('runConsole'), 'log'); } 
-                    else showToast(t('popBlock'), "error");
-                } catch (err) { showToast(t('runFail'), "error"); } return;
-            }
-
-            openPanel('console'); printConsole(`\n${t('runStart')} (${new Date().toLocaleTimeString()}) ---\n`, 'system');
-            if (mode === 'javascript') {
-                try {
-                    const originalLog = console.log; const originalError = console.error; const originalWarn = console.warn;
-                    console.log = (...args) => { printConsole(args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' '), 'log'); originalLog(...args); };
-                    console.error = (...args) => { printConsole(args.join(' '), 'error'); originalError(...args); };
-                    console.warn = (...args) => { printConsole(args.join(' '), 'yellow'); if(originalWarn) originalWarn(...args); };
-                    const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor; const result = await new AsyncFunction(code)();
-                    if (result !== undefined) printConsole(`<- ${typeof result === 'object' ? JSON.stringify(result) : result}`, 'log');
-                    console.log = originalLog; console.error = originalError; console.warn = originalWarn;
-                } catch (err) { printConsole(err.toString(), 'error'); }
-            } else if (mode === 'python') {
-                if (!pyodideInstance) { printConsole(t('runWait'), 'error'); return; }
-                try { await pyodideInstance.runPythonAsync(`import sys; import io; sys.stdout = io.StringIO(); sys.stderr = io.StringIO()`); await pyodideInstance.runPythonAsync(code); const stdout = await pyodideInstance.runPythonAsync(`sys.stdout.getvalue()`); const stderr = await pyodideInstance.runPythonAsync(`sys.stderr.getvalue()`); if (stdout) printConsole(stdout, 'log'); if (stderr) printConsole(stderr, 'error'); } catch (err) { printConsole(err.toString(), 'error'); }
-            } else { printConsole(`${t('runNotSup')} ${mode} ${t('runHint')}`, 'error'); }
-        }
-
-        function renameFile() {
-            let currentName = document.getElementById('file-name').textContent;
-            showCustomPrompt(t('renamePrompt'), t('renameMsg'), currentName, (newName) => {
-                if (newName && newName.trim() !== "") { document.getElementById('file-name').textContent = newName.trim(); if (currentName !== newName.trim()) { isUnsaved = true; } updateUI(); showToast(`${t('toastRenamed')} ${newName}`, 'success'); }
-            });
-        }
-
-        function fallbackDownload(content, filename) {
-            if (filename === t('defaultFile')) {
-                showCustomPrompt(t('savePrompt'), t('saveMsg'), "index.html", (userInput) => {
-                    if (!userInput || userInput.trim() === "") { showToast(t('cancelSave'), 'info'); return; }
-                    executeDownload(content, userInput.trim());
-                });
-            } else executeDownload(content, filename);
-        }
-
-        function executeDownload(content, filename) {
-            document.getElementById('file-name').textContent = filename; updateUI();
-            const blob = new Blob([content], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const a = document.createElement('a');
-            a.href = url; a.download = filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-            isUnsaved = false; updateUI(); showToast(t('toastSaved'), 'success');
-        }
-
-        function openFile() { const input = document.createElement('input'); input.type = 'file'; input.onchange = e => { const file = e.target.files[0]; if (file) loadFileContent(file); }; input.click(); }
-        function saveFile() { const content = editor.getValue(); let currentFileName = document.getElementById('file-name').textContent; fallbackDownload(content, currentFileName); }
-
-        function loadFileContent(file) {
-            if (file.size > MAX_FILE_SIZE) { showToast(`${t('tooBig')} (${(file.size/1024/1024).toFixed(1)}MB)，${t('limit')}`, 'error'); return; }
-            const reader = new FileReader();
-            reader.onload = (event) => { editor.setValue(event.target.result); document.getElementById('file-name').textContent = file.name; isUnsaved = false; updateUI(); showToast(`${t('toastLoaded')} ${file.name}`, 'success'); };
-            reader.readAsText(file);
-        }
-
-        function updateUI() {
-            const indicator = document.getElementById('unsaved-indicator');
-            if (isUnsaved) { indicator.classList.remove('hidden'); document.getElementById('file-name').classList.add('italic'); } 
-            else { indicator.classList.add('hidden'); document.getElementById('file-name').classList.remove('italic'); }
-
-            const currentName = document.getElementById('file-name').textContent;
-            if (currentName !== t('defaultFile')) {
-                const name = currentName.toLowerCase(); let mode = 'htmlmixed'; let lintType = true;
-                if (name.endsWith('.js')) { mode = 'javascript'; } else if (name.endsWith('.css')) { mode = 'css'; } else if (name.endsWith('.json')) { mode = 'application/json'; }
-                else if (name.endsWith('.py')) { mode = 'python'; if (!window.loadPyodide) { const script = document.createElement('script'); script.src = "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"; document.head.appendChild(script); } }
-                else if (name.endsWith('.txt') || name.endsWith('.md') || name.endsWith('.srt')) { mode = 'null'; lintType = false; }
-                editor.setOption('mode', mode);
-                if (lintType) { editor.setOption('lint', { onUpdateLinting: function(a, annotations) { if (typeof updateProblemsPanel === 'function') updateProblemsPanel(annotations); } }); } 
-                else { editor.setOption('lint', false); updateProblemsPanel([]); }
-                document.getElementById('language-mode').textContent = name.split('.').pop().toUpperCase();
-            } else { editor.setOption('lint', { onUpdateLinting: function(a, annotations) { updateProblemsPanel(annotations); } }); }
-        }
-
-        function updateStatus() {
-            const cursor = editor.getCursor(); document.getElementById('cursor-pos').textContent = `Ln ${cursor.line + 1}, Col ${cursor.ch + 1}`;
-            const bytes = new Blob([editor.getValue()]).size; document.getElementById('file-size').textContent = bytes > 1024 ? (bytes / 1024).toFixed(1) + ' KB' : bytes + ' Bytes';
-        }
-
-        function toggleTheme() {
-            const html = document.documentElement; const icon = document.getElementById('theme-icon');
-            if (html.classList.contains('dark')) { html.classList.remove('dark'); icon.classList.replace('fa-sun', 'fa-moon'); editor.setOption('theme', 'default'); } 
-            else { html.classList.add('dark'); icon.classList.replace('fa-moon', 'fa-sun'); editor.setOption('theme', 'dracula'); }
-        }
-
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toast-container'); if (container.children.length >= 3) container.removeChild(container.firstChild);
-            const toast = document.createElement('div');
-            let bgColor = type === 'success' ? 'bg-green-800 dark:bg-green-900' : (type === 'error' ? 'bg-red-800 dark:bg-red-900' : 'bg-gray-800 dark:bg-gray-700');
-            let icon = type === 'success' ? '<i class="fa-solid fa-circle-check text-green-400"></i>' : (type === 'error' ? '<i class="fa-solid fa-circle-xmark text-red-400"></i>' : '<i class="fa-solid fa-circle-info text-blue-400"></i>');
-            toast.className = `${bgColor} text-white px-4 py-3 rounded shadow-lg flex items-center gap-3 transform transition-all duration-300 translate-y-10 opacity-0`;
-            toast.innerHTML = `${icon} <span>${message}</span>`; container.appendChild(toast);
-            requestAnimationFrame(() => toast.classList.remove('translate-y-10', 'opacity-0'));
-            setTimeout(() => { toast.classList.add('opacity-0'); setTimeout(() => toast.remove(), 300); }, 3000);
-        }
-
-        let dragCounter = 0; const overlay = document.getElementById('drop-overlay');
-        window.addEventListener('dragenter', (e) => { e.preventDefault(); dragCounter++; if (dragCounter === 1) overlay.classList.remove('hidden'); });
-        window.addEventListener('dragleave', (e) => { e.preventDefault(); dragCounter--; if (dragCounter === 0) overlay.classList.add('hidden'); });
-        window.addEventListener('dragover', (e) => e.preventDefault());
-        window.addEventListener('drop', (e) => { e.preventDefault(); dragCounter = 0; overlay.classList.add('hidden'); const item = e.dataTransfer.items[0]; if (item && item.kind === 'file') { const file = item.getAsFile(); if (file) loadFileContent(file); } });
-    </script>
+    <!-- Core Scripts -->
+    <script src="js/i18n.js"></script>
+    <script src="js/filesystem.js"></script>
+    <script src="js/editor.js"></script>
 </body>
 </html>
