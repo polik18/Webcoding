@@ -9,6 +9,40 @@
 let _sheetData = [];   // 2D array of strings
 let _sheetFilename = 'spreadsheet.csv';
 
+let _isDragging = false;
+let _selStart = null;
+let _selEnd = null;
+let _lastSelectedCol = null;
+
+function getSelectedRange() {
+    if (!_selStart || !_selEnd) return null;
+    return {
+        minR: Math.min(_selStart.r, _selEnd.r),
+        maxR: Math.max(_selStart.r, _selEnd.r),
+        minC: Math.min(_selStart.c, _selEnd.c),
+        maxC: Math.max(_selStart.c, _selEnd.c)
+    };
+}
+
+function _applySelection() {
+    document.querySelectorAll('#spreadsheet-table td.sheet-selected').forEach(td => {
+        td.classList.remove('sheet-selected', 'bg-blue-100', 'dark:bg-blue-900');
+    });
+    const range = getSelectedRange();
+    if (!range) return;
+    
+    for (let r = range.minR; r <= range.maxR; r++) {
+        for (let c = range.minC; c <= range.maxC; c++) {
+            const cell = document.querySelector(`#spreadsheet-table td[data-row="${r}"][data-col="${c}"]`);
+            if (cell) cell.classList.add('sheet-selected', 'bg-blue-100', 'dark:bg-blue-900');
+        }
+    }
+}
+
+document.addEventListener('mouseup', () => {
+    _isDragging = false;
+});
+
 function loadSpreadsheet(buffer, filename) {
     _sheetFilename = filename;
     let wb;
@@ -32,7 +66,8 @@ function loadSpreadsheet(buffer, filename) {
 // Create a new blank spreadsheet and open in spreadsheet mode
 window.newSpreadsheet = function() {
     const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.aoa_to_sheet([['']]);
+    const data = Array(50).fill(null).map(() => Array(26).fill(''));
+    const ws = XLSX.utils.aoa_to_sheet(data);
     XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
     const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
     loadSpreadsheet(wbout, 'new.xlsx');
@@ -59,20 +94,23 @@ function renderSpreadsheet() {
     table.id = 'spreadsheet-table';
     table.className = 'border-collapse text-sm';
 
+    // Optional: make sure all rows have the same number of columns visually
+    const maxCols = Math.max(..._sheetData.map(r => r.length), 26);
+
     _sheetData.forEach((row, ri) => {
         const tr = document.createElement('tr');
 
         // Row number cell
         const th = document.createElement('td');
         th.textContent = ri + 1;
-        th.className = 'sheet-row-num select-none';
+        th.className = 'sheet-row-num select-none bg-gray-100 dark:bg-gray-800 text-center font-bold text-gray-500 border border-gray-300 dark:border-gray-700 w-10';
         tr.appendChild(th);
 
-        const cols = Math.max(row.length, 1);
+        const cols = Math.max(row.length, maxCols);
         for (let ci = 0; ci < cols; ci++) {
             const td = document.createElement('td');
             td.contentEditable = 'true';
-            td.className = ri === 0 ? 'sheet-cell sheet-header' : 'sheet-cell';
+            td.className = ri === 0 ? 'sheet-cell sheet-header border border-gray-300 dark:border-gray-700 px-2 py-1 outline-none' : 'sheet-cell border border-gray-300 dark:border-gray-700 px-2 py-1 outline-none';
             td.textContent = row[ci] !== undefined ? row[ci] : '';
             td.dataset.row = ri;
             td.dataset.col = ci;
@@ -85,12 +123,40 @@ function renderSpreadsheet() {
                 if (e.key === 'Tab') { e.preventDefault(); moveFocus(ri, ci, 0, 1); }
                 if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); moveFocus(ri, ci, 1, 0); }
             });
+            
+            // Selection handling
+            td.addEventListener('mousedown', (e) => {
+                if (document.activeElement === td) return;
+                _isDragging = true;
+                _selStart = {r: ri, c: ci};
+                _selEnd = {r: ri, c: ci};
+                _lastSelectedCol = ci;
+                _applySelection();
+            });
+            td.addEventListener('mouseenter', (e) => {
+                if (_isDragging) {
+                    _selEnd = {r: ri, c: ci};
+                    _applySelection();
+                    const sel = window.getSelection();
+                    if (sel) sel.removeAllRanges();
+                }
+            });
+            td.addEventListener('focus', () => {
+                _lastSelectedCol = ci;
+                if (!_isDragging) {
+                    _selStart = {r: ri, c: ci};
+                    _selEnd = {r: ri, c: ci};
+                    _applySelection();
+                }
+            });
+            
             tr.appendChild(td);
         }
         table.appendChild(tr);
     });
 
     wrapper.appendChild(table);
+    _applySelection();
 }
 
 function moveFocus(row, col, dr, dc) {
@@ -131,12 +197,14 @@ window.ssDeleteCol = function() {
 
 window.ssSort = function(dir) {
     _syncSheetData();
-    const activeCell = document.activeElement;
-    if (!activeCell || !activeCell.dataset.col) {
+    const range = getSelectedRange();
+    let colIdx = range ? range.minC : _lastSelectedCol;
+    
+    if (colIdx === null || colIdx === undefined) {
         showToast('Please click a cell in the column you want to sort.', 'info');
         return;
     }
-    const colIdx = parseInt(activeCell.dataset.col);
+    
     if (_sheetData.length < 2) return;
     
     // Assuming first row is header
@@ -150,7 +218,7 @@ window.ssSort = function(dir) {
         const numB = parseFloat(valB);
         
         let comp = 0;
-        if (!isNaN(numA) && !isNaN(numB)) {
+        if (!isNaN(numA) && !isNaN(numB) && valA.trim() !== '' && valB.trim() !== '') {
             comp = numA - numB;
         } else {
             comp = valA.localeCompare(valB);
@@ -164,22 +232,25 @@ window.ssSort = function(dir) {
 
 window.ssMath = function(type) {
     _syncSheetData();
-    const activeCell = document.activeElement;
-    if (!activeCell || !activeCell.dataset.col) {
-        showToast('Please click a cell in the column to calculate.', 'info');
+    const range = getSelectedRange();
+    
+    if (!range) {
+        showToast('Please select cells to calculate.', 'info');
         return;
     }
-    const colIdx = parseInt(activeCell.dataset.col);
-    if (_sheetData.length < 2) return;
     
     let sum = 0;
     let count = 0;
     
-    for (let i = 1; i < _sheetData.length; i++) {
-        let val = _sheetData[i][colIdx];
-        if (val && !isNaN(parseFloat(val))) {
-            sum += parseFloat(val);
-            count++;
+    for (let r = range.minR; r <= range.maxR; r++) {
+        for (let c = range.minC; c <= range.maxC; c++) {
+            if (_sheetData[r] && _sheetData[r][c] !== undefined) {
+                let val = _sheetData[r][c];
+                if (val && !isNaN(parseFloat(val))) {
+                    sum += parseFloat(val);
+                    count++;
+                }
+            }
         }
     }
     
@@ -190,10 +261,7 @@ window.ssMath = function(type) {
         resultText = count > 0 ? `Avg: ${(sum / count).toFixed(2)}` : 'Avg: 0';
     }
     
-    // Find the cell below the active cell or just alert it?
-    // We can show it as a toast for now to avoid altering the data structure unexpectedly.
-    // Or we could append a row if it's the last row.
-    showToast(`${resultText} (Col ${colIdx + 1})`, 'success');
+    showToast(`${resultText} (Selected ${count} cells)`, 'success');
 };
 
 window.ssExport = function(fmt) {
