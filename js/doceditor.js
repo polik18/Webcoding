@@ -214,11 +214,20 @@ window.ssSort = function(dir) {
     rows.sort((a, b) => {
         let valA = a[colIdx] !== undefined ? a[colIdx].toString() : '';
         let valB = b[colIdx] !== undefined ? b[colIdx].toString() : '';
+        
+        let isEmptyA = valA.trim() === '';
+        let isEmptyB = valB.trim() === '';
+        
+        // Always push empty cells to the bottom
+        if (isEmptyA && !isEmptyB) return 1;
+        if (!isEmptyA && isEmptyB) return -1;
+        if (isEmptyA && isEmptyB) return 0;
+        
         const numA = parseFloat(valA);
         const numB = parseFloat(valB);
         
         let comp = 0;
-        if (!isNaN(numA) && !isNaN(numB) && valA.trim() !== '' && valB.trim() !== '') {
+        if (!isNaN(numA) && !isNaN(numB)) {
             comp = numA - numB;
         } else {
             comp = valA.localeCompare(valB);
