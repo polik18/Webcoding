@@ -99,7 +99,7 @@
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 h-screen flex flex-col overflow-hidden transition-colors duration-200">
     
-    <nav class="flex flex-wrap items-center justify-between px-2 sm:px-4 py-2 sm:py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm z-10 flex-shrink-0 gap-2">
+    <nav class="relative flex flex-wrap items-center justify-between px-2 sm:px-4 py-2 sm:py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm z-[100] flex-shrink-0 gap-2">
         <div class="flex items-center gap-2 sm:gap-4">
             <h1 class="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent flex items-center gap-1 sm:gap-2">
                 <i class="fa-solid fa-code"></i> <span class="hidden sm:inline">WebPad++</span>
@@ -110,69 +110,70 @@
                     <i class="fa-solid fa-bars"></i>
                 </button>
                 <div class="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1"></div>
-                <button onclick="openFile()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition" title="Open" data-i18n-title="nav.openTitle">
-                    <i class="fa-regular fa-folder-open"></i> <span class="hidden sm:inline" data-i18n="nav.openBtn"></span>
-                </button>
-                <!-- New File Dropdown -->
-                <div class="relative" id="new-file-menu-wrapper" onclick="event.stopPropagation()">
-                    <button onclick="toggleNewFileMenu(event)" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-emerald-600 hover:bg-emerald-700 text-white rounded transition shadow-sm flex items-center gap-1" title="New File">
-                        <i class="fa-solid fa-file-circle-plus"></i>
-                        <span class="hidden sm:inline">New</span>
-                        <i class="fa-solid fa-chevron-down text-[9px]"></i>
+
+                <!-- Group 1: File Operations -->
+                <div class="flex items-center gap-1 bg-gray-50 dark:bg-gray-900/50 p-1 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <button onclick="openFile()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition" title="Open" data-i18n-title="nav.openTitle">
+                        <i class="fa-regular fa-folder-open"></i> <span class="hidden sm:inline" data-i18n="nav.openBtn"></span>
                     </button>
-                    <div id="new-file-menu" class="hidden new-file-dropdown">
-                        <div class="py-1 text-xs font-semibold text-gray-400 px-3 pt-2">Code</div>
-                        <button onclick="newFileFromTemplate('html')" class="new-file-item"><i class="fa-brands fa-html5 text-orange-500"></i> HTML</button>
-                        <button onclick="newFileFromTemplate('css')"  class="new-file-item"><i class="fa-brands fa-css3-alt text-blue-500"></i> CSS</button>
-                        <button onclick="newFileFromTemplate('js')"   class="new-file-item"><i class="fa-brands fa-js text-yellow-500"></i> JavaScript</button>
-                        <button onclick="newFileFromTemplate('ts')"   class="new-file-item"><i class="fa-solid fa-code text-blue-400"></i> TypeScript</button>
-                        <button onclick="newFileFromTemplate('py')"   class="new-file-item"><i class="fa-brands fa-python text-indigo-500"></i> Python</button>
-                        <button onclick="newFileFromTemplate('sql')"  class="new-file-item"><i class="fa-solid fa-database text-purple-500"></i> SQL</button>
-                        <div class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
-                        <div class="py-1 text-xs font-semibold text-gray-400 px-3">Document</div>
-                        <button onclick="newFileFromTemplate('md')"   class="new-file-item"><i class="fa-brands fa-markdown text-gray-600"></i> Markdown</button>
-                        <button onclick="newFileFromTemplate('json')" class="new-file-item"><i class="fa-solid fa-brackets-curly text-green-600"></i> JSON</button>
-                        <button onclick="newFileFromTemplate('txt')"  class="new-file-item"><i class="fa-regular fa-file-lines text-gray-500"></i> Text</button>
-                        <div class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
-                        <button onclick="newFileFromTemplate('xlsx')" class="new-file-item"><i class="fa-solid fa-table text-emerald-600"></i> Spreadsheet</button>
+                    <!-- New File Dropdown -->
+                    <div class="relative" id="new-file-menu-wrapper">
+                        <button onclick="toggleNewFileMenu(event)" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-emerald-600 hover:bg-emerald-700 text-white rounded transition shadow-sm flex items-center gap-1" title="New File">
+                            <i class="fa-solid fa-file-circle-plus"></i>
+                            <span class="hidden sm:inline">New</span>
+                            <i class="fa-solid fa-chevron-down text-[9px]"></i>
+                        </button>
+                        <div id="new-file-menu" class="hidden new-file-dropdown">
+                            <div class="py-1 text-xs font-semibold text-gray-400 px-3 pt-2">Code</div>
+                            <button onclick="newFileFromTemplate('html')" class="new-file-item"><i class="fa-brands fa-html5 text-orange-500"></i> HTML</button>
+                            <button onclick="newFileFromTemplate('css')"  class="new-file-item"><i class="fa-brands fa-css3-alt text-blue-500"></i> CSS</button>
+                            <button onclick="newFileFromTemplate('js')"   class="new-file-item"><i class="fa-brands fa-js text-yellow-500"></i> JavaScript</button>
+                            <button onclick="newFileFromTemplate('ts')"   class="new-file-item"><i class="fa-solid fa-code text-blue-400"></i> TypeScript</button>
+                            <button onclick="newFileFromTemplate('py')"   class="new-file-item"><i class="fa-brands fa-python text-indigo-500"></i> Python</button>
+                            <button onclick="newFileFromTemplate('sql')"  class="new-file-item"><i class="fa-solid fa-database text-purple-500"></i> SQL</button>
+                            <div class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
+                            <div class="py-1 text-xs font-semibold text-gray-400 px-3">Document</div>
+                            <button onclick="newFileFromTemplate('md')"   class="new-file-item"><i class="fa-brands fa-markdown text-gray-600"></i> Markdown</button>
+                            <button onclick="newFileFromTemplate('json')" class="new-file-item"><i class="fa-solid fa-brackets-curly text-green-600"></i> JSON</button>
+                            <button onclick="newFileFromTemplate('txt')"  class="new-file-item"><i class="fa-regular fa-file-lines text-gray-500"></i> Text</button>
+                            <div class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
+                            <button onclick="newFileFromTemplate('xlsx')" class="new-file-item"><i class="fa-solid fa-table text-emerald-600"></i> Spreadsheet</button>
+                        </div>
                     </div>
+                    <button onclick="saveFile()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition relative" title="Save" data-i18n-title="nav.saveTitle">
+                        <i class="fa-regular fa-floppy-disk"></i> <span class="hidden sm:inline" data-i18n="nav.saveBtn"></span>
+                        <span id="unsaved-indicator" class="hidden absolute -top-1 -end-1 w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse border-2 border-white dark:border-gray-800"></span>
+                    </button>
                 </div>
-                <button onclick="saveFile()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-blue-600 hover:bg-blue-700 text-white rounded transition shadow-sm relative" title="Save" data-i18n-title="nav.saveTitle">
-                    <i class="fa-regular fa-floppy-disk"></i> <span class="hidden sm:inline" data-i18n="nav.saveBtn"></span>
-                    <span id="unsaved-indicator" class="hidden absolute -top-1 -end-1 w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse border-2 border-white dark:border-gray-800"></span>
-                </button>
-                <button onclick="formatCode()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-purple-600 hover:bg-purple-700 text-white rounded transition shadow-sm" title="Format" data-i18n-title="nav.formatTitle">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i> <span class="hidden sm:inline" data-i18n="nav.formatBtn"></span>
-                </button>
-                <button onclick="runCode()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-green-600 hover:bg-green-700 text-white rounded transition shadow-sm" title="Run" data-i18n-title="nav.runTitle">
-                    <i class="fa-solid fa-play"></i> <span class="hidden sm:inline" data-i18n="nav.runBtn"></span>
-                </button>
-                <!-- OCR button -->
-                <button onclick="openOcrDialog()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-violet-600 hover:bg-violet-700 text-white rounded transition shadow-sm" title="OCR 文字辨識">
-                    <i class="fa-solid fa-language"></i> <span class="hidden sm:inline">OCR</span>
-                </button>
-                <button onclick="exportDocx && exportDocx()" id="btn-export-docx" class="hidden px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded transition shadow-sm" title="Export DOCX">
-                    <i class="fa-solid fa-file-word"></i> <span class="hidden sm:inline">Export DOCX</span>
-                </button>
-                <button onclick="exportDocxToPdf && exportDocxToPdf()" id="btn-export-pdf-doc" class="hidden px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-red-600 hover:bg-red-700 text-white rounded transition shadow-sm" title="Export PDF">
-                    <i class="fa-solid fa-file-pdf"></i> <span class="hidden sm:inline">Export PDF</span>
-                </button>
+
+                <!-- Group 2: Edit Tools -->
+                <div class="flex items-center gap-1 bg-gray-50 dark:bg-gray-900/50 p-1 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <button onclick="formatCode()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition" title="Format" data-i18n-title="nav.formatTitle">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> <span class="hidden sm:inline" data-i18n="nav.formatBtn"></span>
+                    </button>
+                    <button onclick="runCode()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-blue-600 hover:bg-blue-700 text-white rounded transition shadow-sm" title="Run" data-i18n-title="nav.runTitle">
+                        <i class="fa-solid fa-play"></i> <span class="hidden sm:inline" data-i18n="nav.runBtn"></span>
+                    </button>
+                </div>
+
+                <!-- Group 3: Contextual Tools (Hidden by default) -->
+                <div id="contextual-tools" class="flex items-center gap-1">
+                    <button id="btn-ocr" onclick="openOcrDialog()" class="hidden px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded transition" title="OCR 文字辨識">
+                        <i class="fa-solid fa-language"></i> <span class="hidden sm:inline">OCR</span>
+                    </button>
+                    <button onclick="exportDocx && exportDocx()" id="btn-export-docx" class="hidden px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded transition shadow-sm" title="Export DOCX">
+                        <i class="fa-solid fa-file-word"></i> <span class="hidden sm:inline">Export DOCX</span>
+                    </button>
+                    <button onclick="exportDocxToPdf && exportDocxToPdf()" id="btn-export-pdf-doc" class="hidden px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-red-600 hover:bg-red-700 text-white rounded transition shadow-sm" title="Export PDF">
+                        <i class="fa-solid fa-file-pdf"></i> <span class="hidden sm:inline">Export PDF</span>
+                    </button>
+                </div>
             </div>
         </div>
 
-        <div class="flex items-center bg-gray-100 dark:bg-gray-900 p-1 rounded-lg border border-gray-200 dark:border-gray-700 w-full sm:w-auto justify-center order-last sm:order-none mt-1 sm:mt-0">
-            <button id="mode-code-btn" onclick="switchToCode()" class="px-3 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-md bg-blue-600 text-white shadow-sm transition-all duration-200 flex items-center gap-1 sm:gap-2">
-                <i class="fa-solid fa-code"></i> <span data-i18n="nav.modeCode"></span>
-            </button>
-            <button id="mode-split-btn" onclick="switchToSplit()" class="px-3 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 transition-all duration-200 flex items-center gap-1 sm:gap-2">
-                <i class="fa-solid fa-table-columns"></i> <span data-i18n="nav.modeSplit"></span>
-            </button>
-            <button id="mode-visual-btn" onclick="switchToVisual()" class="px-3 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 transition-all duration-200 flex items-center gap-1 sm:gap-2">
-                <i class="fa-solid fa-pen-nib"></i> <span data-i18n="nav.modeVisual"></span>
-            </button>
-        </div>
-
         <div class="flex items-center gap-2 sm:gap-3">
+
+
             <div onclick="renameFile()" class="group flex items-center gap-1 sm:gap-2 px-1 sm:px-2 py-1 rounded cursor-pointer border border-transparent hover:border-blue-300 hover:bg-blue-50 dark:hover:border-blue-700 dark:hover:bg-blue-900/30 transition-all" title="Rename" data-i18n-title="nav.renameTitle">
                 <span id="file-name" data-is-default="true" class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 max-w-[100px] sm:max-w-[150px] truncate group-hover:text-blue-600 dark:group-hover:text-blue-400"></span>
                 <i class="fa-solid fa-pen text-[10px] sm:text-xs text-gray-400 group-hover:text-blue-500"></i>
@@ -221,7 +222,7 @@
     </nav>
 
     <!-- Tab Bar -->
-    <div id="tab-bar" class="flex items-center overflow-x-auto bg-gray-200 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700 hide-scrollbar flex-shrink-0 min-h-[36px]">
+    <div id="tab-bar" class="flex items-center overflow-x-auto bg-gray-200 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700 hide-scrollbar flex-shrink-0 min-h-[36px] px-1">
         <div id="tabs-container" class="flex items-center h-full">
             <!-- Tabs will be injected here -->
         </div>
@@ -229,8 +230,22 @@
             <i class="fa-solid fa-plus"></i>
         </button>
         <div class="flex-grow"></div>
+        
+        <!-- Mode Switch Buttons (Moved here for better UX) -->
+        <div id="mode-switch-container" class="flex items-center bg-gray-300 dark:bg-gray-900/50 p-0.5 rounded-md mx-2 scale-90 sm:scale-100">
+            <button id="mode-code-btn" onclick="switchToCode()" class="px-3 py-1 text-xs font-medium rounded bg-blue-600 text-white shadow-sm transition-all duration-200">
+                <i class="fa-solid fa-code"></i> <span class="hidden md:inline ms-1" data-i18n="nav.modeCode">Code</span>
+            </button>
+            <button id="mode-split-btn" onclick="switchToSplit()" class="px-3 py-1 text-xs font-medium rounded text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
+                <i class="fa-solid fa-table-columns"></i> <span class="hidden md:inline ms-1" data-i18n="nav.modeSplit">Split</span>
+            </button>
+            <button id="mode-visual-btn" onclick="switchToVisual()" class="px-3 py-1 text-xs font-medium rounded text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
+                <i class="fa-solid fa-pen-nib"></i> <span class="hidden md:inline ms-1" data-i18n="nav.modeVisual">Visual</span>
+            </button>
+        </div>
+
         <button onclick="openCompareModal()" class="px-3 py-1 text-xs text-gray-600 hover:text-blue-600 border-l border-gray-300 dark:border-gray-600 dark:text-gray-400 transition whitespace-nowrap" title="Compare" data-i18n-title="nav.compareTitle">
-            <i class="fa-solid fa-code-compare"></i> <span data-i18n="nav.compareBtn">Compare</span>
+            <i class="fa-solid fa-code-compare"></i> <span class="hidden sm:inline ms-1" data-i18n="nav.compareBtn">Compare</span>
         </button>
     </div>
 
@@ -246,7 +261,7 @@
                     <button onclick="window.fileSystem.createNodePrompt('file')" class="text-gray-500 hover:text-blue-500 transition-colors" title="New File" data-i18n-title="nav.newFile"><i class="fa-solid fa-file-circle-plus"></i></button>
                     <button onclick="window.fileSystem.createNodePrompt('folder')" class="text-gray-500 hover:text-blue-500 transition-colors" title="New Folder" data-i18n-title="nav.newFolder"><i class="fa-solid fa-folder-plus"></i></button>
                     <button onclick="window.fileSystem.renameSelectedNode()" class="text-gray-500 hover:text-yellow-500 transition-colors" title="Rename" data-i18n-title="nav.renameNode"><i class="fa-solid fa-pen-to-square"></i></button>
-                    <button onclick="window.fileSystem.deleteSelectedNode()" class="text-gray-500 hover:text-red-500 transition-colors" title="Delete" data-i18n-title="nav.deleteNode"><i class="fa-solid fa-trash-can"></i></button>
+                    <button onclick="window.fileSystem.deleteSelectedNode()" class="btn-explorer-delete text-gray-500 hover:text-red-500 transition-colors" title="Delete" data-i18n-title="nav.deleteNode"><i class="fa-solid fa-trash-can"></i></button>
                     <button onclick="window.fileSystem.exportZip()" class="text-gray-500 hover:text-green-500 transition-colors" title="Export ZIP" data-i18n-title="nav.exportZip"><i class="fa-solid fa-file-zipper"></i></button>
                 </div>
             </div>
@@ -480,6 +495,31 @@
                     取消
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- OCR Progress Modal -->
+    <div id="ocr-progress-modal" class="hidden fixed inset-0 z-[250] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden p-6">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-violet-100 dark:bg-violet-900/30 rounded-full flex items-center justify-center text-violet-600">
+                    <i class="fa-solid fa-spinner fa-spin text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-semibold text-gray-900 dark:text-white">OCR 辨識中...</h3>
+                    <p id="ocr-status-text" class="text-xs text-gray-500 dark:text-gray-400">正在初始化引擎</p>
+                </div>
+            </div>
+            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mb-2">
+                <div id="ocr-progress-bar" class="bg-violet-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+            <div class="flex justify-between text-[10px] text-gray-400 mb-4">
+                <span id="ocr-progress-percent">0%</span>
+                <span>辨識中文與英文</span>
+            </div>
+            <button id="ocr-cancel-btn" class="w-full py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm transition">
+                取消
+            </button>
         </div>
     </div>
 

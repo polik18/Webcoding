@@ -64,7 +64,10 @@ function _applySelection() {
         td.classList.remove('sheet-selected', 'bg-blue-100', 'dark:bg-blue-900');
     });
     const range = getSelectedRange();
-    if (!range) return;
+    if (!range) {
+        if (typeof updateStatus === 'function') updateStatus();
+        return;
+    }
     
     for (let r = range.minR; r <= range.maxR; r++) {
         for (let c = range.minC; c <= range.maxC; c++) {
@@ -72,7 +75,19 @@ function _applySelection() {
             if (cell) cell.classList.add('sheet-selected', 'bg-blue-100', 'dark:bg-blue-900');
         }
     }
+
+    // Update status bar with selected range
+    const posEl = document.getElementById('cursor-pos');
+    if (posEl) {
+        const colToLetter = (c) => String.fromCharCode(65 + c);
+        const start = `${colToLetter(range.minC)}${range.minR + 1}`;
+        const end = `${colToLetter(range.maxC)}${range.maxR + 1}`;
+        const rows = range.maxR - range.minR + 1;
+        const cols = range.maxC - range.minC + 1;
+        posEl.textContent = `Selected: ${start}:${end} (${rows}R × ${cols}C)`;
+    }
 }
+
 
 document.addEventListener('mouseup', () => {
     _isDragging = false;
@@ -755,8 +770,7 @@ window.exportDocxToPdf = async function() {
 window.openOcrDialog = async function(imageDataUrl) {
     if (!imageDataUrl) {
         const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
+        input.type = 'file'; input.accept = 'image/*';
         input.onchange = e => {
             const file = e.target.files[0];
             if (!file) return;
@@ -764,25 +778,76 @@ window.openOcrDialog = async function(imageDataUrl) {
             reader.onload = ev => window.openOcrDialog(ev.target.result);
             reader.readAsDataURL(file);
         };
-        input.click();
-        return;
+        input.click(); return;
     }
     if (typeof Tesseract === 'undefined') {
         showToast('Tesseract.js not loaded', 'error'); return;
     }
-    showToast('OCR 辨識中，請稍候…', 'info');
+
+    const modal = document.getElementById('ocr-progress-modal');
+    const progressBar = document.getElementById('ocr-progress-bar');
+    const progressText = document.getElementById('ocr-status-text');
+    const progressPercent = document.getElementById('ocr-progress-percent');
+    const cancelBtn = document.getElementById('ocr-cancel-btn');
+
+    if (modal) modal.classList.remove('hidden');
+    if (progressBar) progressBar.style.width = '0%';
+    if (progressPercent) progressPercent.textContent = '0%';
+    if (progressText) progressText.textContent = '正在初始化 OCR 引擎...';
+
+    let isCancelled = false;
+    let worker = null;
+
+    if (cancelBtn) {
+        cancelBtn.onclick = async () => {
+            isCancelled = true;
+            if (worker) await worker.terminate();
+            if (modal) modal.classList.add('hidden');
+            showToast('OCR 已取消', 'info');
+        };
+    }
+
     try {
-        const result = await Tesseract.recognize(imageDataUrl, 'eng+chi_tra+chi_sim');
+        worker = await Tesseract.createWorker({
+            logger: m => {
+                if (isCancelled) return;
+                if (m.status === 'recognizing text') {
+                    const p = Math.floor(m.progress * 100);
+                    if (progressBar) progressBar.style.width = p + '%';
+                    if (progressPercent) progressPercent.textContent = p + '%';
+                    if (progressText) progressText.textContent = '正在辨識文字...';
+                } else {
+                    if (progressText) progressText.textContent = m.status;
+                }
+            }
+        });
+
+        await worker.loadLanguage('eng+chi_tra+chi_sim');
+        await worker.initialize('eng+chi_tra+chi_sim');
+        
+        if (isCancelled) return;
+        
+        const result = await worker.recognize(imageDataUrl);
         const text = result.data.text || '';
-        // Open result in a new code tab
-        if (typeof tabManager !== 'undefined') {
-            tabManager.createNewTab('ocr-result.txt', text, false);
+        await worker.terminate();
+
+        if (modal) modal.classList.add('hidden');
+        
+        if (!isCancelled) {
+            if (typeof tabManager !== 'undefined') {
+                tabManager.createNewTab(`OCR_${new Date().getTime()}.txt`, text, false);
+            }
+            showToast('✅ OCR 辨識成功！', 'success');
         }
-        showToast('✅ OCR 完成！結果已開啟在新頁籤', 'success');
-    } catch(e) {
-        showToast('OCR 失敗：' + e.message, 'error');
+    } catch (err) {
+        if (modal) modal.classList.add('hidden');
+        if (!isCancelled) {
+            console.error(err);
+            showToast('OCR 辨識失敗: ' + err.message, 'error');
+        }
     }
 };
+
 
 /* ═══════════════════════════════════════════════════════
    QR CODE DECODER  (jsQR)

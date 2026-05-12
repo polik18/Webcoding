@@ -1057,15 +1057,31 @@ window.newFileFromTemplate = function(type) {
 window.toggleNewFileMenu = function(e) {
     if (e) e.stopPropagation();
     const menu = document.getElementById('new-file-menu');
-    if (!menu) return;
-    menu.classList.toggle('hidden');
+    if (!menu) {
+        console.error('Menu element #new-file-menu not found');
+        return;
+    }
+    const isHidden = menu.classList.contains('hidden');
+    console.log('Toggling menu. Currently hidden:', isHidden);
+    if (isHidden) {
+        menu.classList.remove('hidden');
+    } else {
+        menu.classList.add('hidden');
+    }
 };
 
 // Close dropdown on outside click
-document.addEventListener('click', () => {
+document.addEventListener('click', (e) => {
     const menu = document.getElementById('new-file-menu');
-    if (menu) menu.classList.add('hidden');
+    if (!menu || menu.classList.contains('hidden')) return;
+    
+    // Don't close if clicking inside the menu wrapper
+    const wrapper = document.getElementById('new-file-menu-wrapper');
+    if (wrapper && wrapper.contains(e.target)) return;
+    
+    menu.classList.add('hidden');
 });
+
 
 // ─── Export current code/text as PDF ──────────────────────────────
 window.exportCurrentAsPdf = function() {
@@ -1103,16 +1119,37 @@ function updateUI() {
     const tab = getActive();
     if (!tab) return;
     
-    document.getElementById('file-name').textContent = tab.name;
-    const indicator = document.getElementById('unsaved-indicator');
-    if (tab.isUnsaved) { indicator.classList.remove('hidden'); document.getElementById('file-name').classList.add('italic'); } 
-    else { indicator.classList.add('hidden'); document.getElementById('file-name').classList.remove('italic'); }
+    // 1. Filename & Unsaved indicator
+    const nameEl = document.getElementById('file-name');
+    if (nameEl) {
+        nameEl.textContent = tab.name;
+        const indicator = document.getElementById('unsaved-indicator');
+        if (tab.isUnsaved) { 
+            if (indicator) indicator.classList.remove('hidden'); 
+            nameEl.classList.add('italic'); 
+        } else { 
+            if (indicator) indicator.classList.add('hidden'); 
+            nameEl.classList.remove('italic'); 
+        }
+    }
 
+    // 2. Editor Mode & Linting
     if (!tab.isDefault) {
-        const name = tab.name.toLowerCase(); let mode = 'htmlmixed'; let lintType = true;
-        if (name.endsWith('.js')) { mode = 'javascript'; } else if (name.endsWith('.ts')) { mode = 'application/typescript'; lintType = false; }
-        else if (name.endsWith('.css')) { mode = 'css'; } else if (name.endsWith('.json')) { mode = 'application/json'; }
-        else if (name.endsWith('.py')) { mode = 'python'; if (!window.loadPyodide) { const script = document.createElement('script'); script.src = "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"; document.head.appendChild(script); } }
+        const name = tab.name.toLowerCase(); 
+        let mode = 'htmlmixed'; 
+        let lintType = true;
+        if (name.endsWith('.js')) { mode = 'javascript'; } 
+        else if (name.endsWith('.ts')) { mode = 'application/typescript'; lintType = false; }
+        else if (name.endsWith('.css')) { mode = 'css'; } 
+        else if (name.endsWith('.json')) { mode = 'application/json'; }
+        else if (name.endsWith('.py')) { 
+            mode = 'python'; 
+            if (!window.loadPyodide) { 
+                const script = document.createElement('script'); 
+                script.src = "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"; 
+                document.head.appendChild(script); 
+            } 
+        }
         else if (name.endsWith('.c') || name.endsWith('.cpp') || name.endsWith('.h')) { mode = 'text/x-c++src'; lintType = false; }
         else if (name.endsWith('.java')) { mode = 'text/x-java'; lintType = false; }
         else if (name.endsWith('.cs')) { mode = 'text/x-csharp'; lintType = false; }
@@ -1122,44 +1159,68 @@ function updateUI() {
         else if (name.endsWith('.go')) { mode = 'go'; lintType = false; }
         else if (name.endsWith('.md')) { mode = 'markdown'; lintType = false; }
         else if (name.endsWith('.txt') || name.endsWith('.srt') || !name.includes('.')) { mode = 'null'; lintType = false; }
-        editor.setOption('mode', mode);
-        if (lintType) { editor.setOption('lint', { onUpdateLinting: function(a, annotations) { if (typeof updateProblemsPanel === 'function') updateProblemsPanel(annotations); } }); } 
-        else { editor.setOption('lint', false); updateProblemsPanel([]); }
-        document.getElementById('language-mode').textContent = name.split('.').pop().toUpperCase();
-    } else { editor.setOption('lint', { onUpdateLinting: function(a, annotations) { updateProblemsPanel(annotations); } }); }
-    
-    document.getElementById('eol-toggle').textContent = tab.eol === '\n' ? 'LF' : 'CRLF';
-    document.getElementById('encoding-select').value = tab.encoding;
-    
-    // Hide mode buttons for document types
-    const modeCodeBtn = document.getElementById('mode-code-btn');
-    const modeSplitBtn = document.getElementById('mode-split-btn');
-    const modeVisualBtn = document.getElementById('mode-visual-btn');
-    
-    const isDoc = tab.mode === 'spreadsheet' || tab.mode === 'pdf' || (tab.docType && ['docx', 'odt', 'pdf-text'].includes(tab.docType));
-    
-    if (isDoc) {
-        if (modeCodeBtn) modeCodeBtn.classList.add('hidden');
-        if (modeSplitBtn) modeSplitBtn.classList.add('hidden');
-        if (tab.mode === 'spreadsheet' || tab.mode === 'pdf') {
-            if (modeVisualBtn) modeVisualBtn.classList.add('hidden');
-        } else {
-            if (modeVisualBtn) { modeVisualBtn.classList.remove('hidden'); modeVisualBtn.classList.add('flex'); }
+        
+        if (editor) {
+            editor.setOption('mode', mode);
+            if (lintType) { 
+                editor.setOption('lint', { onUpdateLinting: function(a, annotations) { if (typeof updateProblemsPanel === 'function') updateProblemsPanel(annotations); } }); 
+            } else { 
+                editor.setOption('lint', false); 
+                if (typeof updateProblemsPanel === 'function') updateProblemsPanel([]); 
+            }
         }
-    } else {
-        if (modeCodeBtn) { modeCodeBtn.classList.remove('hidden'); modeCodeBtn.classList.add('flex'); }
-        if (modeSplitBtn) { modeSplitBtn.classList.remove('hidden'); modeSplitBtn.classList.add('flex'); }
-        if (modeVisualBtn) { modeVisualBtn.classList.remove('hidden'); modeVisualBtn.classList.add('flex'); }
+        const langDisplay = document.getElementById('language-mode');
+        if (langDisplay) langDisplay.textContent = name.split('.').pop().toUpperCase();
+    }
+    
+    // 3. Status Bar Bottom Bits
+    const eolToggle = document.getElementById('eol-toggle');
+    if (eolToggle) eolToggle.textContent = tab.eol === '\n' ? 'LF' : 'CRLF';
+    
+    const encSelect = document.getElementById('encoding-select');
+    if (encSelect) encSelect.value = tab.encoding;
+    
+    // 4. Contextual Toolbar & Mode Buttons
+    const btnOcr = document.getElementById('btn-ocr');
+    const btnDocx = document.getElementById('btn-export-docx');
+    const btnPdf = document.getElementById('btn-export-pdf-doc');
+    const splitResizer = document.getElementById('split-resizer');
+    const modeSwitchContainer = document.getElementById('mode-switch-container');
+
+    // Default: hidden
+    if (btnOcr) btnOcr.classList.add('hidden');
+    if (btnDocx) btnDocx.classList.add('hidden');
+    if (btnPdf) btnPdf.classList.add('hidden');
+
+    const ext = tab.name.split('.').pop().toLowerCase();
+    const isDocType = tab.docType && ['docx', 'odt', 'pdf-text'].includes(tab.docType);
+    const isSpreadsheet = tab.mode === 'spreadsheet';
+    const isPdf = ext === 'pdf';
+    const isImage = ['jpg','jpeg','png','webp','bmp','gif'].includes(ext);
+
+    // Show Export buttons for Docs or Visual modes
+    if (isDocType || tab.mode === 'visual' || tab.mode === 'split') {
+        if (btnDocx) btnDocx.classList.remove('hidden');
+        if (btnPdf) btnPdf.classList.remove('hidden');
+    }
+    // Show OCR for images and PDF
+    if (btnOcr && (isImage || isPdf)) {
+        btnOcr.classList.remove('hidden');
     }
 
-    const btnExportDocx = document.getElementById('btn-export-docx');
-    const btnExportPdfDoc = document.getElementById('btn-export-pdf-doc');
-    if (tab.docType && ['docx', 'odt', 'pdf-text'].includes(tab.docType)) {
-        if (btnExportDocx) { btnExportDocx.classList.remove('hidden'); btnExportDocx.classList.add('inline-flex'); }
-        if (btnExportPdfDoc) { btnExportPdfDoc.classList.remove('hidden'); btnExportPdfDoc.classList.add('inline-flex'); }
-    } else {
-        if (btnExportDocx) { btnExportDocx.classList.add('hidden'); btnExportDocx.classList.remove('inline-flex'); }
-        if (btnExportPdfDoc) { btnExportPdfDoc.classList.add('hidden'); btnExportPdfDoc.classList.remove('inline-flex'); }
+    // Toggle Mode Switchers
+    if (modeSwitchContainer) {
+        if (isSpreadsheet || isPdf) modeSwitchContainer.classList.add('hidden');
+        else modeSwitchContainer.classList.remove('hidden');
+    }
+
+    _setActiveBtn('mode-code-btn', tab.mode === 'code');
+    _setActiveBtn('mode-split-btn', tab.mode === 'split');
+    _setActiveBtn('mode-visual-btn', tab.mode === 'visual');
+
+    if (splitResizer) {
+        if (tab.mode === 'split') splitResizer.classList.remove('hidden');
+        else splitResizer.classList.add('hidden');
     }
 
     updateStatus();
@@ -1167,9 +1228,25 @@ function updateUI() {
 
 function updateStatus() {
     if (!editor) return;
-    const cursor = editor.getCursor(); document.getElementById('cursor-pos').textContent = `Ln ${cursor.line + 1}, Col ${cursor.ch + 1}`;
-    const bytes = new Blob([editor.getValue()]).size; document.getElementById('file-size').textContent = bytes > 1024 ? (bytes / 1024).toFixed(1) + ' KB' : bytes + ' Bytes';
+    const tab = getActive();
+    const cursor = editor.getCursor(); 
+    const selections = editor.getSelections();
+    const selChars = selections.reduce((a, b) => a + b.length, 0);
+    
+    const posEl = document.getElementById('cursor-pos');
+    if (posEl) {
+        let statusText = `Ln ${cursor.line + 1}, Col ${cursor.ch + 1}`;
+        if (selChars > 0) statusText += ` (${selChars} selected)`;
+        posEl.textContent = statusText;
+    }
+
+    const sizeEl = document.getElementById('file-size');
+    if (sizeEl) {
+        const bytes = new Blob([editor.getValue()]).size; 
+        sizeEl.textContent = bytes > 1024 ? (bytes / 1024).toFixed(1) + ' KB' : bytes + ' Bytes';
+    }
 }
+
 
 function toggleTheme() {
     const html = document.documentElement;
