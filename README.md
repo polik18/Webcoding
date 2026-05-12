@@ -2,10 +2,10 @@
 
 <div align="center">
 
-![WebPad++](https://img.shields.io/badge/WebPad++-IDE_Edition-blue?style=for-the-badge&logo=codemirror)
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
-![Languages](https://img.shields.io/badge/Languages-30+-orange?style=for-the-badge)
-![No Backend](https://img.shields.io/badge/Backend-None_Required-purple?style=for-the-badge)
+[![WebPad++](https://img.shields.io/badge/WebPad++-IDE_Edition-blue?style=for-the-badge&logo=codemirror)](#-quick-start)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](#license)
+[![Languages](https://img.shields.io/badge/Languages-30+-orange?style=for-the-badge)](#-language--語言選擇)
+[![No Backend](https://img.shields.io/badge/Backend-None_Required-purple?style=for-the-badge)](#-quick-start)
 
 **A powerful, browser-based IDE with zero backend requirements.**
 支援 30+ 語系 | 多頁籤↔檔案總管同步 | 即時預覽 | 文件編輯（PDF/DOCX/XLSX）
