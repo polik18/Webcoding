@@ -65,12 +65,40 @@ function loadSpreadsheet(buffer, filename) {
 
 // Create a new blank spreadsheet and open in spreadsheet mode
 window.newSpreadsheet = function() {
+    // First create a dedicated tab for this spreadsheet
+    if (typeof tabManager !== 'undefined') {
+        tabManager.createNewTab('new.xlsx', '', false);
+    }
+
     const wb = XLSX.utils.book_new();
     const data = Array(50).fill(null).map(() => Array(26).fill(''));
     const ws = XLSX.utils.aoa_to_sheet(data);
     XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
     const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    loadSpreadsheet(wbout, 'new.xlsx');
+
+    // loadSpreadsheet will call switchToSpreadsheet() which sets mode on the active tab
+    _sheetFilename = 'new.xlsx';
+    let parsedWb;
+    try {
+        parsedWb = XLSX.read(wbout, { type: 'array' });
+    } catch(e) {
+        showToast('Failed to create spreadsheet: ' + e.message, 'error');
+        return;
+    }
+    const ws2 = parsedWb.Sheets[parsedWb.SheetNames[0]];
+    _sheetData = XLSX.utils.sheet_to_json(ws2, { header: 1, defval: '' });
+    if (_sheetData.length === 0) _sheetData = [['']];
+    renderSpreadsheet();
+    switchToSpreadsheet();
+
+    // Mark the active tab as a spreadsheet tab
+    const tab = typeof getActive === 'function' ? getActive() : null;
+    if (tab) {
+        tab.mode = 'spreadsheet';
+        tab.docType = 'xlsx';
+        tab.isUnsaved = true;
+    }
+    if (typeof updateUI === 'function') updateUI();
 };
 
 function loadCsv(text, filename) {
