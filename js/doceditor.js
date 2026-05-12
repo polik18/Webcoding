@@ -120,6 +120,73 @@ window.ssDeleteCol = function() {
     renderSpreadsheet();
 };
 
+window.ssSort = function(dir) {
+    _syncSheetData();
+    const activeCell = document.activeElement;
+    if (!activeCell || !activeCell.dataset.col) {
+        showToast('Please click a cell in the column you want to sort.', 'info');
+        return;
+    }
+    const colIdx = parseInt(activeCell.dataset.col);
+    if (_sheetData.length < 2) return;
+    
+    // Assuming first row is header
+    const header = _sheetData[0];
+    let rows = _sheetData.slice(1);
+    
+    rows.sort((a, b) => {
+        let valA = a[colIdx] !== undefined ? a[colIdx].toString() : '';
+        let valB = b[colIdx] !== undefined ? b[colIdx].toString() : '';
+        const numA = parseFloat(valA);
+        const numB = parseFloat(valB);
+        
+        let comp = 0;
+        if (!isNaN(numA) && !isNaN(numB)) {
+            comp = numA - numB;
+        } else {
+            comp = valA.localeCompare(valB);
+        }
+        return dir === 'asc' ? comp : -comp;
+    });
+    
+    _sheetData = [header, ...rows];
+    renderSpreadsheet();
+};
+
+window.ssMath = function(type) {
+    _syncSheetData();
+    const activeCell = document.activeElement;
+    if (!activeCell || !activeCell.dataset.col) {
+        showToast('Please click a cell in the column to calculate.', 'info');
+        return;
+    }
+    const colIdx = parseInt(activeCell.dataset.col);
+    if (_sheetData.length < 2) return;
+    
+    let sum = 0;
+    let count = 0;
+    
+    for (let i = 1; i < _sheetData.length; i++) {
+        let val = _sheetData[i][colIdx];
+        if (val && !isNaN(parseFloat(val))) {
+            sum += parseFloat(val);
+            count++;
+        }
+    }
+    
+    let resultText = '';
+    if (type === 'sum') {
+        resultText = `Sum: ${sum}`;
+    } else if (type === 'avg') {
+        resultText = count > 0 ? `Avg: ${(sum / count).toFixed(2)}` : 'Avg: 0';
+    }
+    
+    // Find the cell below the active cell or just alert it?
+    // We can show it as a toast for now to avoid altering the data structure unexpectedly.
+    // Or we could append a row if it's the last row.
+    showToast(`${resultText} (Col ${colIdx + 1})`, 'success');
+};
+
 window.ssExport = function(fmt) {
     _syncSheetData();
     const ws = XLSX.utils.aoa_to_sheet(_sheetData);
@@ -130,6 +197,22 @@ window.ssExport = function(fmt) {
         const csv = XLSX.utils.sheet_to_csv(ws);
         _triggerDownload(new Blob([csv], {type:'text/csv;charset=utf-8'}), base + '.csv');
         showToast('Exported ' + base + '.csv', 'success');
+    } else if (fmt === 'pdf') {
+        if (typeof window.jspdf === 'undefined') { showToast('jsPDF not loaded', 'error'); return; }
+        const doc = new window.jspdf.jsPDF();
+        
+        const header = _sheetData[0] || [];
+        const body = _sheetData.slice(1);
+        
+        doc.autoTable({
+            head: [header],
+            body: body,
+            theme: 'striped',
+            styles: { font: 'helvetica', fontSize: 10 }
+        });
+        
+        doc.save(base + '.pdf');
+        showToast('Exported ' + base + '.pdf', 'success');
     } else {
         // SheetJS writeFile triggers download directly
         XLSX.writeFile(wb, base + '.xlsx');
@@ -170,10 +253,28 @@ async function loadDocx(buffer, filename) {
     _docFilename = filename;
     showToast('Converting document…', 'info');
     try {
-        const result = await mammoth.convertToHtml({ arrayBuffer: buffer });
+        const options = {
+            styleMap: [
+                "b => b", "i => i", "u => u", "strike => s",
+                "p[style-name='Normal'] => p:fresh",
+                "p[style-name='Heading 1'] => h1:fresh",
+                "p[style-name='Heading 2'] => h2:fresh",
+                "p[style-name='Heading 3'] => h3:fresh",
+                "table => table:fresh",
+                "tr => tr:fresh",
+                "td => td:fresh"
+            ]
+        };
+        const result = await mammoth.convertToHtml({ arrayBuffer: buffer }, options);
         const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
-<style>body{font-family:Georgia,serif;max-width:800px;margin:2rem auto;padding:1rem;line-height:1.7;}
-table{border-collapse:collapse;width:100%;}td,th{border:1px solid #ccc;padding:6px 10px;}</style>
+<style>
+body { font-family: "Times New Roman", Times, serif; max-width: 850px; margin: 2rem auto; padding: 2rem 4rem; line-height: 1.5; background: #fff; color: #000; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+table, th, td { border: 1px solid #000; }
+th, td { padding: 6px 10px; text-align: left; vertical-align: top; }
+h1, h2, h3, h4, h5, h6 { font-family: Arial, sans-serif; margin-top: 1.5em; margin-bottom: 0.5em; }
+p { margin: 0 0 1em 0; }
+</style>
 </head><body>${result.value}</body></html>`;
 
         const tab = getActive();
@@ -427,6 +528,70 @@ window.pdfExportText = async function() {
     isProgrammaticChange = false;
     switchToVisual();
     showToast('Text extracted — edit and Export DOCX', 'success');
+};
+
+window.pdfExportOCRText = async function() {
+    if (!_pdfDoc) return;
+    if (typeof Tesseract === 'undefined') {
+        showToast('Tesseract.js not loaded', 'error'); return;
+    }
+    
+    showToast('Starting OCR... This may take a while.', 'info');
+    let allText = '';
+    const canvases = document.querySelectorAll('.pdf-page-canvas');
+    if (canvases.length === 0) {
+        showToast('No PDF pages rendered to OCR.', 'error'); return;
+    }
+    
+    for (let i = 0; i < canvases.length; i++) {
+        showToast(`OCR processing page ${i + 1} of ${canvases.length}...`, 'info');
+        try {
+            const dataUrl = canvases[i].toDataURL('image/png');
+            // Using English + Traditional Chinese
+            const result = await Tesseract.recognize(dataUrl, 'eng+chi_tra');
+            allText += result.data.text + '\n\n';
+        } catch (e) {
+            console.error('OCR Error on page', i+1, e);
+        }
+    }
+    
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
+<style>body{font-family:Georgia,serif;max-width:800px;margin:2rem auto;padding:1rem;line-height:1.7;white-space:pre-wrap;}</style>
+</head><body>${_xmlEscape(allText).replace(/\n/g,'<br>')}</body></html>`;
+    const tab = getActive();
+    if (tab) { tab.docType = 'pdf-text'; tab.content = html; _pdfFilename = _pdfFilename.replace('.pdf','.docx'); }
+    isProgrammaticChange = true;
+    editor.setValue(html);
+    isProgrammaticChange = false;
+    switchToVisual();
+    showToast('OCR extracted — edit and Export DOCX', 'success');
+};
+
+window.exportDocxToPdf = async function() {
+    if (typeof html2pdf === 'undefined') {
+        showToast('html2pdf.js not loaded', 'error'); return;
+    }
+    const frame = document.getElementById('visual-frame');
+    if (!frame) return;
+    const doc = frame.contentWindow.document;
+    const bodyEl = doc.body;
+    
+    showToast('Building PDF...', 'info');
+    const base = _docFilename.replace(/\.[^.]+$/, '');
+    
+    const opt = {
+        margin:       0.5,
+        filename:     base + '.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2 },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    
+    html2pdf().set(opt).from(bodyEl).save().then(() => {
+        showToast('✅ Saved: ' + base + '.pdf', 'success');
+    }).catch(e => {
+        showToast('PDF export failed: ' + e.message, 'error');
+    });
 };
 
 /* ═══════════════════════════════════════════════════════

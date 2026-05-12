@@ -947,6 +947,38 @@ function updateUI() {
     
     document.getElementById('eol-toggle').textContent = tab.eol === '\n' ? 'LF' : 'CRLF';
     document.getElementById('encoding-select').value = tab.encoding;
+    
+    // Hide mode buttons for document types
+    const modeCodeBtn = document.getElementById('mode-code-btn');
+    const modeSplitBtn = document.getElementById('mode-split-btn');
+    const modeVisualBtn = document.getElementById('mode-visual-btn');
+    
+    const isDoc = tab.mode === 'spreadsheet' || tab.mode === 'pdf' || (tab.docType && ['docx', 'odt', 'pdf-text'].includes(tab.docType));
+    
+    if (isDoc) {
+        if (modeCodeBtn) modeCodeBtn.classList.add('hidden');
+        if (modeSplitBtn) modeSplitBtn.classList.add('hidden');
+        if (tab.mode === 'spreadsheet' || tab.mode === 'pdf') {
+            if (modeVisualBtn) modeVisualBtn.classList.add('hidden');
+        } else {
+            if (modeVisualBtn) { modeVisualBtn.classList.remove('hidden'); modeVisualBtn.classList.add('flex'); }
+        }
+    } else {
+        if (modeCodeBtn) { modeCodeBtn.classList.remove('hidden'); modeCodeBtn.classList.add('flex'); }
+        if (modeSplitBtn) { modeSplitBtn.classList.remove('hidden'); modeSplitBtn.classList.add('flex'); }
+        if (modeVisualBtn) { modeVisualBtn.classList.remove('hidden'); modeVisualBtn.classList.add('flex'); }
+    }
+
+    const btnExportDocx = document.getElementById('btn-export-docx');
+    const btnExportPdfDoc = document.getElementById('btn-export-pdf-doc');
+    if (tab.docType && ['docx', 'odt', 'pdf-text'].includes(tab.docType)) {
+        if (btnExportDocx) { btnExportDocx.classList.remove('hidden'); btnExportDocx.classList.add('inline-flex'); }
+        if (btnExportPdfDoc) { btnExportPdfDoc.classList.remove('hidden'); btnExportPdfDoc.classList.add('inline-flex'); }
+    } else {
+        if (btnExportDocx) { btnExportDocx.classList.add('hidden'); btnExportDocx.classList.remove('inline-flex'); }
+        if (btnExportPdfDoc) { btnExportPdfDoc.classList.add('hidden'); btnExportPdfDoc.classList.remove('inline-flex'); }
+    }
+
     updateStatus();
 }
 

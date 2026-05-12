@@ -86,6 +86,12 @@
     <!-- PDF.js for PDF rendering -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
+    <!-- OCR and PDF Export Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
     <!-- Custom Style -->
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -117,6 +123,9 @@
                 </button>
                 <button onclick="exportDocx && exportDocx()" id="btn-export-docx" class="hidden px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded transition shadow-sm" title="Export DOCX">
                     <i class="fa-solid fa-file-word"></i> <span class="hidden sm:inline">Export DOCX</span>
+                </button>
+                <button onclick="exportDocxToPdf && exportDocxToPdf()" id="btn-export-pdf-doc" class="hidden px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-red-600 hover:bg-red-700 text-white rounded transition shadow-sm" title="Export PDF">
+                    <i class="fa-solid fa-file-pdf"></i> <span class="hidden sm:inline">Export PDF</span>
                 </button>
             </div>
         </div>
@@ -309,8 +318,14 @@
                 <button onclick="ssAddCol()" class="px-2 py-1 text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 rounded hover:bg-blue-100 transition">+Col</button>
                 <button onclick="ssDeleteCol()" class="px-2 py-1 text-xs bg-red-50 dark:bg-red-900/30 text-red-500 border border-red-200 dark:border-red-800 rounded hover:bg-red-100 transition">-Col</button>
                 <div class="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                <button onclick="ssSort('asc')" class="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded transition" title="Sort A-Z"><i class="fa-solid fa-arrow-down-a-z"></i></button>
+                <button onclick="ssSort('desc')" class="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded transition" title="Sort Z-A"><i class="fa-solid fa-arrow-up-z-a"></i></button>
+                <button onclick="ssMath('sum')" class="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded transition font-bold" title="Sum">∑</button>
+                <button onclick="ssMath('avg')" class="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded transition font-bold" title="Average">Avg</button>
+                <div class="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1"></div>
                 <button onclick="ssExport('csv')" class="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition shadow-sm"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
                 <button onclick="ssExport('xlsx')" class="px-2 py-1 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700 transition shadow-sm"><i class="fa-solid fa-file-excel"></i> Export XLSX</button>
+                <button onclick="ssExport('pdf')" class="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition shadow-sm"><i class="fa-solid fa-file-pdf"></i> Export PDF</button>
             </div>
             <div id="spreadsheet-wrapper" class="flex-grow overflow-auto p-2"></div>
         </div>
@@ -320,6 +335,7 @@
             <div class="flex flex-wrap items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700 flex-shrink-0">
                 <span class="text-xs font-bold text-gray-500 dark:text-gray-400 mr-2"><i class="fa-regular fa-file-pdf text-red-500"></i> PDF Viewer</span>
                 <button onclick="pdfExportText()" class="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition shadow-sm"><i class="fa-solid fa-pen-to-square"></i> Extract & Edit Text</button>
+                <button onclick="pdfExportOCRText()" class="px-3 py-1 text-xs bg-purple-600 text-white rounded hover:bg-purple-700 transition shadow-sm" title="Warning: May take a while"><i class="fa-solid fa-language"></i> Extract via OCR</button>
             </div>
             <div id="pdf-pages" class="flex-grow overflow-auto flex flex-col items-center gap-4 p-4"></div>
         </div>
