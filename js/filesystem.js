@@ -261,18 +261,21 @@ class FileSystem {
         const zip = new JSZip();
         
         const getPath = (node) => {
-            if (!node.parentId || node.parentId === 'root') return node.name;
+            if (!node || node.id === 'root') return '';
             const parent = this.getNode(node.parentId);
-            return parent ? getPath(parent) + '/' + node.name : node.name;
+            const parentPath = getPath(parent);
+            return parentPath ? parentPath + '/' + node.name : node.name;
         };
         
-        // Add files to ZIP
+        // Add files and folders to ZIP
         this.nodes.forEach(node => {
+            if (node.id === 'root') return;
+            const path = getPath(node);
+            if (!path) return;
+            
             if (node.type === 'file') {
-                const path = getPath(node);
                 zip.file(path, node.content || "");
             } else if (node.type === 'folder') {
-                const path = getPath(node);
                 zip.folder(path);
             }
         });

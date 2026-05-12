@@ -1304,7 +1304,7 @@ function showToast(message, type = 'info') {
     setTimeout(() => { toast.classList.add('opacity-0'); setTimeout(() => toast.remove(), 300); }, 3000);
 }
 
-function resetAll() {
+window.resetAll = function() {
     const warnTitle = typeof t === 'function' ? (t('nav.resetAllTitle') || 'Reset Everything') : 'Reset Everything';
     const warnMsg = typeof t === 'function'
         ? (t('messages.confirmReset') || '⚠️ This will permanently delete ALL files, tabs and settings. This action CANNOT be undone!')
