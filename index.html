@@ -93,6 +93,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <!-- jsQR for QR Code decoding -->
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+    <!-- qrcodejs for QR Code generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <!-- Custom Style -->
     <link rel="stylesheet" href="css/style.css">
@@ -140,10 +142,29 @@
                             <button onclick="newFileFromTemplate('xlsx')" class="new-file-item"><i class="fa-solid fa-table text-emerald-600"></i> Spreadsheet</button>
                         </div>
                     </div>
-                    <button onclick="saveFile()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition relative" title="Save" data-i18n-title="nav.saveTitle">
-                        <i class="fa-regular fa-floppy-disk"></i> <span class="hidden sm:inline" data-i18n="nav.saveBtn"></span>
-                        <span id="unsaved-indicator" class="hidden absolute -top-1 -end-1 w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse border-2 border-white dark:border-gray-800"></span>
-                    </button>
+                    <!-- Save Dropdown -->
+                    <div class="relative" id="save-menu-wrapper">
+                        <div class="flex items-stretch">
+                            <button onclick="saveFile()" class="ps-2 sm:ps-3 pe-1 sm:pe-2 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-s transition relative border-r border-gray-200 dark:border-gray-700" title="Quick Save" data-i18n-title="nav.saveTitle">
+                                <i class="fa-regular fa-floppy-disk"></i> <span class="hidden sm:inline" data-i18n="nav.saveBtn"></span>
+                                <span id="unsaved-indicator" class="hidden absolute -top-1 -end-1 w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse border-2 border-white dark:border-gray-800"></span>
+                            </button>
+                            <button onclick="toggleSaveMenu(event)" class="px-1.5 sm:px-2 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-e transition" title="Save Options">
+                                <i class="fa-solid fa-chevron-down text-[9px]"></i>
+                            </button>
+                        </div>
+                        <div id="save-menu" class="hidden absolute left-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-[200] py-1">
+                            <button onclick="saveFile(); document.getElementById('save-menu').classList.add('hidden');" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                                <i class="fa-solid fa-cloud-arrow-up text-blue-500 w-4"></i> <span data-i18n="nav.saveBtn"></span>
+                            </button>
+                            <button onclick="downloadFileAs(); document.getElementById('save-menu').classList.add('hidden');" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                                <i class="fa-solid fa-file-export text-emerald-500 w-4"></i> <span data-i18n="nav.saveAs">另存新檔...</span>
+                            </button>
+                            <button onclick="window.exportCurrentAsPdf && window.exportCurrentAsPdf(); document.getElementById('save-menu').classList.add('hidden');" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                                <i class="fa-solid fa-file-pdf text-red-500 w-4"></i> <span data-i18n="nav.saveAsPdf">匯出為 PDF</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Group 2: Edit Tools -->
@@ -159,7 +180,10 @@
                 <!-- Group 3: Contextual Tools (Hidden by default) -->
                 <div id="contextual-tools" class="flex items-center gap-1">
                     <button id="btn-ocr" onclick="openOcrDialog()" class="hidden px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded transition" title="OCR 文字辨識">
-                        <i class="fa-solid fa-language"></i> <span class="hidden sm:inline">OCR</span>
+                        <i class="fa-solid fa-language text-violet-500"></i> <span class="hidden sm:inline">OCR</span>
+                    </button>
+                    <button id="btn-qr" onclick="openQrModal()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded transition" title="QR Code 工具">
+                        <i class="fa-solid fa-qrcode text-emerald-500"></i> <span class="hidden sm:inline">QR Code</span>
                     </button>
                     <button onclick="exportDocx && exportDocx()" id="btn-export-docx" class="hidden px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded transition shadow-sm" title="Export DOCX">
                         <i class="fa-solid fa-file-word"></i> <span class="hidden sm:inline">Export DOCX</span>
@@ -520,6 +544,82 @@
             <button id="ocr-cancel-btn" class="w-full py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm transition">
                 取消
             </button>
+        </div>
+    </div>
+
+    <!-- QR Code Generator & Scanner Modal -->
+    <div id="qr-modal" class="hidden fixed inset-0 z-[300] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col max-h-[90vh]">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-qrcode text-emerald-500 text-xl"></i>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">QR Code 工具</h3>
+                </div>
+                <button onclick="closeQrModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="flex border-b border-gray-200 dark:border-gray-700">
+                <button onclick="switchQrTab('generate')" id="qr-tab-generate" class="flex-1 py-3 text-sm font-bold border-b-2 border-emerald-500 text-emerald-600 transition-colors">產生器</button>
+                <button onclick="switchQrTab('scan')" id="qr-tab-scan" class="flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">解碼器 / 掃描</button>
+            </div>
+
+            <div id="qr-panel-generate" class="p-6 overflow-y-auto">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">QR Code 內容</label>
+                        <textarea id="qr-gen-input" class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition resize-none" rows="3" placeholder="輸入文字、網址或點擊下方按鈕匯入內容..."></textarea>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="qrImportContent('current')" class="px-3 py-1.5 text-xs bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 rounded-lg hover:bg-emerald-100 transition">匯入目前內容</button>
+                        <button onclick="qrImportContent('link')" class="px-3 py-1.5 text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 rounded-lg hover:bg-blue-100 transition">匯入目前網址</button>
+                    </div>
+                    <div class="flex justify-center p-4 bg-gray-50 dark:bg-gray-900 rounded-2xl min-h-[220px] items-center relative group">
+                        <div id="qr-output" class="p-4 bg-white rounded-lg shadow-sm"></div>
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-2xl cursor-pointer" onclick="downloadQrCode()">
+                            <span class="bg-white text-gray-900 px-4 py-2 rounded-full text-sm font-bold shadow-lg flex items-center gap-2">
+                                <i class="fa-solid fa-download"></i> 下載圖片
+                            </span>
+                        </div>
+                    </div>
+                    <button onclick="generateQrCode()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-lg shadow-emerald-600/20 transition-all active:scale-95">產生 QR Code</button>
+                </div>
+            </div>
+
+            <div id="qr-panel-scan" class="hidden p-6 overflow-y-auto">
+                <div class="space-y-6">
+                    <div class="grid grid-cols-2 gap-4">
+                        <button onclick="triggerQrFileUpload()" class="flex flex-col items-center justify-center gap-3 p-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-2xl hover:border-emerald-500 dark:hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/10 transition-all group">
+                            <i class="fa-solid fa-file-image text-3xl text-gray-400 group-hover:text-emerald-500"></i>
+                            <span class="text-sm font-medium text-gray-600 dark:text-gray-400 group-hover:text-emerald-600">上傳圖片</span>
+                            <input type="file" id="qr-file-input" class="hidden" accept="image/*" onchange="handleQrFileUpload(event)">
+                        </button>
+                        <button onclick="triggerQrPaste()" class="flex flex-col items-center justify-center gap-3 p-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-2xl hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all group">
+                            <i class="fa-solid fa-clipboard text-3xl text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="text-sm font-medium text-gray-600 dark:text-gray-400 group-hover:text-blue-600">貼上圖片</span>
+                        </button>
+                    </div>
+                    
+                    <div id="qr-scan-result-container" class="hidden space-y-3">
+                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">解碼結果</label>
+                        <div class="p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl relative">
+                            <p id="qr-scan-result" class="text-sm text-gray-800 dark:text-gray-200 break-all pr-10"></p>
+                            <button onclick="copyQrResult()" class="absolute right-3 top-3 text-emerald-600 hover:text-emerald-800 transition" title="複製">
+                                <i class="fa-regular fa-copy"></i>
+                            </button>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="openQrResultAsTab()" class="flex-1 py-2 text-xs bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition">開啟為新分頁</button>
+                            <button id="qr-result-link-btn" class="hidden flex-1 py-2 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">造訪網址</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 text-center">
+                <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Powered by qrcode.js & jsQR</p>
+            </div>
         </div>
     </div>
 

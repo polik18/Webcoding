@@ -362,3 +362,18 @@ main {
 .dark .new-file-item:hover {
     background: #334155;
 }
+
+/* Save Dropdown Animation */
+#save-menu {
+    animation: dropdownFadeIn 0.12s ease;
+}
+
+/* QR Modal animations */
+#qr-modal > div {
+    animation: modalScaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalScaleIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to   { opacity: 1; transform: scale(1); }
+}

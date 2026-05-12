@@ -2,6 +2,8 @@
   "nav": {
     "openBtn": "開啟",
     "saveBtn": "儲存",
+    "saveAs": "另存新檔...",
+    "saveAsPdf": "匯出為 PDF",
     "runBtn": "執行",
     "code": "程式碼",
     "visual": "視覺化",
@@ -72,7 +74,8 @@
     "savePrompt": "存檔",
     "saveMsg": "請輸入存檔名稱 (包含副檔名，例如: subtitle.srt, index.html):",
     "cancelSave": "已取消存檔",
-    "toastSaved": "已下載檔案",
+    "toastSaved": "已儲存",
+    "toastDownloaded": "檔案下載中...",
     "tooBig": "檔案過大",
     "limit": "限制 2MB",
     "toastLoaded": "已載入:",

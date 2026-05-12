@@ -813,6 +813,23 @@ function executeDownload(content, filename) {
 }
 
 function openFile() { const input = document.createElement('input'); input.type = 'file'; input.onchange = e => { const file = e.target.files[0]; if (file) loadFileContent(file); }; input.click(); }
+
+window.toggleSaveMenu = function(e) {
+    if (e) e.stopPropagation();
+    const menu = document.getElementById('save-menu');
+    if (!menu) return;
+    menu.classList.toggle('hidden');
+};
+
+// Close save menu on outside click
+document.addEventListener('click', (e) => {
+    const menu = document.getElementById('save-menu');
+    if (!menu || menu.classList.contains('hidden')) return;
+    const wrapper = document.getElementById('save-menu-wrapper');
+    if (wrapper && wrapper.contains(e.target)) return;
+    menu.classList.add('hidden');
+});
+
 function saveFile() {
     const tab = getActive();
     if (!tab) return;
@@ -837,8 +854,16 @@ function saveFile() {
         }
     }
 
-    // Show save dialog with PDF option included
+    // Fallback if not in FS: trigger Download As
+    downloadFileAs();
+}
+
+window.downloadFileAs = function() {
+    const tab = getActive();
+    if (!tab) return;
+    const content = editor.getValue(tab.eol);
     const ext = tab.name.includes('.') ? tab.name.split('.').pop().toLowerCase() : 'txt';
+    
     showSaveDialog(tab.name, null, (chosen) => {
         const chosenExt = chosen.split('.').pop().toLowerCase();
         if (chosenExt === 'pdf') {
@@ -848,7 +873,7 @@ function saveFile() {
             executeDownload(content, chosen);
         }
     });
-}
+};
 
 
 
@@ -1454,3 +1479,47 @@ function exitCompareMode() {
         document.getElementById('merge-view-wrapper').innerHTML = '';
     }
 }
+
+// --- QR Code Modal UI Logic ---
+window.openQrModal = function() {
+    const modal = document.getElementById('qr-modal');
+    modal.classList.remove('hidden');
+    // Default to generate tab
+    switchQrTab('generate');
+};
+
+window.closeQrModal = function() {
+    document.getElementById('qr-modal').classList.add('hidden');
+};
+
+window.switchQrTab = function(tab) {
+    const genTab = document.getElementById('qr-tab-generate');
+    const scanTab = document.getElementById('qr-tab-scan');
+    const genPanel = document.getElementById('qr-panel-generate');
+    const scanPanel = document.getElementById('qr-panel-scan');
+
+    if (tab === 'generate') {
+        genTab.classList.add('border-emerald-500', 'text-emerald-600');
+        genTab.classList.remove('border-transparent', 'text-gray-500');
+        scanTab.classList.remove('border-emerald-500', 'text-emerald-600');
+        scanTab.classList.add('border-transparent', 'text-gray-500');
+        genPanel.classList.remove('hidden');
+        scanPanel.classList.add('hidden');
+    } else {
+        scanTab.classList.add('border-emerald-500', 'text-emerald-600');
+        scanTab.classList.remove('border-transparent', 'text-gray-500');
+        genTab.classList.remove('border-emerald-500', 'text-emerald-600');
+        genTab.classList.add('border-transparent', 'text-gray-500');
+        scanPanel.classList.remove('hidden');
+        genPanel.classList.add('hidden');
+    }
+};
+
+window.qrImportContent = function(type) {
+    const input = document.getElementById('qr-gen-input');
+    if (type === 'current') {
+        input.value = editor.getValue();
+    } else if (type === 'link') {
+        input.value = window.location.href;
+    }
+};

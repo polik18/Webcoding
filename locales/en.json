@@ -2,6 +2,8 @@
   "nav": {
     "openBtn": "Open",
     "saveBtn": "Save",
+    "saveAs": "Save As...",
+    "saveAsPdf": "Export to PDF",
     "runBtn": "Run",
     "code": "Code",
     "visual": "Visual",
@@ -72,7 +74,8 @@
     "savePrompt": "Save File",
     "saveMsg": "Enter save name (with extension, e.g., subtitle.srt, index.html):",
     "cancelSave": "Save cancelled",
-    "toastSaved": "File downloaded",
+    "toastSaved": "Saved",
+    "toastDownloaded": "Downloading file...",
     "tooBig": "File too large",
     "limit": "limit 2MB",
     "toastLoaded": "Loaded:",

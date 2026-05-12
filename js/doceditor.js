@@ -854,7 +854,6 @@ window.openOcrDialog = async function(imageDataUrl) {
 ═══════════════════════════════════════════════════════ */
 
 window.decodeQrFromImage = function(imageSource) {
-    // imageSource: DataURL string or HTMLImageElement or File
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     const img = new Image();
@@ -869,10 +868,28 @@ window.decodeQrFromImage = function(imageSource) {
         }
         const code = jsQR(imageData.data, imageData.width, imageData.height);
         if (code) {
-            if (typeof tabManager !== 'undefined') {
-                tabManager.createNewTab('qr-result.txt', code.data, false);
+            const modal = document.getElementById('qr-modal');
+            if (modal && !modal.classList.contains('hidden')) {
+                const resultText = document.getElementById('qr-scan-result');
+                const resultContainer = document.getElementById('qr-scan-result-container');
+                const linkBtn = document.getElementById('qr-result-link-btn');
+                
+                resultText.textContent = code.data;
+                resultContainer.classList.remove('hidden');
+                
+                if (code.data.startsWith('http')) {
+                    linkBtn.classList.remove('hidden');
+                    linkBtn.onclick = () => window.open(code.data, '_blank');
+                } else {
+                    linkBtn.classList.add('hidden');
+                }
+                showToast('✅ QR Code 解碼成功！', 'success');
+            } else {
+                if (typeof tabManager !== 'undefined') {
+                    tabManager.createNewTab('qr-result.txt', code.data, false);
+                }
+                showToast('✅ QR Code 解碼成功！結果已開啟在新頁籤', 'success');
             }
-            showToast('✅ QR Code 解碼成功！結果已開啟在新頁籤', 'success');
         } else {
             showToast('❌ 未偵測到 QR Code', 'error');
         }
@@ -939,3 +956,51 @@ window.loadCsv = loadCsv;
 window.loadDocx = loadDocx;
 window.loadOdt = loadOdt;
 window.loadPdf = loadPdf;
+
+// --- New QR Code Generation & Scanning Logic ---
+let _qrGenerator = null;
+window.generateQrCode = function() {
+    const input = document.getElementById('qr-gen-input');
+    const output = document.getElementById('qr-output');
+    const text = input.value.trim();
+    if (!text) { showToast('請輸入內容', 'info'); return; }
+    if (typeof QRCode === 'undefined') { showToast('QRCode library not loaded', 'error'); return; }
+    output.innerHTML = '';
+    _qrGenerator = new QRCode(output, {
+        text: text,
+        width: 180,
+        height: 180,
+        colorDark : "#000000",
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.H
+    });
+    showToast('QR Code 已產生', 'success');
+};
+
+window.downloadQrCode = function() {
+    const output = document.getElementById('qr-output');
+    const img = output.querySelector('img');
+    if (!img) { showToast('請先產生 QR Code', 'info'); return; }
+    const a = document.createElement('a');
+    a.href = img.src;
+    a.download = `qrcode_${new Date().getTime()}.png`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+};
+
+window.triggerQrFileUpload = function() { document.getElementById('qr-file-input').click(); };
+window.handleQrFileUpload = function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => window.decodeQrFromImage(ev.target.result);
+    reader.readAsDataURL(file);
+};
+window.triggerQrPaste = function() { showToast('請直接按下 Ctrl+V (或 Cmd+V) 貼上圖片', 'info'); };
+window.copyQrResult = function() {
+    const text = document.getElementById('qr-scan-result').textContent;
+    navigator.clipboard.writeText(text).then(() => showToast('已複製到剪貼簿', 'success'));
+};
+window.openQrResultAsTab = function() {
+    const text = document.getElementById('qr-scan-result').textContent;
+    if (typeof tabManager !== 'undefined') { tabManager.createNewTab('qr-result.txt', text, false); window.closeQrModal(); }
+};
