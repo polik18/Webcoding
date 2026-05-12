@@ -46,6 +46,10 @@ class TabManager {
             const activeTab = this.getActiveTab();
             if (activeTab) {
                 activeTab.content = editor.getValue();
+                // Sync spreadsheet DOM → data → tab before persisting
+                if (activeTab.mode === 'spreadsheet' && typeof window._syncAndSaveSheetToTab === 'function') {
+                    window._syncAndSaveSheetToTab(activeTab);
+                }
             }
         }
         await localforage.setItem(this.storageKey, {
@@ -111,6 +115,10 @@ class TabManager {
             currentTab.history = editor.getHistory();
             currentTab.cursor = editor.getCursor();
             currentTab.scrollInfo = editor.getScrollInfo();
+            // Save spreadsheet state when leaving a spreadsheet tab
+            if (currentTab.mode === 'spreadsheet' && typeof window._syncAndSaveSheetToTab === 'function') {
+                window._syncAndSaveSheetToTab(currentTab);
+            }
         }
 
         this.activeTabId = id;
@@ -119,7 +127,7 @@ class TabManager {
 
         isProgrammaticChange = true;
         if (editor) {
-            editor.setValue(newTab.content);
+            editor.setValue(newTab.content || '');
             if (newTab.history) editor.setHistory(newTab.history);
             else editor.clearHistory();
             if (newTab.cursor) editor.setCursor(newTab.cursor);
@@ -132,7 +140,14 @@ class TabManager {
         updateUI();
         if (newTab.mode === 'visual') switchToVisual();
         else if (newTab.mode === 'split') switchToSplit();
-        else if (newTab.mode === 'spreadsheet') switchToSpreadsheet();
+        else if (newTab.mode === 'spreadsheet') {
+            // Restore this tab's spreadsheet data
+            if (typeof window.restoreSpreadsheetTab === 'function') {
+                window.restoreSpreadsheetTab(newTab);
+            } else {
+                switchToSpreadsheet();
+            }
+        }
         else switchToCode();
     }
 
@@ -303,9 +318,37 @@ document.addEventListener('DOMContentLoaded', () => {
     
     initVisualFrame();
 
-    window.addEventListener('beforeunload', (e) => { 
-        if (tabManager.tabs.some(t => t.isUnsaved)) { e.preventDefault(); e.returnValue = ''; } 
+    window.addEventListener('beforeunload', (e) => {
         tabManager.saveToStorage();
+        if (tabManager.tabs.some(t => t.isUnsaved)) {
+            e.preventDefault();
+            // Modern browsers show generic text; we use returnValue as a hint for older ones
+            e.returnValue = '您有未下載的檔案。瀏覽器暫存區的資料在清除快取後會消失，建議先下載儲存。';
+        }
+    });
+
+    // Show auto-save info toast once per session
+    if (!sessionStorage.getItem('autosave_notice_shown')) {
+        sessionStorage.setItem('autosave_notice_shown', '1');
+        setTimeout(() => {
+            showToast('💾 自動暫存已啟用 — 資料存於瀏覽器 IndexedDB，清除快取才會消失', 'info');
+        }, 3000);
+    }
+
+    // Paste handler: intercept image pastes for QR/OCR
+    document.addEventListener('paste', (e) => {
+        const items = (e.clipboardData || {}).items;
+        if (!items) return;
+        for (const item of items) {
+            if (item.type.startsWith('image/')) {
+                e.preventDefault();
+                const file = item.getAsFile();
+                if (file && typeof window.handleImageFile === 'function') {
+                    window.handleImageFile(file);
+                }
+                return;
+            }
+        }
     });
     
     // Auto-save to IndexedDB every 5 seconds
@@ -686,10 +729,11 @@ function renameFile() {
 const EXT_GROUPS = {
     'Web':        ['html','css','js','ts'],
     'Data':       ['json','xml','csv','xlsx'],
-    'Document':   ['docx','md','txt'],
+    'Document':   ['docx','md','txt','pdf'],
     'Script':     ['py','sql','sh'],
     'Media':      ['svg','srt'],
 };
+
 
 function showSaveDialog(defaultName, allowedExts, onConfirm) {
     const modal    = document.getElementById('save-dialog');
@@ -793,8 +837,19 @@ function saveFile() {
         }
     }
 
-    fallbackDownload(content, tab.name);
+    // Show save dialog with PDF option included
+    const ext = tab.name.includes('.') ? tab.name.split('.').pop().toLowerCase() : 'txt';
+    showSaveDialog(tab.name, null, (chosen) => {
+        const chosenExt = chosen.split('.').pop().toLowerCase();
+        if (chosenExt === 'pdf') {
+            window.exportCurrentAsPdf && window.exportCurrentAsPdf();
+        } else {
+            tab.isDefault = false;
+            executeDownload(content, chosen);
+        }
+    });
 }
+
 
 
 function toggleEOL() {
@@ -881,6 +936,15 @@ function loadFileContent(file) {
         return;
     }
 
+    // ── Image formats → OCR / QR dialog ─────────────────────────────────────
+    const imgExts = ['jpg','jpeg','png','webp','bmp','gif','tiff'];
+    if (imgExts.includes(ext)) {
+        if (typeof window.handleImageFile === 'function') {
+            window.handleImageFile(file);
+        }
+        return;
+    }
+
     // ── Plain text / code files ───────────────────────
     reader.onload = (event) => {
         const buffer = event.target.result;
@@ -915,6 +979,125 @@ function loadFileContent(file) {
     };
     reader.readAsArrayBuffer(file);
 }
+
+// ─── New File Templates ──────────────────────────────────────────────────
+const _FILE_TEMPLATES = {
+    html: { name: 'index.html', content: `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body { margin: 0; font-family: sans-serif; }
+    </style>
+</head>
+<body>
+
+</body>
+</html>` },
+    css:  { name: 'style.css',   content: `/* Styles */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: sans-serif;
+    line-height: 1.6;
+}
+` },
+    js:   { name: 'script.js',  content: `// JavaScript
+
+(function() {
+    'use strict';
+
+})();
+` },
+    ts:   { name: 'index.ts',   content: `// TypeScript
+
+` },
+    py:   { name: 'main.py',    content: `# Python
+
+def main():
+    pass
+
+if __name__ == '__main__':
+    main()
+` },
+    md:   { name: 'README.md',  content: `# 標題
+
+## 說明
+
+` },
+    json: { name: 'data.json', content: `{
+  
+}
+` },
+    txt:  { name: 'notes.txt', content: '' },
+    sql:  { name: 'query.sql', content: `-- SQL Query
+
+SELECT * FROM table_name;
+` },
+    xlsx: null  // handled by newSpreadsheet()
+};
+
+window.newFileFromTemplate = function(type) {
+    // Close dropdown
+    const menu = document.getElementById('new-file-menu');
+    if (menu) menu.classList.add('hidden');
+
+    if (type === 'xlsx') {
+        window.newSpreadsheet && window.newSpreadsheet();
+        return;
+    }
+    const tmpl = _FILE_TEMPLATES[type];
+    if (!tmpl) return;
+    tabManager.createNewTab(tmpl.name, tmpl.content, false);
+};
+
+window.toggleNewFileMenu = function(e) {
+    if (e) e.stopPropagation();
+    const menu = document.getElementById('new-file-menu');
+    if (!menu) return;
+    menu.classList.toggle('hidden');
+};
+
+// Close dropdown on outside click
+document.addEventListener('click', () => {
+    const menu = document.getElementById('new-file-menu');
+    if (menu) menu.classList.add('hidden');
+});
+
+// ─── Export current code/text as PDF ──────────────────────────────
+window.exportCurrentAsPdf = function() {
+    if (typeof html2pdf === 'undefined') {
+        showToast('html2pdf.js not loaded', 'error'); return;
+    }
+    const tab = getActive();
+    if (!tab) return;
+    const content = editor.getValue();
+    const base = (tab.name || 'document').replace(/\.[^.]+$/, '');
+    // Wrap code in a styled HTML document for PDF output
+    const htmlDoc = `<!DOCTYPE html><html><head><meta charset="utf-8">
+<style>body{font-family:monospace;font-size:12px;white-space:pre-wrap;padding:20px;color:#000;background:#fff;}</style>
+</head><body>${content.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</body></html>`;
+    const el = document.createElement('div');
+    el.style.cssText = 'font-family:monospace;font-size:12px;white-space:pre-wrap;padding:20px;color:#000;background:#fff;';
+    el.textContent = content;
+    document.body.appendChild(el);
+    html2pdf().set({
+        margin: 0.5,
+        filename: base + '.pdf',
+        image: { type: 'jpeg', quality: 0.95 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+    }).from(el).save().then(() => {
+        document.body.removeChild(el);
+        showToast('✅ PDF 導出完成！', 'success');
+    }).catch(err => {
+        document.body.removeChild(el);
+        showToast('PDF 導出失敗: ' + err.message, 'error');
+    });
+};
 
 function updateUI() {
     const tab = getActive();

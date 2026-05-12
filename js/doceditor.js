@@ -8,11 +8,46 @@
 
 let _sheetData = [];   // 2D array of strings
 let _sheetFilename = 'spreadsheet.csv';
+let _sheetSaveTimer = null;
 
 let _isDragging = false;
 let _selStart = null;
 let _selEnd = null;
 let _lastSelectedCol = null;
+
+// ── Spreadsheet Persistence Helpers ──────────────────────────────────────────
+function _saveSheetToTab() {
+    const tab = typeof getActive === 'function' ? getActive() : null;
+    if (tab && tab.mode === 'spreadsheet') {
+        tab.sheetData = _sheetData.map(r => [...r]);
+    }
+}
+window._saveSheetToTab = _saveSheetToTab;
+
+// Sync DOM cells → _sheetData → tab.sheetData (called before tab switch or storage)
+window._syncAndSaveSheetToTab = function(tab) {
+    document.querySelectorAll('#spreadsheet-table td[data-row]').forEach(td => {
+        const r = parseInt(td.dataset.row), c = parseInt(td.dataset.col);
+        while (_sheetData.length <= r) _sheetData.push([]);
+        while (_sheetData[r].length <= c) _sheetData[r].push('');
+        _sheetData[r][c] = td.textContent;
+    });
+    if (tab) tab.sheetData = _sheetData.map(r => [...r]);
+};
+
+// Restore spreadsheet data from a tab object
+window.restoreSpreadsheetTab = function(tab) {
+    if (!tab) return;
+    _sheetFilename = tab.name || 'spreadsheet.xlsx';
+    if (tab.sheetData && tab.sheetData.length > 0) {
+        _sheetData = tab.sheetData.map(r => [...r]);
+    } else {
+        _sheetData = Array(50).fill(null).map(() => Array(26).fill(''));
+    }
+    renderSpreadsheet();
+    switchToSpreadsheet();
+    if (typeof updateUI === 'function') updateUI();
+};
 
 function getSelectedRange() {
     if (!_selStart || !_selEnd) return null;
@@ -146,6 +181,9 @@ function renderSpreadsheet() {
                 while (_sheetData.length <= ri) _sheetData.push([]);
                 while (_sheetData[ri].length <= ci) _sheetData[ri].push('');
                 _sheetData[ri][ci] = td.textContent;
+                // Debounced persist to tab
+                clearTimeout(_sheetSaveTimer);
+                _sheetSaveTimer = setTimeout(_saveSheetToTab, 800);
             });
             td.addEventListener('keydown', e => {
                 if (e.key === 'Tab') { e.preventDefault(); moveFocus(ri, ci, 0, 1); }
@@ -200,6 +238,7 @@ function _syncSheetData() {
         while (_sheetData[r].length <= c) _sheetData[r].push('');
         _sheetData[r][c] = td.textContent;
     });
+    _saveSheetToTab();
 }
 
 window.ssAddRow = function() {
@@ -709,8 +748,117 @@ window.exportDocxToPdf = async function() {
 };
 
 /* ═══════════════════════════════════════════════════════
+   OCR  (Image → Text, supports Chinese)
+═══════════════════════════════════════════════════════ */
+
+// Open OCR from an image DataURL or launch file-picker
+window.openOcrDialog = async function(imageDataUrl) {
+    if (!imageDataUrl) {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = e => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = ev => window.openOcrDialog(ev.target.result);
+            reader.readAsDataURL(file);
+        };
+        input.click();
+        return;
+    }
+    if (typeof Tesseract === 'undefined') {
+        showToast('Tesseract.js not loaded', 'error'); return;
+    }
+    showToast('OCR 辨識中，請稍候…', 'info');
+    try {
+        const result = await Tesseract.recognize(imageDataUrl, 'eng+chi_tra+chi_sim');
+        const text = result.data.text || '';
+        // Open result in a new code tab
+        if (typeof tabManager !== 'undefined') {
+            tabManager.createNewTab('ocr-result.txt', text, false);
+        }
+        showToast('✅ OCR 完成！結果已開啟在新頁籤', 'success');
+    } catch(e) {
+        showToast('OCR 失敗：' + e.message, 'error');
+    }
+};
+
+/* ═══════════════════════════════════════════════════════
+   QR CODE DECODER  (jsQR)
+═══════════════════════════════════════════════════════ */
+
+window.decodeQrFromImage = function(imageSource) {
+    // imageSource: DataURL string or HTMLImageElement or File
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+
+    const run = () => {
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        ctx.drawImage(img, 0, 0);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        if (typeof jsQR === 'undefined') {
+            showToast('jsQR not loaded', 'error'); return;
+        }
+        const code = jsQR(imageData.data, imageData.width, imageData.height);
+        if (code) {
+            if (typeof tabManager !== 'undefined') {
+                tabManager.createNewTab('qr-result.txt', code.data, false);
+            }
+            showToast('✅ QR Code 解碼成功！結果已開啟在新頁籤', 'success');
+        } else {
+            showToast('❌ 未偵測到 QR Code', 'error');
+        }
+    };
+
+    if (typeof imageSource === 'string') {
+        img.onload = run;
+        img.src = imageSource;
+    } else {
+        showToast('無效的圖片來源', 'error');
+    }
+};
+
+// Shared handler: called when an image file is opened/dropped — asks OCR or QR
+window.handleImageFile = function(file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+        const dataUrl = e.target.result;
+        // Show choice modal
+        _showImageActionModal(dataUrl, file.name);
+    };
+    reader.readAsDataURL(file);
+};
+
+function _showImageActionModal(dataUrl, filename) {
+    const modal = document.getElementById('image-action-modal');
+    const preview = document.getElementById('image-action-preview');
+    if (!modal) {
+        // fallback: just do OCR
+        window.openOcrDialog(dataUrl);
+        return;
+    }
+    preview.src = dataUrl;
+    modal.classList.remove('hidden');
+    document.getElementById('image-action-ocr').onclick = () => {
+        modal.classList.add('hidden');
+        window.openOcrDialog(dataUrl);
+    };
+    document.getElementById('image-action-qr').onclick = () => {
+        modal.classList.add('hidden');
+        window.decodeQrFromImage(dataUrl);
+    };
+    document.getElementById('image-action-cancel').onclick = () => {
+        modal.classList.add('hidden');
+    };
+}
+
+/* ═══════════════════════════════════════════════════════
    SHARED UTILITY
 ═══════════════════════════════════════════════════════ */
+
 
 function _triggerDownload(blob, filename) {
     const url = URL.createObjectURL(blob);
