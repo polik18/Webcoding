@@ -1,0 +1,10 @@
+<script>
+    try {
+        const type = 'folder';
+        const id = 1;
+        const html = `<div onclick="fileSystem.${type === 'folder' ? \`toggleFolder('${id}', event)\` : \`selectNode('${id}', true)\`}"></div>`;
+        console.log("SUCCESS");
+    } catch (e) {
+        console.error("ERROR", e);
+    }
+</script>

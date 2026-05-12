@@ -79,6 +79,13 @@
     <script src="https://unpkg.com/i18next@23.10.1/dist/umd/i18next.min.js"></script>
     <script src="https://unpkg.com/i18next-http-backend@2.5.0/i18nextHttpBackend.min.js"></script>
 
+    <!-- SheetJS for Excel / CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- mammoth.js for DOCX → HTML -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <!-- PDF.js for PDF rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
     <!-- Custom Style -->
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -107,6 +114,9 @@
                 </button>
                 <button onclick="runCode()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-green-600 hover:bg-green-700 text-white rounded transition shadow-sm" title="Run" data-i18n-title="nav.runTitle">
                     <i class="fa-solid fa-play"></i> <span class="hidden sm:inline" data-i18n="nav.runBtn"></span>
+                </button>
+                <button onclick="exportDocx && exportDocx()" id="btn-export-docx" class="hidden px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded transition shadow-sm" title="Export DOCX">
+                    <i class="fa-solid fa-file-word"></i> <span class="hidden sm:inline">Export DOCX</span>
                 </button>
             </div>
         </div>
@@ -289,6 +299,30 @@
             </div>
             <div id="merge-view-wrapper" class="flex-grow w-full relative overflow-hidden"></div>
         </div>
+
+        <!-- Spreadsheet Container (CSV / XLSX) -->
+        <div id="spreadsheet-container" class="hidden flex-col w-full h-full overflow-hidden bg-white dark:bg-gray-900">
+            <div class="flex flex-wrap items-center gap-1 px-3 py-2 bg-gray-100 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700 flex-shrink-0">
+                <span class="text-xs font-bold text-gray-500 dark:text-gray-400 mr-2"><i class="fa-solid fa-table"></i> Spreadsheet</span>
+                <button onclick="ssAddRow()" class="px-2 py-1 text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 rounded hover:bg-blue-100 transition">+Row</button>
+                <button onclick="ssDeleteRow()" class="px-2 py-1 text-xs bg-red-50 dark:bg-red-900/30 text-red-500 border border-red-200 dark:border-red-800 rounded hover:bg-red-100 transition">-Row</button>
+                <button onclick="ssAddCol()" class="px-2 py-1 text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 rounded hover:bg-blue-100 transition">+Col</button>
+                <button onclick="ssDeleteCol()" class="px-2 py-1 text-xs bg-red-50 dark:bg-red-900/30 text-red-500 border border-red-200 dark:border-red-800 rounded hover:bg-red-100 transition">-Col</button>
+                <div class="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                <button onclick="ssExport('csv')" class="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition shadow-sm"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+                <button onclick="ssExport('xlsx')" class="px-2 py-1 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700 transition shadow-sm"><i class="fa-solid fa-file-excel"></i> Export XLSX</button>
+            </div>
+            <div id="spreadsheet-wrapper" class="flex-grow overflow-auto p-2"></div>
+        </div>
+
+        <!-- PDF Container -->
+        <div id="pdf-container" class="hidden flex-col w-full h-full overflow-hidden bg-gray-200 dark:bg-gray-900">
+            <div class="flex flex-wrap items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700 flex-shrink-0">
+                <span class="text-xs font-bold text-gray-500 dark:text-gray-400 mr-2"><i class="fa-regular fa-file-pdf text-red-500"></i> PDF Viewer</span>
+                <button onclick="pdfExportText()" class="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition shadow-sm"><i class="fa-solid fa-pen-to-square"></i> Extract & Edit Text</button>
+            </div>
+            <div id="pdf-pages" class="flex-grow overflow-auto flex flex-col items-center gap-4 p-4"></div>
+        </div>
     </main>
 
     <div id="drop-overlay" class="hidden absolute inset-0 flex items-center justify-center flex-col text-white">
@@ -331,5 +365,6 @@
     <script src="js/i18n.js"></script>
     <script src="js/filesystem.js"></script>
     <script src="js/editor.js"></script>
+    <script src="js/doceditor.js"></script>
 </body>
 </html>
