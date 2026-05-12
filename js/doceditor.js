@@ -29,6 +29,15 @@ function loadSpreadsheet(buffer, filename) {
     if (tab) { tab.mode = 'spreadsheet'; tab.docType = filename.split('.').pop().toLowerCase(); }
 }
 
+// Create a new blank spreadsheet and open in spreadsheet mode
+window.newSpreadsheet = function() {
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet([['']]);
+    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    loadSpreadsheet(wbout, 'new.xlsx');
+};
+
 function loadCsv(text, filename) {
     _sheetFilename = filename;
     const wb = XLSX.read(text, { type: 'string' });
