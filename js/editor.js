@@ -749,14 +749,7 @@ document.getElementById('custom-modal-cancel').addEventListener('click', closeCu
 document.getElementById('custom-modal-confirm').addEventListener('click', () => {
     if (modalCallback) modalCallback(document.getElementById('custom-modal-input').value); closeCustomModal();
 });
-document.getElementById('custom-modal-input').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') { e.preventDefault(); document.getElementById('custom-modal-confirm').click(); }
-    if (e.key === 'Escape') { e.preventDefault(); closeCustomModal(); }
-});
-
-let isSyncingSelection = false;
-
-function syncSelectionToVisual() {
+document.getElementById('custom-modal-input').addEventListener('keydfunction syncSelectionToVisual() {
     if (isSyncingSelection || isSyncingVisual) return;
     const tab = getActive();
     if (!tab || tab.mode !== 'split') return;
@@ -765,33 +758,77 @@ function syncSelectionToVisual() {
     if (!frame) return;
     const win = frame.contentWindow;
     const doc = win.document;
-    
-    const cursor = editor.getCursor();
-    const line = editor.getLine(cursor.line);
-    if (line === undefined || line === null) return;
-    
-    let snippet = editor.getSelection();
-    if (!snippet) {
-        // Try to get a small context around the cursor if nothing is selected
-        const start = Math.max(0, cursor.ch - 8);
-        const end = Math.min(line.length, cursor.ch + 8);
-        snippet = line.substring(start, end).trim();
-    }
-    
-    snippet = snippet.replace(/[#*`_>\[\]\(\)]/g, '').trim();
-    
-    if (!snippet || snippet.length < 1) return;
+    if (!doc.body) return;
     
     isSyncingSelection = true;
     
-    const sel = win.getSelection();
-    sel.removeAllRanges();
-    const range = doc.createRange();
-    range.selectNodeContents(doc.body);
-    range.collapse(true);
-    sel.addRange(range);
-    
-    win.find(snippet, false, false, true, false, false, false);
+    try {
+        const cursor = editor.getCursor();
+        const isSelection = editor.somethingSelected();
+        let snippet = '';
+        let offsetInSnippet = 0;
+        
+        if (isSelection) {
+            snippet = editor.getSelection().replace(/[#*`_>\\[\\]\\(\\)]/g, '').trim();
+        } else {
+            const line = editor.getLine(cursor.line);
+            if (line !== undefined && line !== null) {
+                const start = Math.max(0, cursor.ch - 12);
+                const end = Math.min(line.length, cursor.ch + 12);
+                const leftText = line.substring(start, cursor.ch).replace(/[#*`_>\\[\\]\\(\\)]/g, '');
+                const rightText = line.substring(cursor.ch, end).replace(/[#*`_>\\[\\]\\(\\)]/g, '');
+                snippet = leftText + rightText;
+                offsetInSnippet = leftText.length;
+            }
+        }
+        
+        if (snippet && snippet.length > 0) {
+            const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, null, false);
+            const nodes = [];
+            let fullText = "";
+            let node;
+            while(node = walker.nextNode()) {
+                const val = node.nodeValue;
+                nodes.push({ node, start: fullText.length, end: fullText.length + val.length });
+                fullText += val;
+            }
+            
+            const matchIndex = fullText.indexOf(snippet);
+            if (matchIndex !== -1) {
+                const sel = win.getSelection();
+                sel.removeAllRanges();
+                const range = doc.createRange();
+                
+                const findPos = (targetIdx) => {
+                    for (const n of nodes) {
+                        if (targetIdx >= n.start && targetIdx <= n.end) {
+                            return { node: n.node, offset: targetIdx - n.start };
+                        }
+                    }
+                    if (nodes.length > 0) {
+                        const last = nodes[nodes.length - 1];
+                        return { node: last.node, offset: last.node.nodeValue.length };
+                    }
+                    return null;
+                };
+                
+                const startPos = findPos(isSelection ? matchIndex : matchIndex + offsetInSnippet);
+                const endPos = findPos(isSelection ? matchIndex + snippet.length : matchIndex + offsetInSnippet);
+                
+                if (startPos && endPos) {
+                    range.setStart(startPos.node, startPos.offset);
+                    range.setEnd(endPos.node, endPos.offset);
+                    sel.addRange(range);
+                    
+                    let scrollNode = startPos.node;
+                    if (scrollNode.nodeType === 3) scrollNode = scrollNode.parentNode;
+                    if (scrollNode && scrollNode.scrollIntoView) {
+                        scrollNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+            }
+        }
+    } catch(e) { console.error('Sync to visual error:', e); }
     
     setTimeout(() => { isSyncingSelection = false; }, 300);
 }
@@ -808,47 +845,81 @@ function syncSelectionToCode() {
     const sel = win.getSelection();
     if (!sel || sel.rangeCount === 0) return;
     
-    let snippet = sel.toString();
-    if (!snippet) {
-        const node = sel.anchorNode;
-        if (node && node.nodeType === 3) {
-            const text = node.textContent;
-            const offset = sel.anchorOffset;
-            
-            // Get word around cursor
-            let start = offset;
-            while (start > 0 && /\\S/.test(text[start - 1])) start--;
-            let end = offset;
-            while (end < text.length && /\\S/.test(text[end])) end++;
-            
-            snippet = text.substring(start, end).trim();
-            
-            if (!snippet) {
-                start = Math.max(0, offset - 8);
-                end = Math.min(text.length, offset + 8);
-                snippet = text.substring(start, end).trim();
-            }
-        }
-    }
-    
-    if (!snippet || snippet.length < 1) return;
-    
     isSyncingSelection = true;
     
-    const cursor = editor.getSearchCursor(snippet);
-    if (cursor.findNext()) {
-        editor.setSelection(cursor.from(), cursor.to());
-        editor.scrollIntoView(cursor.from(), 100);
-    } else {
-        const words = snippet.split(/\\s+/).filter(w => w.length > 1);
-        if (words.length > 0) {
-            const subCursor = editor.getSearchCursor(words[0]);
-            if (subCursor.findNext()) {
-                editor.setSelection(subCursor.from(), subCursor.to());
-                editor.scrollIntoView(subCursor.from(), 100);
+    try {
+        const isSelection = !sel.isCollapsed;
+        let snippet = '';
+        let offsetInSnippet = 0;
+        
+        if (isSelection) {
+            snippet = sel.toString().trim();
+        } else {
+            const node = sel.anchorNode;
+            if (node && node.nodeType === 3) {
+                const text = node.textContent;
+                const offset = sel.anchorOffset;
+                const start = Math.max(0, offset - 10);
+                const end = Math.min(text.length, offset + 10);
+                const leftText = text.substring(start, offset);
+                const rightText = text.substring(offset, end);
+                snippet = leftText + rightText;
+                offsetInSnippet = leftText.length;
             }
         }
-    }
+        
+        if (snippet && snippet.length > 0) {
+            let found = false;
+            let targetPos = null;
+            let targetEnd = null;
+
+            const cursor = editor.getSearchCursor(snippet);
+            if (cursor.findNext()) {
+                found = true;
+                if (isSelection) {
+                    targetPos = cursor.from();
+                    targetEnd = cursor.to();
+                } else {
+                    targetPos = { line: cursor.from().line, ch: cursor.from().ch + offsetInSnippet };
+                }
+            } else {
+                if (!isSelection) {
+                    const leftText = snippet.substring(0, offsetInSnippet).trim();
+                    const leftCursor = editor.getSearchCursor(leftText);
+                    if (leftText.length > 1 && leftCursor.findNext()) {
+                        found = true;
+                        targetPos = leftCursor.to();
+                    } else {
+                        const rightText = snippet.substring(offsetInSnippet).trim();
+                        const rightCursor = editor.getSearchCursor(rightText);
+                        if (rightText.length > 1 && rightCursor.findNext()) {
+                            found = true;
+                            targetPos = rightCursor.from();
+                        }
+                    }
+                } else if (isSelection && snippet.length > 1) {
+                    const words = snippet.split(/\\s+/).filter(w => w.length > 1);
+                    if (words.length > 0) {
+                        const subCursor = editor.getSearchCursor(words[0]);
+                        if (subCursor.findNext()) {
+                            found = true;
+                            targetPos = subCursor.from();
+                            targetEnd = subCursor.to();
+                        }
+                    }
+                }
+            }
+
+            if (found) {
+                if (isSelection && targetEnd) {
+                    editor.setSelection(targetPos, targetEnd);
+                } else {
+                    editor.setCursor(targetPos);
+                }
+                editor.scrollIntoView(targetPos, 100);
+            }
+        }
+    } catch(e) { console.error('Sync to code error:', e); }
     
     setTimeout(() => { isSyncingSelection = false; }, 300);
 }
