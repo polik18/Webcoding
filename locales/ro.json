@@ -116,5 +116,33 @@
   },
   "content": {
     "default": "# Bun venit la WebPad++ 🚀\n\nWebPad++ este un IDE puternic, complet bazat pe browser. **Nu este necesar backend** - toate fișierele, filele și setările dvs. sunt stocate în siguranță chiar în browser.\n\n## ✨ Funcții noi și avansate\n\n* **Editor vizual (WYSIWYG)**: Comută fără probleme între modurile Cod și vizual. Trageți și plasați folderele direct în editor și sincronizați instantaneu Markdown frumos formatat!\n* **Smart Spreadsheet Engine**: Editați fișierele `.xlsx` și `.csv` la fel ca Excel! Acceptă tragerea pentru selectare, calcule (Suma/Medie), sortarea dinamică și evaluarea formulelor live (de exemplu, `=B3+C2*F2`).\n* **Recunoaștere text OCR a imaginii**: dați clic pe instrumentul **OCR** ​​pentru a face o fotografie cu camera dvs., pentru a încărca sau a lipi o imagine. Acesta va detecta automat textul în mai multe limbi și îl va salva într-un fișier nou instantaneu!\n* **QR Code Suite**: Generați coduri QR pentru orice text/URL sau utilizați camera dvs. pentru a scana și decoda codurile QR existente fără probleme.\n\n## 🛠 Capabilități de bază\n\n* **Editare inteligentă**: evidențierea sintaxei, IntelliSense, potrivirea parantezelor și formatarea codului cu un singur clic.\n* **Execuție instantanee**: rulați HTML (previzualizare live într-o filă nouă), JavaScript (consolă) și Python (Pyodide).\n* **Split Preview & Diff**: comparați oricare două file una lângă alta sau previzualizați codul de ieșire în timp real.\n* **Suport avansat pentru documente**: Vizualizați, extrageți text și editați documente PDF, DOCX și ODT cu compatibilitate deplină de export.\n* **Gestionarea fișierelor**: creați foldere imbricate, trageți și plasați directoare întregi spațiu de lucru, redenumiți, ștergeți și exportați întregul proiect ca fișier ZIP.\n\n## 📖 Ghid de pornire rapidă\n\n1. **File Explorer**: faceți clic pe `☰` pentru a vă gestiona fișierele. Trageți un folder întreg de pe computer direct în WebPad++!\n2. **Deschideți documente**: trageți un fișier PDF, DOCX sau XLSX în fereastră pentru a-l deschide în editorul său dedicat.\n3. **Run Code**: Faceți clic pe ▶️ **Run** sau apăsați `Ctrl+Enter` pentru a testa codul instantaneu.\n4. **Instrumente contextuale**: Faceți clic pe butonul violet 🔠 **OCR** ​​sau pe butonul verde 📱 **Cod QR** pentru utilitare avansate.\n5. **Salvați și exportați**: utilizați meniul drop-down pentru a descărca fișierul sau pentru a exporta documentele în DOCX/PDF.\n6. **Începe proaspăt**: faceți clic pe butonul roșu 🔄 **Resetați toate** pentru a șterge toate datele locale și a reporni.\n\nCodare fericită! 🎉"
+  },
+  "seo": {
+    "auditTab": "Audit și previzualizare",
+    "sitemapTab": "Generator Sitemap",
+    "robotsTab": "Robots.txt",
+    "schemaTab": "Schema.org",
+    "scoreTitle": "Scorul de audit SEO",
+    "previewTitle": "Previzualizare Căutare Google",
+    "desc": "Analizați-vă conținutul pentru probleme tehnice SEO și previzualizați cum apare în rezultatele căutării."
+  },
+  "ocr": {
+    "initialTitle": "Nicio imagine selectată",
+    "initialSub": "Selectați o sursă din stânga sau trageți o imagine aici",
+    "startBtn": "Începeți recunoașterea",
+    "resetBtn": "Începe de la capăt",
+    "saveBtn": "Salvați în fișier",
+    "langLabel": "Setarea limbii",
+    "sourceLabel": "Sursa de intrare",
+    "resultLabel": "Rezultat recunoaștere (editabil)",
+    "camera": "Faceți o fotografie",
+    "upload": "Încărcați imaginea",
+    "paste": "Lipiți imaginea"
+  },
+  "recent": {
+    "title": "Acces recent",
+    "clear": "Ștergeți istoricul",
+    "empty": "Nu au fost găsite înregistrări recente.",
+    "desc": "Redeschideți rapid fișierele și folderele de proiect recent accesate."
   }
 }

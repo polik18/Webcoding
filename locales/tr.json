@@ -116,5 +116,33 @@
   },
   "content": {
     "default": "# WebPad++'a hoş geldiniz 🚀\n\nWebPad++ güçlü, tamamen tarayıcı tabanlı bir IDE'dir. **Arka uç gerekmez** — tüm dosyalarınız, sekmeleriniz ve ayarlarınız doğrudan tarayıcınızda güvenli bir şekilde saklanır.\n\n## ✨ Yeni ve Gelişmiş Özellikler\n\n* **Görsel Düzenleyici (WYSIWYG)**: Kod ve Görsel modları arasında sorunsuzca geçiş yapın. Klasörleri doğrudan düzenleyiciye sürükleyip bırakın ve güzel biçimlendirilmiş Markdown'ı anında senkronize edin!\n* **Akıllı Elektronik Tablo Motoru**: `.xlsx` ve `.csv` dosyalarını tıpkı Excel gibi düzenleyin! Seçmek için sürüklemeyi, hesaplamaları (Toplam/Ortalama), dinamik sıralamayı ve canlı formül değerlendirmeyi (ör. `=B3+C2*F2`) destekler.\n* **Resim OCR Metin Tanıma**: Kameranızla fotoğraf çekmek, resim yüklemek veya yapıştırmak için **OCR** ​​aracını tıklayın. Çok dilli metni otomatik olarak algılayacak ve anında yeni bir dosyaya kaydedecektir!\n* **QR Code Suite**: Herhangi bir metin/URL için QR kodları oluşturun veya mevcut QR kodlarını sorunsuz bir şekilde taramak ve kodunu çözmek için kameranızı kullanın.\n\n## 🛠 Temel Yetenekler\n\n* **Akıllı Düzenleme**: Sözdizimi vurgulama, IntelliSense, parantez eşleştirme ve tek tıklamayla kod biçimlendirme.\n* **Anında Yürütme**: HTML'yi (yeni bir sekmede canlı önizleme), JavaScript'i (Konsol) ve Python'u (Pyodide) çalıştırın.\n* **Bölünmüş Önizleme ve Fark**: Herhangi iki sekmeyi yan yana karşılaştırın veya kod çıktısını gerçek zamanlı olarak önizleyin.\n* **Gelişmiş Belge Desteği**: Tam dışa aktarma uyumluluğuyla PDF, DOCX ve ODT belgelerini görüntüleyin, metni çıkarın ve düzenleyin.\n* **Dosya Yönetimi**: İç içe geçmiş klasörler oluşturun, tüm çalışma alanı dizinlerini sürükleyip bırakın, yeniden adlandırın, silin ve projenizin tamamını ZIP olarak dışa aktarın.\n\n## 📖 Hızlı Başlangıç Kılavuzu\n\n1. **Dosya Gezgini**: Dosyalarınızı yönetmek için `☰` düğmesini tıklayın. Bilgisayarınızdaki bir klasörün tamamını doğrudan WebPad++'a sürükleyin!\n2. **Belgeleri Aç**: Bir PDF, DOCX veya XLSX dosyasını özel düzenleyicisinde açmak için pencereye sürükleyin.\n3. **Kodu Çalıştır**: Kodunuzu anında test etmek için ▶️ **Çalıştır**'a tıklayın veya 'Ctrl+Enter' tuşuna basın.\n4. **Bağlamsal Araçlar**: Gelişmiş yardımcı programlar için mor 🔠 **OCR** ​​düğmesini veya yeşil 📱 **QR Code** düğmesini tıklayın.\n5. **Kaydet ve Dışa Aktar**: Dosyanızı indirmek veya belgelerinizi DOCX/PDF'ye aktarmak için kaydetme açılır menüsünü kullanın.\n6. **Yeniden Başlat**: Tüm yerel verileri silmek ve yeniden başlatmak için kırmızı 🔄 **Tümünü Sıfırla** düğmesini tıklayın.\n\nMutlu kodlama! 🎉"
+  },
+  "seo": {
+    "auditTab": "Denetim ve Önizleme",
+    "sitemapTab": "Site Haritası Oluşturucu",
+    "robotsTab": "Robots.txt",
+    "schemaTab": "Schema.org",
+    "scoreTitle": "SEO Denetim Puanı",
+    "previewTitle": "Google Arama Önizlemesi",
+    "desc": "İçeriğinizi teknik SEO sorunları açısından analiz edin ve arama sonuçlarında nasıl göründüğünün önizlemesini yapın."
+  },
+  "ocr": {
+    "initialTitle": "Resim Seçilmedi",
+    "initialSub": "Soldan bir kaynak seçin veya bir resmi buraya sürükleyin",
+    "startBtn": "Tanıma Başlat",
+    "resetBtn": "Yeniden Başla",
+    "saveBtn": "Dosyaya Kaydet",
+    "langLabel": "Dil Ayarı",
+    "sourceLabel": "Giriş Kaynağı",
+    "resultLabel": "Tanıma Sonucu (Düzenlenebilir)",
+    "camera": "Fotoğraf Çek",
+    "upload": "Resim Yükle",
+    "paste": "Resmi Yapıştır"
+  },
+  "recent": {
+    "title": "Son Erişim",
+    "clear": "Geçmişi Temizle",
+    "empty": "Yeni kayıt bulunamadı.",
+    "desc": "Son eriştiğiniz dosyalarınızı ve proje klasörlerinizi hızla yeniden açın."
   }
 }

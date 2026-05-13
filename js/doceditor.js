@@ -1299,7 +1299,28 @@ window.stopOcrCamera = function() {
     }
 };
 
-window.takeOcrPhoto = function() {
+window.switchOcrView = function(view) {
+    const views = ['initial', 'preview', 'result'];
+    views.forEach(v => {
+        const el = document.getElementById(`ocr-view-${v}`);
+        if (el) el.classList.toggle('hidden', v !== view);
+    });
+};
+
+window.showOcrPreview = function(dataUrl) {
+    _ocrPendingDataUrl = dataUrl;
+    const previewImg = document.getElementById('ocr-preview-img');
+    if (previewImg) previewImg.src = dataUrl;
+    switchOcrView('preview');
+};
+
+window.startPerformingOcr = function() {
+    if (_ocrPendingDataUrl) {
+        performOcr(_ocrPendingDataUrl);
+    }
+};
+
+window.takeOcrPhoto = function(autoSave = false) {
     const video = document.getElementById('ocr-video');
     if (!video || !video.videoWidth) return;
     
@@ -1310,7 +1331,11 @@ window.takeOcrPhoto = function() {
     
     stopOcrCamera();
     const dataUrl = canvas.toDataURL('image/png');
-    showOcrPreview(dataUrl);
+    if (autoSave) {
+        performOcr(dataUrl, true);
+    } else {
+        showOcrPreview(dataUrl);
+    }
 };
 
 window.triggerOcrFileUpload = function() { document.getElementById('ocr-file-input').click(); };
@@ -1346,7 +1371,7 @@ document.addEventListener('paste', function(e) {
     }
 });
 
-async function performOcr(imageDataUrl) {
+async function performOcr(imageDataUrl, autoSave = false) {
     if (typeof Tesseract === 'undefined') {
         showToast('Tesseract.js OCR 引擎尚未載入', 'error');
         return;
@@ -1369,17 +1394,20 @@ async function performOcr(imageDataUrl) {
             return;
         }
         
-        // Auto-create new file and open it
-        const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '').split('.')[0];
-        const filename = `OCR_Result_${dateStr}.txt`;
-        
-        closeOcrModal();
-        
-        if (typeof tabManager !== 'undefined') {
-            tabManager.createNewTab(filename, result.data.text, false);
-            showToast('OCR 辨識完成', 'success');
+        if (autoSave) {
+            const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '').split('.')[0];
+            const filename = `OCR_Result_${dateStr}.txt`;
+            closeOcrModal();
+            if (typeof tabManager !== 'undefined') {
+                tabManager.createNewTab(filename, result.data.text, false);
+                showToast('OCR 辨識並匯出完成', 'success');
+            }
         } else {
-            alert("OCR Result:\n\n" + result.data.text);
+            // Show result view for manual editing
+            document.getElementById('ocr-result-img').src = imageDataUrl;
+            document.getElementById('ocr-result-text').value = result.data.text;
+            switchOcrView('result');
+            showToast('辨識完成', 'success');
         }
         
     } catch (e) {
@@ -1388,6 +1416,21 @@ async function performOcr(imageDataUrl) {
         showToast('OCR 辨識失敗: ' + e.message, 'error');
     }
 }
+
+window.saveOcrResult = function() {
+    const text = document.getElementById('ocr-result-text').value;
+    if (!text.trim()) {
+        showToast('沒有文字可儲存', 'info');
+        return;
+    }
+    const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '').split('.')[0];
+    const filename = `OCR_Result_${dateStr}.txt`;
+    if (typeof tabManager !== 'undefined') {
+        tabManager.createNewTab(filename, text, false);
+        closeOcrModal();
+        showToast('已儲存為新檔案', 'success');
+    }
+};
 
 /* ═══════════════════════════════════════════════════════
    SPREADSHEET FORMULAS

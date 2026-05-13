@@ -116,5 +116,33 @@
   },
   "content": {
     "default": "# Tervetuloa WebPad++:aan 🚀\n\nWebPad++ on tehokas, täysin selainpohjainen IDE. **Taustajärjestelmää ei tarvita** — kaikki tiedostosi, välilehdet ja asetuksesi tallennetaan turvallisesti suoraan selaimeesi.\n\n## ✨ Uudet ja edistyneet ominaisuudet\n\n* **Visuaalinen editori (WYSIWYG)**: Vaihda saumattomasti koodi- ja visuaalitilojen välillä. Vedä ja pudota kansiot suoraan editoriin ja synkronoi kauniisti muotoiltu Markdown välittömästi!\n* **Smart Spreadsheet Engine**: Muokkaa .xlsx- ja .csv-tiedostoja aivan kuten Excelissä! Tukee vetämällä valintaan, laskelmia (summa/keskiarvo), dynaamista lajittelua ja reaaliaikaista kaavan arviointia (esim. `=B3+C2*F2`).\n* **Kuvan OCR-tekstin tunnistus**: Napsauta **OCR**-työkalua ottaaksesi valokuvan kamerallasi, ladataksesi tai liittääksesi kuvan. Se tunnistaa automaattisesti monikielisen tekstin ja tallentaa sen uuteen tiedostoon välittömästi!\n* **QR Code Suite**: Luo QR-koodeja mille tahansa tekstille/URL-osoitteelle tai skannaa ja dekoodaa olemassa olevia QR-koodeja kamerallasi saumattomasti.\n\n## 🛠 Ydinominaisuudet\n\n* **Älykäs muokkaus**: Syntaksin korostus, IntelliSense, hakasulkujen täsmäys ja yhden napsautuksen koodin muotoilu.\n* **Instant Execution**: Suorita HTML (live esikatselu uudessa välilehdessä), JavaScript (konsoli) ja Python (Pyodide).\n* **Jaa esikatselu ja ero**: Vertaa mitä tahansa kahta välilehteä vierekkäin tai esikatsele koodia reaaliajassa.\n* **Advanced Document Support**: Tarkastele, pura tekstiä ja muokkaa PDF-, DOCX- ja ODT-asiakirjoja täydellä vientiyhteensopivuudella.\n* **Tiedostonhallinta**: Luo sisäkkäisiä kansioita, vedä ja pudota kokonaisia ​​työtilan hakemistoja, nimeä uudelleen, poista ja vie koko projekti ZIP-tiedostona.\n\n## 📖 Pika-aloitusopas\n\n1. **File Explorer**: Napsauta `☰` hallitaksesi tiedostoja. Vedä kokonainen kansio tietokoneeltasi suoraan WebPad++:aan!\n2. **Avaa asiakirjat**: Vedä PDF-, DOCX- tai XLSX-tiedosto ikkunaan avataksesi sen erillisessä editorissa.\n3. **Suorita koodi**: Napsauta ▶️ **Suorita** tai paina Ctrl+Enter testataksesi koodia välittömästi.\n4. **Asiayhteystyökalut**: Napsauta violettia 🔠 **OCR** ​​-painiketta tai vihreää 📱 **QR Code** -painiketta, jos haluat käyttää lisäapuohjelmia.\n5. **Tallenna ja vie**: Lataa tiedosto tai vie asiakirjat DOCX/PDF-tiedostoon käyttämällä avattavaa tallennusvalikkoa.\n6. **Aloita tuoreesta**: Napsauta punaista 🔄 **Palauta kaikki** -painiketta tyhjentääksesi kaikki paikalliset tiedot ja käynnistääksesi uudelleen.\n\nHyvää koodausta! 🎉"
+  },
+  "seo": {
+    "auditTab": "Tarkastus ja esikatselu",
+    "sitemapTab": "Sivustokartan luontitoiminto",
+    "robotsTab": "Robots.txt",
+    "schemaTab": "Schema.org",
+    "scoreTitle": "SEO tarkastuspisteet",
+    "previewTitle": "Google-haun esikatselu",
+    "desc": "Analysoi sisältösi teknisten SEO-ongelmien varalta ja esikatsele, miten se näkyy hakutuloksissa."
+  },
+  "ocr": {
+    "initialTitle": "Kuvaa ei ole valittu",
+    "initialSub": "Valitse lähde vasemmalta tai vedä kuva tähän",
+    "startBtn": "Aloita tunnistus",
+    "resetBtn": "Aloita alusta",
+    "saveBtn": "Tallenna tiedostoon",
+    "langLabel": "Kieliasetus",
+    "sourceLabel": "Tulolähde",
+    "resultLabel": "Tunnistustulos (muokattava)",
+    "camera": "Ota valokuva",
+    "upload": "Lataa kuva",
+    "paste": "Liitä kuva"
+  },
+  "recent": {
+    "title": "Viimeaikainen käyttö",
+    "clear": "Tyhjennä historia",
+    "empty": "Uusia tietueita ei löytynyt.",
+    "desc": "Avaa äskettäin käyttämäsi tiedostot ja projektikansiot nopeasti uudelleen."
   }
 }

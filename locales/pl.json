@@ -116,5 +116,33 @@
   },
   "content": {
     "default": "# Witamy w WebPadzie++ 🚀\n\nWebPad++ to potężne, w pełni oparte na przeglądarce IDE. **Nie jest wymagane żadne zaplecze** – wszystkie Twoje pliki, karty i ustawienia są bezpiecznie przechowywane bezpośrednio w Twojej przeglądarce.\n\n## ✨ Nowe i zaawansowane funkcje\n\n* **Edytor wizualny (WYSIWYG)**: Płynne przełączanie między trybami kodu i wizualizacji. Przeciągnij i upuść foldery bezpośrednio do edytora i natychmiast zsynchronizuj pięknie sformatowany Markdown!\n* **Inteligentny silnik arkusza kalkulacyjnego**: Edytuj pliki `.xlsx` i `.csv` tak jak Excel! Obsługuje funkcję „przeciągnij, aby wybrać”, obliczenia (suma/średnia), sortowanie dynamiczne i ocenę formuł na żywo (np. `=B3+C2*F2`).\n* **Rozpoznawanie tekstu OCR obrazu**: Kliknij narzędzie **OCR**, aby zrobić zdjęcie aparatem, przesłać lub wkleić obraz. Automatycznie wykryje tekst wielojęzyczny i natychmiast zapisze go w nowym pliku!\n* **Pakiet kodów QR**: generuj kody QR dla dowolnego tekstu/adresu URL lub użyj aparatu, aby bezproblemowo skanować i dekodować istniejące kody QR.\n\n## 🛠 Podstawowe możliwości\n\n* **Inteligentna edycja**: podświetlanie składni, technologia IntelliSense, dopasowywanie nawiasów i formatowanie kodu jednym kliknięciem.\n* **Natychmiastowe wykonanie**: Uruchom HTML (podgląd na żywo w nowej karcie), JavaScript (konsola) i Python (Pyodide).\n* **Podziel podgląd i porównanie**: Porównaj dowolne dwie karty obok siebie lub podgląd kodu wyjściowego w czasie rzeczywistym.\n* **Zaawansowana obsługa dokumentów**: przeglądaj, wyodrębniaj tekst i edytuj dokumenty PDF, DOCX i ODT z pełną kompatybilnością eksportu.\n* **Zarządzanie plikami**: Twórz zagnieżdżone foldery, przeciągaj i upuszczaj całe katalogi obszaru roboczego, zmieniaj nazwę, usuwaj i eksportuj cały projekt jako ZIP.\n\n## 📖 Skrócona instrukcja obsługi\n\n1. **Eksplorator plików**: Kliknij `☰`, aby zarządzać plikami. Przeciągnij cały folder ze swojego komputera bezpośrednio do WebPad++!\n2. **Otwarte dokumenty**: Przeciągnij plik PDF, DOCX lub XLSX do okna, aby otworzyć go w dedykowanym edytorze.\n3. **Uruchom kod**: Kliknij ▶️ **Uruchom** lub naciśnij `Ctrl+Enter`, aby natychmiast przetestować swój kod.\n4. **Narzędzia kontekstowe**: Kliknij fioletowy przycisk 🔠 **OCR** ​​lub zielony przycisk 📱 **Kod QR**, aby wyświetlić zaawansowane narzędzia.\n5. **Zapisz i eksportuj**: Użyj menu rozwijanego Zapisz, aby pobrać plik lub wyeksportować dokumenty do formatu DOCX/PDF.\n6. **Rozpocznij od nowa**: Kliknij czerwony przycisk 🔄 **Resetuj wszystko**, aby wyczyścić wszystkie dane lokalne i uruchomić ponownie.\n\nMiłego kodowania! 🎉"
+  },
+  "seo": {
+    "auditTab": "Audyt i podgląd",
+    "sitemapTab": "Generator mapy witryny",
+    "robotsTab": "plik robots.txt",
+    "schemaTab": "Schemat.org",
+    "scoreTitle": "Wynik audytu SEO",
+    "previewTitle": "Podgląd wyszukiwarki Google",
+    "desc": "Przeanalizuj swoją treść pod kątem technicznych problemów związanych z SEO i wyświetl podgląd jej wyglądu w wynikach wyszukiwania."
+  },
+  "ocr": {
+    "initialTitle": "Nie wybrano obrazu",
+    "initialSub": "Wybierz źródło z lewej strony lub przeciągnij obraz tutaj",
+    "startBtn": "Rozpocznij rozpoznawanie",
+    "resetBtn": "Zacznij od nowa",
+    "saveBtn": "Zapisz do pliku",
+    "langLabel": "Ustawienie języka",
+    "sourceLabel": "Źródło wejściowe",
+    "resultLabel": "Wynik rozpoznania (edytowalny)",
+    "camera": "Zrób zdjęcie",
+    "upload": "Prześlij obraz",
+    "paste": "Wklej obraz"
+  },
+  "recent": {
+    "title": "Niedawny dostęp",
+    "clear": "Wyczyść historię",
+    "empty": "Nie znaleziono ostatnich zapisów.",
+    "desc": "Szybko otwieraj ponownie ostatnio otwierane pliki i foldery projektów."
   }
 }

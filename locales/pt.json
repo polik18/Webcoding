@@ -116,5 +116,33 @@
   },
   "content": {
     "default": "# Bem vindo ao WebPad++ 🚀\n\nWebPad++ é um IDE poderoso e totalmente baseado em navegador. **Não é necessário back-end** — todos os seus arquivos, guias e configurações são armazenados com segurança diretamente no seu navegador.\n\n## ✨ Recursos novos e avançados\n\n* **Editor Visual (WYSIWYG)**: alterne perfeitamente entre os modos Código e Visual. Arraste e solte pastas diretamente no editor e sincronize instantaneamente Markdown lindamente formatado!\n* **Mecanismo de planilha inteligente**: edite arquivos `.xlsx` e `.csv` como o Excel! Suporta arrastar para selecionar, cálculos (Soma/Média), classificação dinâmica e avaliação de fórmulas ao vivo (por exemplo, `=B3+C2*F2`).\n* **Reconhecimento de texto de OCR de imagem**: clique na ferramenta **OCR** ​​para tirar uma foto com sua câmera, fazer upload ou colar uma imagem. Ele detectará automaticamente texto em vários idiomas e o salvará em um novo arquivo instantaneamente!\n* **QR Code Suite**: Gere códigos QR para qualquer texto/URL ou use sua câmera para digitalizar e decodificar códigos QR existentes perfeitamente.\n\n## 🛠 Capacidades principais\n\n* **Edição inteligente**: realce de sintaxe, IntelliSense, correspondência de colchetes e formatação de código com um clique.\n* **Execução instantânea**: execute HTML (visualização ao vivo em uma nova guia), JavaScript (Console) e Python (Pyodide).\n* **Visualização dividida e comparação**: compare quaisquer duas guias lado a lado ou visualize a saída do código em tempo real.\n* **Suporte avançado a documentos**: visualize, extraia texto e edite documentos PDF, DOCX e ODT com total compatibilidade de exportação.\n* **Gerenciamento de arquivos**: crie pastas aninhadas, arraste e solte diretórios inteiros do espaço de trabalho, renomeie, exclua e exporte todo o seu projeto como um ZIP.\n\n## 📖 Guia de início rápido\n\n1. **Explorador de Arquivos**: Clique em `☰` para gerenciar seus arquivos. Arraste uma pasta inteira do seu computador direto para o WebPad++!\n2. **Abrir documentos**: arraste um arquivo PDF, DOCX ou XLSX para a janela para abri-lo em seu editor dedicado.\n3. **Executar código**: Clique em ▶️ **Executar** ou pressione `Ctrl+Enter` para testar seu código instantaneamente.\n4. **Ferramentas contextuais**: Clique no botão roxo 🔠 **OCR** ​​ou no botão verde 📱 **QR Code** para utilitários avançados.\n5. **Salvar e exportar**: Use o menu suspenso Salvar para baixar seu arquivo ou exportar seus documentos para DOCX/PDF.\n6. **Começar do zero**: Clique no botão vermelho 🔄 **Redefinir tudo** para limpar todos os dados locais e reiniciar.\n\nBoa codificação! 🎉"
+  },
+  "seo": {
+    "auditTab": "Auditoria e visualização",
+    "sitemapTab": "Gerador de mapa de site",
+    "robotsTab": "Robôs.txt",
+    "schemaTab": "Schema.org",
+    "scoreTitle": "Pontuação de auditoria de SEO",
+    "previewTitle": "Visualização da Pesquisa Google",
+    "desc": "Analise seu conteúdo em busca de problemas técnicos de SEO e visualize como ele aparece nos resultados de pesquisa."
+  },
+  "ocr": {
+    "initialTitle": "Nenhuma imagem selecionada",
+    "initialSub": "Selecione uma fonte à esquerda ou arraste uma imagem aqui",
+    "startBtn": "Iniciar reconhecimento",
+    "resetBtn": "Recomeçar",
+    "saveBtn": "Salvar em arquivo",
+    "langLabel": "Configuração de idioma",
+    "sourceLabel": "Fonte de entrada",
+    "resultLabel": "Resultado de reconhecimento (editável)",
+    "camera": "Tirar foto",
+    "upload": "Carregar imagem",
+    "paste": "Colar imagem"
+  },
+  "recent": {
+    "title": "Acesso recente",
+    "clear": "Limpar histórico",
+    "empty": "Nenhum registro recente encontrado.",
+    "desc": "Reabra rapidamente seus arquivos e pastas de projeto acessados ​​recentemente."
   }
 }

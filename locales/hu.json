@@ -116,5 +116,33 @@
   },
   "content": {
     "default": "# Üdvözöljük a WebPad++-ban 🚀\n\nA WebPad++ egy erőteljes, teljesen böngészőalapú IDE. **Nincs szükség háttérprogramra** – minden fájlját, lapját és beállítását biztonságosan tárolja közvetlenül a böngészőjében.\n\n## ✨ Új és speciális funkciók\n\n* **Vizuális szerkesztő (WYSIWYG)**: Zökkenőmentesen válthat a kód és a vizuális mód között. Húzza át a mappákat közvetlenül a szerkesztőbe, és azonnal szinkronizálja a gyönyörűen formázott Markdownt!\n* **Smart Spreadsheet Engine**: Szerkessze az .xlsx és .csv fájlokat az Excelhez hasonlóan! Támogatja a húzással kiválasztást, a számításokat (összeg/átlag), a dinamikus rendezést és az élő képletértékelést (pl. `=B3+C2*F2`).\n* **Kép OCR-szövegfelismerés**: Kattintson az **OCR** ​​eszközre, ha fényképet szeretne készíteni a fényképezőgépével, feltölteni vagy beilleszteni egy képet. Automatikusan felismeri a többnyelvű szöveget, és azonnal új fájlba menti!\n* **QR Code Suite**: QR-kódokat generálhat bármilyen szöveghez/URL-hez, vagy használja a kamerát a meglévő QR-kódok zökkenőmentes beolvasására és dekódolására.\n\n## 🛠 Alapvető képességek\n\n* **Intelligens szerkesztés**: Szintaxis kiemelés, IntelliSense, zárójelek illesztése és egy kattintással történő kódformázás.\n* **Azonnali végrehajtás**: HTML futtatása (élő előnézet egy új lapon), JavaScript (konzol) és Python (Pyodide).\n* **Split Preview & Diff**: Hasonlítsa össze a két lapot egymás mellett, vagy tekintse meg a kód kimenetét valós időben.\n* **Speciális dokumentumtámogatás**: Tekintse meg, bontsa ki a szöveget és szerkessze PDF-, DOCX- és ODT-dokumentumokat teljes export-kompatibilitás mellett.\n* **Fájlkezelés**: Hozzon létre beágyazott mappákat, húzza át a teljes munkaterület-könyvtárakat, nevezze át, törölje és exportálja a teljes projektet ZIP-fájlként.\n\n## 📖 Rövid útmutató\n\n1. **Fájlböngésző**: Kattintson a „☰” gombra a fájlok kezeléséhez. Húzzon egy teljes mappát a számítógépéről közvetlenül a WebPad++-ba!\n2. **Dokumentumok megnyitása**: Húzzon egy PDF-, DOCX- vagy XLSX-fájlt az ablakba, hogy megnyissa a dedikált szerkesztőben.\n3. **Kód futtatása**: Kattintson a ▶️ **Futtatás** lehetőségre, vagy nyomja meg a Ctrl+Enter billentyűkombinációt a kód azonnali teszteléséhez.\n4. **Kontextus szerinti eszközök**: Kattintson a lila 🔠 **OCR** ​​gombra vagy a zöld 📱 **QR Code** gombra a speciális segédprogramokhoz.\n5. **Mentés és exportálás**: A mentés legördülő menü segítségével töltse le a fájlt, vagy exportálja a dokumentumokat DOCX/PDF formátumba.\n6. **Indítás frissen**: Kattintson a piros 🔄 **Reset All** gombra az összes helyi adat törléséhez és az újraindításhoz.\n\nBoldog kódolást! 🎉"
+  },
+  "seo": {
+    "auditTab": "Audit és előnézet",
+    "sitemapTab": "Webhelytérkép-generátor",
+    "robotsTab": "Robots.txt",
+    "schemaTab": "Schema.org",
+    "scoreTitle": "SEO Audit Score",
+    "previewTitle": "Google Keresés előnézete",
+    "desc": "Elemezze a tartalom technikai SEO-problémáját, és tekintse meg, hogyan jelenik meg a keresési eredmények között."
+  },
+  "ocr": {
+    "initialTitle": "Nincs kép kiválasztva",
+    "initialSub": "Válasszon ki egy forrást a bal oldalról, vagy húzzon ide egy képet",
+    "startBtn": "Indítsa el a Felismerést",
+    "resetBtn": "Kezdje újra",
+    "saveBtn": "Mentés fájlba",
+    "langLabel": "Nyelvi beállítás",
+    "sourceLabel": "Bemeneti forrás",
+    "resultLabel": "Felismerés eredménye (szerkeszthető)",
+    "camera": "Fotó készítése",
+    "upload": "Kép feltöltése",
+    "paste": "Kép beillesztése"
+  },
+  "recent": {
+    "title": "Legutóbbi hozzáférés",
+    "clear": "Törölje az előzményeket",
+    "empty": "Nem találhatók friss rekordok.",
+    "desc": "Gyorsan nyissa meg újra a legutóbb elért fájlokat és projektmappákat."
   }
 }

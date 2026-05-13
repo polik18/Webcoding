@@ -116,5 +116,33 @@
   },
   "content": {
     "default": "# Benvenuti in WebPad++ 🚀\n\nWebPad++ è un potente IDE completamente basato su browser. **Non è richiesto alcun backend**: tutti i tuoi file, schede e impostazioni sono archiviati in modo sicuro direttamente nel tuo browser.\n\n## ✨ Funzionalità nuove e avanzate\n\n* **Editor visivo (WYSIWYG)**: passa facilmente dalla modalità Codice a quella visiva. Trascina e rilascia le cartelle direttamente nell'editor e sincronizza istantaneamente Markdown splendidamente formattato!\n* **Smart Spreadsheet Engine**: modifica file `.xlsx` e `.csv` proprio come Excel! Supporta il trascinamento per selezionare, i calcoli (somma/media), l'ordinamento dinamico e la valutazione delle formule in tempo reale (ad esempio `=B3+C2*F2`).\n* **Riconoscimento testo OCR immagini**: fai clic sullo strumento **OCR** ​​per scattare una foto con la fotocamera, caricare o incollare un'immagine. Rileverà automaticamente il testo multilingue e lo salverà immediatamente in un nuovo file!\n* **QR Code Suite**: genera codici QR per qualsiasi testo/URL oppure utilizza la fotocamera per scansionare e decodificare facilmente i codici QR esistenti.\n\n## 🛠Capacità fondamentali\n\n* **Modifica intelligente**: evidenziazione della sintassi, IntelliSense, corrispondenza delle parentesi e formattazione del codice con un clic.\n* **Esecuzione istantanea**: esegui HTML (anteprima live in una nuova scheda), JavaScript (Console) e Python (Pyodide).\n* **Anteprima divisa e differenze**: confronta due schede affiancate o visualizza in anteprima l'output del codice in tempo reale.\n* **Supporto documenti avanzato**: visualizza, estrai testo e modifica documenti PDF, DOCX e ODT con piena compatibilità di esportazione.\n* **Gestione file**: crea cartelle nidificate, trascina e rilascia intere directory dell'area di lavoro, rinomina, elimina ed esporta l'intero progetto come ZIP.\n\n## 📖 Guida rapida\n\n1. **Esplora file**: fai clic su \"☰\" per gestire i tuoi file. Trascina un'intera cartella dal tuo computer direttamente in WebPad++!\n2. **Apri documenti**: trascina un file PDF, DOCX o XLSX nella finestra per aprirlo nel suo editor dedicato.\n3. **Esegui codice**: fai clic su ▶️ **Esegui** o premi `Ctrl+Invio` per testare immediatamente il tuo codice.\n4. **Strumenti contestuali**: fai clic sul pulsante viola 🔠 **OCR** ​​o sul pulsante verde 📱 **QR Code** per le utilità avanzate.\n5. **Salva ed esporta**: utilizza il menu a discesa di salvataggio per scaricare il file o esportare i documenti in DOCX/PDF.\n6. **Ricomincia da zero**: fai clic sul pulsante rosso 🔄 **Ripristina tutto** per cancellare tutti i dati locali e riavviare.\n\nBuona programmazione! 🎉"
+  },
+  "seo": {
+    "auditTab": "Controllo e anteprima",
+    "sitemapTab": "Generatore di mappe del sito",
+    "robotsTab": "Robots.txt",
+    "schemaTab": "Schema.org",
+    "scoreTitle": "Punteggio di controllo SEO",
+    "previewTitle": "Anteprima di ricerca Google",
+    "desc": "Analizza i tuoi contenuti per individuare eventuali problemi tecnici SEO e visualizza in anteprima come appaiono nei risultati di ricerca."
+  },
+  "ocr": {
+    "initialTitle": "Nessuna immagine selezionata",
+    "initialSub": "Seleziona una fonte da sinistra o trascina un'immagine qui",
+    "startBtn": "Inizia il riconoscimento",
+    "resetBtn": "Ricominciare",
+    "saveBtn": "Salva su file",
+    "langLabel": "Impostazione della lingua",
+    "sourceLabel": "Sorgente di ingresso",
+    "resultLabel": "Risultato del riconoscimento (modificabile)",
+    "camera": "Scatta foto",
+    "upload": "Carica immagine",
+    "paste": "Incolla immagine"
+  },
+  "recent": {
+    "title": "Accesso recente",
+    "clear": "Cancella cronologia",
+    "empty": "Nessun record recente trovato.",
+    "desc": "Riapri rapidamente i file e le cartelle di progetto a cui hai avuto accesso di recente."
   }
 }

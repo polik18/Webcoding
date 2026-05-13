@@ -116,5 +116,33 @@
   },
   "content": {
     "default": "# Bienvenue sur WebPad++ 🚀\n\nWebPad++ est un IDE puissant entièrement basé sur un navigateur. **Aucun backend requis** : tous vos fichiers, onglets et paramètres sont stockés en toute sécurité directement dans votre navigateur.\n\n## ✨ Fonctionnalités nouvelles et avancées\n\n* **Éditeur visuel (WYSIWYG)** : basculez en toute transparence entre les modes Code et Visuel. Faites glisser et déposez des dossiers directement dans l'éditeur et synchronisez instantanément Markdown magnifiquement formaté !\n* **Moteur de feuille de calcul intelligent** : modifiez les fichiers `.xlsx` et `.csv` comme Excel ! Prend en charge le glisser-sélectionner, les calculs (Somme/Moyenne), le tri dynamique et l'évaluation de formule en direct (par exemple `=B3+C2*F2`).\n* **Reconnaissance de texte OCR d'image** : cliquez sur l'outil **OCR** ​​pour prendre une photo avec votre appareil photo, télécharger ou coller une image. Il détectera automatiquement le texte multilingue et l'enregistrera instantanément dans un nouveau fichier !\n* **QR Code Suite** : générez des codes QR pour n'importe quel texte/URL, ou utilisez votre appareil photo pour numériser et décoder les codes QR existants de manière transparente.\n\n## 🛠 Capacités de base\n\n* **Édition intelligente** : mise en évidence de la syntaxe, IntelliSense, correspondance des crochets et formatage du code en un clic.\n* **Exécution instantanée** : exécutez HTML (aperçu en direct dans un nouvel onglet), JavaScript (Console) et Python (Pyodide).\n* **Split Preview & Diff** : comparez deux onglets côte à côte ou prévisualisez la sortie du code en temps réel.\n* **Prise en charge avancée des documents** : affichez, extrayez du texte et modifiez des documents PDF, DOCX et ODT avec une compatibilité d'exportation totale.\n* **Gestion de fichiers** : créez des dossiers imbriqués, faites glisser et déposez des répertoires d'espace de travail entiers, renommez, supprimez et exportez l'intégralité de votre projet au format ZIP.\n\n## 📖 Guide de démarrage rapide\n\n1. **Explorateur de fichiers** : cliquez sur « ☰ » pour gérer vos fichiers. Faites glisser un dossier entier de votre ordinateur directement dans WebPad++ !\n2. **Ouvrir les documents** : faites glisser un fichier PDF, DOCX ou XLSX dans la fenêtre pour l'ouvrir dans son éditeur dédié.\n3. **Exécuter le code** : cliquez sur ▶️ **Exécuter** ou appuyez sur `Ctrl+Entrée` pour tester votre code instantanément.\n4. **Outils contextuels** : cliquez sur le bouton violet 🔠 **OCR** ​​ou sur le bouton vert 📱 **QR Code** pour les utilitaires avancés.\n5. **Enregistrer et exporter** : utilisez le menu déroulant Enregistrer pour télécharger votre fichier ou exporter vos documents au format DOCX/PDF.\n6. **Recommencer à zéro** : cliquez sur le bouton rouge 🔄 **Réinitialiser tout** pour effacer toutes les données locales et redémarrer.\n\nBon codage ! 🎉"
+  },
+  "seo": {
+    "auditTab": "Audit et aperçu",
+    "sitemapTab": "Générateur de plan de site",
+    "robotsTab": "Robots.txt",
+    "schemaTab": "Schéma.org",
+    "scoreTitle": "Score d'audit SEO",
+    "previewTitle": "Aperçu de la recherche Google",
+    "desc": "Analysez votre contenu pour détecter les problèmes techniques de référencement et prévisualisez son apparition dans les résultats de recherche."
+  },
+  "ocr": {
+    "initialTitle": "Aucune image sélectionnée",
+    "initialSub": "Sélectionnez une source à gauche ou faites glisser une image ici",
+    "startBtn": "Démarrer la reconnaissance",
+    "resetBtn": "Recommencer",
+    "saveBtn": "Enregistrer dans un fichier",
+    "langLabel": "Paramètres de langue",
+    "sourceLabel": "Source d'entrée",
+    "resultLabel": "Résultat de la reconnaissance (modifiable)",
+    "camera": "Prendre une photo",
+    "upload": "Télécharger une image",
+    "paste": "Coller l'image"
+  },
+  "recent": {
+    "title": "Accès récent",
+    "clear": "Effacer l'historique",
+    "empty": "Aucun enregistrement récent trouvé.",
+    "desc": "Rouvrez rapidement vos fichiers et dossiers de projet récemment consultés."
   }
 }

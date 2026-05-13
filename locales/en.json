@@ -117,5 +117,33 @@
   },
   "content": {
     "default": "# Welcome to WebPad++ 🚀\n\nWebPad++ is a powerful, fully browser-based IDE. **No backend required** — all your files, tabs, and settings are stored securely right in your browser.\n\n## ✨ New & Advanced Features\n\n* **Visual Editor (WYSIWYG)**: Seamlessly toggle between Code and Visual modes. Drag and drop folders directly into the editor, and sync beautifully formatted Markdown instantly!\n* **Smart Spreadsheet Engine**: Edit `.xlsx` & `.csv` files just like Excel! Supports drag-to-select, calculations (Sum/Average), dynamic sorting, and live formula evaluation (e.g. `=B3+C2*F2`).\n* **Image OCR Text Recognition**: Click the **OCR** tool to snap a photo with your camera, upload, or paste an image. It will auto-detect multi-language text and save it to a new file instantly!\n* **QR Code Suite**: Generate QR codes for any text/URL, or use your camera to scan and decode existing QR codes seamlessly.\n\n## 🛠 Core Capabilities\n\n* **Intelligent Editing**: Syntax highlighting, IntelliSense, bracket matching, and one-click code formatting.\n* **Instant Execution**: Run HTML (live preview in a new tab), JavaScript (Console), and Python (Pyodide).\n* **Split Preview & Diff**: Compare any two tabs side-by-side or preview code output in real-time.\n* **Advanced Document Support**: View, extract text, and edit PDFs, DOCX, and ODT documents with full export compatibility.\n* **File Management**: Create nested folders, drag-and-drop entire workspace directories, rename, delete, and Export your entire project as a ZIP.\n\n## 📖 Quick Start Guide\n\n1. **File Explorer**: Click `☰` to manage your files. Drag an entire folder from your computer straight into WebPad++!\n2. **Open Documents**: Drag a PDF, DOCX, or XLSX file into the window to open it in its dedicated editor.\n3. **Run Code**: Click ▶️ **Run** or press `Ctrl+Enter` to test your code instantly.\n4. **Contextual Tools**: Click the purple 🔠 **OCR** button or the green 📱 **QR Code** button for advanced utilities.\n5. **Save & Export**: Use the save dropdown to download your file or export your documents to DOCX/PDF.\n6. **Start Fresh**: Click the red 🔄 **Reset All** button to wipe all local data and restart.\n\nHappy coding! 🎉\n"
+  },
+  "seo": {
+    "auditTab": "Audit & Preview",
+    "sitemapTab": "Sitemap Generator",
+    "robotsTab": "Robots.txt",
+    "schemaTab": "Schema.org",
+    "scoreTitle": "SEO Audit Score",
+    "previewTitle": "Google Search Preview",
+    "desc": "Analyze your content for technical SEO issues and preview how it appears in search results."
+  },
+  "ocr": {
+    "initialTitle": "No Image Selected",
+    "initialSub": "Select a source from the left or drag an image here",
+    "startBtn": "Start Recognition",
+    "resetBtn": "Start Over",
+    "saveBtn": "Save to File",
+    "langLabel": "Language Setting",
+    "sourceLabel": "Input Source",
+    "resultLabel": "Recognition Result (Editable)",
+    "camera": "Take Photo",
+    "upload": "Upload Image",
+    "paste": "Paste Image"
+  },
+  "recent": {
+    "title": "Recent Access",
+    "clear": "Clear History",
+    "empty": "No recent records found.",
+    "desc": "Quickly reopen your recently accessed files and project folders."
   }
 }

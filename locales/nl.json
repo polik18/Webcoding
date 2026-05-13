@@ -116,5 +116,33 @@
   },
   "content": {
     "default": "# Welkom bij WebPad++ 🚀\n\nWebPad++ is een krachtige, volledig browsergebaseerde IDE. **Geen backend vereist**: al uw bestanden, tabbladen en instellingen worden veilig in uw browser opgeslagen.\n\n## ✨ Nieuwe en geavanceerde functies\n\n* **Visuele editor (WYSIWYG)**: Schakel naadloos tussen code- en visuele modi. Sleep mappen rechtstreeks naar de editor en synchroniseer direct prachtig opgemaakte Markdown!\n* **Smart Spreadsheet Engine**: bewerk `.xlsx` & `.csv` bestanden net als Excel! Ondersteunt slepen om te selecteren, berekeningen (Som/Gemiddeld), dynamisch sorteren en live formule-evaluatie (bijv. `=B3+C2*F2`).\n* **Afbeelding-OCR-tekstherkenning**: klik op het **OCR**-hulpmiddel om een ​​foto te maken met uw camera, een afbeelding te uploaden of te plakken. Het detecteert automatisch meertalige tekst en slaat deze onmiddellijk op in een nieuw bestand!\n* **QR Code Suite**: genereer QR-codes voor elke tekst/URL, of gebruik uw camera om bestaande QR-codes naadloos te scannen en te decoderen.\n\n## 🛠 Kerncapaciteiten\n\n* **Intelligent bewerken**: syntaxisaccentuering, IntelliSense, haakjes matchen en codeopmaak met één klik.\n* **Onmiddellijke uitvoering**: voer HTML uit (live preview in een nieuw tabblad), JavaScript (console) en Python (Pyodide).\n* **Split Preview & Diff**: Vergelijk twee tabbladen naast elkaar of bekijk een voorbeeld van de code-uitvoer in realtime.\n* **Geavanceerde documentondersteuning**: bekijk, extraheer tekst en bewerk PDF's, DOCX- en ODT-documenten met volledige exportcompatibiliteit.\n* **Bestandsbeheer**: geneste mappen maken, hele werkruimtemappen slepen en neerzetten, de naam wijzigen, verwijderen en uw hele project exporteren als een ZIP.\n\n## 📖 Snelstartgids\n\n1. **Bestandsverkenner**: klik op `☰` om uw bestanden te beheren. Sleep een hele map van uw computer rechtstreeks naar WebPad++!\n2. **Documenten openen**: Sleep een PDF-, DOCX- of XLSX-bestand naar het venster om het in de speciale editor te openen.\n3. **Code uitvoeren**: Klik op ▶️ **Uitvoeren** of druk op `Ctrl+Enter` om uw code onmiddellijk te testen.\n4. **Contextuele hulpmiddelen**: klik op de paarse 🔠 **OCR**-knop of de groene 📱 **QR-code**-knop voor geavanceerde hulpprogramma's.\n5. **Opslaan en exporteren**: gebruik de vervolgkeuzelijst voor opslaan om uw bestand te downloaden of uw documenten naar DOCX/PDF te exporteren.\n6. **Start opnieuw**: klik op de rode 🔄**Alles resetten**-knop om alle lokale gegevens te wissen en opnieuw op te starten.\n\nVeel codeerplezier! 🎉"
+  },
+  "seo": {
+    "auditTab": "Controle en voorbeeld",
+    "sitemapTab": "Sitemapgenerator",
+    "robotsTab": "Robots.txt",
+    "schemaTab": "Schema.org",
+    "scoreTitle": "SEO-auditscore",
+    "previewTitle": "Voorbeeld van Google Zoeken",
+    "desc": "Analyseer uw inhoud op technische SEO-problemen en bekijk hoe deze in de zoekresultaten wordt weergegeven."
+  },
+  "ocr": {
+    "initialTitle": "Geen afbeelding geselecteerd",
+    "initialSub": "Selecteer een bron aan de linkerkant of sleep een afbeelding hierheen",
+    "startBtn": "Herkenning starten",
+    "resetBtn": "Begin opnieuw",
+    "saveBtn": "Opslaan in bestand",
+    "langLabel": "Taalinstelling",
+    "sourceLabel": "Invoerbron",
+    "resultLabel": "Herkenningsresultaat (bewerkbaar)",
+    "camera": "Maak een foto",
+    "upload": "Afbeelding uploaden",
+    "paste": "Afbeelding plakken"
+  },
+  "recent": {
+    "title": "Recente toegang",
+    "clear": "Geschiedenis wissen",
+    "empty": "Geen recente records gevonden.",
+    "desc": "Heropen snel uw recent geopende bestanden en projectmappen."
   }
 }
