@@ -40,20 +40,22 @@ i18next
         updateLanguageUI();
         
         const select = document.getElementById('lang-select');
-        if (Array.from(select.options).some(opt => opt.value === i18next.language)) {
-            select.value = i18next.language;
-        } else {
-            select.value = 'en';
+        if (select) {
+            if (Array.from(select.options).some(opt => opt.value === i18next.language)) {
+                select.value = i18next.language;
+            } else {
+                select.value = 'en';
+            }
         }
 
+        window.i18nLoaded = true;
         if (typeof window.onI18nReady === 'function') {
             window.onI18nReady();
         }
     })
     .catch(err => {
         console.warn("⚠️ i18next failed to load translations (likely due to file:// CORS restriction). Falling back to default UI text.", err);
-        // CRITICAL: We MUST call onI18nReady even if translations fail, 
-        // otherwise the entire IDE initialization stops and the UI breaks.
+        window.i18nLoaded = true;
         if (typeof window.onI18nReady === 'function') {
             window.onI18nReady();
         }

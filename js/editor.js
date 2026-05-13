@@ -259,7 +259,10 @@ const tabManager = window.tabManager;
 function getActive() { return tabManager.getActiveTab() || {}; }
 
 window.onI18nReady = () => {
-    if (document.getElementById('problem-count').textContent === "0") {
+    if (!window.tabManager || !window.tabManager.tabs) return; // Prevent running before initialization
+
+    const problemCount = document.getElementById('problem-count');
+    if (problemCount && problemCount.textContent === "0") {
         document.getElementById('panel-problems').innerHTML = `<div class="text-green-400 mt-2 p-2">${t('messages.msgPerfect')}</div>`;
     }
     // Update default tabs if they haven't been modified
@@ -401,6 +404,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (vf) vf.style.pointerEvents = '';
             }
         });
+    }
+
+    // Call onI18nReady if i18next already finished loading before DOMContentLoaded
+    if (window.i18nLoaded && typeof window.onI18nReady === 'function') {
+        window.onI18nReady();
     }
 });
 
