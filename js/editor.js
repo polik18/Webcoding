@@ -556,25 +556,35 @@ function syncCodeToVisual() {
     const isMarkdown = tab && (tab.docType === 'md' || tab.docType === 'markdown');
     let htmlContent = isMarkdown ? (typeof marked !== 'undefined' ? marked.parse(content) : content) : content;
     
-    const fullHtml = `<!DOCTYPE html>
+    const isInitialized = doc.body && doc.head && doc.head.querySelector('style[data-theme="visual"]');
+    
+    if (isInitialized) {
+        const scrollTop = doc.documentElement.scrollTop || doc.body.scrollTop;
+        doc.body.innerHTML = htmlContent;
+        doc.documentElement.scrollTop = doc.body.scrollTop = scrollTop;
+    } else {
+        const fullHtml = `<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
-    <style>${themeCss}</style>
+    <style data-theme="visual">${themeCss}</style>
 </head>
-<body spellcheck="false">
+<body spellcheck="false" class="markdown-body">
     ${htmlContent}
 </body>
 </html>`;
 
-    doc.open();
-    doc.write(fullHtml);
-    doc.close();
+        doc.open();
+        doc.write(fullHtml);
+        doc.close();
+    }
     
     if (doc.body) {
-        doc.body.contentEditable = true;
-        // Listen for changes to sync back
-        doc.body.addEventListener('input', syncVisualToCode);
+        doc.body.contentEditable = !isMarkdown;
+        if (!isMarkdown) {
+            doc.body.removeEventListener('input', syncVisualToCode);
+            doc.body.addEventListener('input', syncVisualToCode);
+        }
     }
 }
 
@@ -926,6 +936,19 @@ function executeDownload(content, filename) {
     updateUI();
     showToast(t('messages.toastSaved') || 'Saved successfully', 'success');
 }
+
+window.openCameraToText = function() {
+    if (typeof openOcrModal === 'function') {
+        openOcrModal();
+        setTimeout(() => {
+            if (typeof startOcrCamera === 'function') {
+                startOcrCamera();
+            }
+        }, 300);
+    } else {
+        showToast('OCR 模組尚未載入', 'error');
+    }
+};
 
 async function openFile() {
     if ('showOpenFilePicker' in window) {
