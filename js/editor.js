@@ -749,7 +749,14 @@ document.getElementById('custom-modal-cancel').addEventListener('click', closeCu
 document.getElementById('custom-modal-confirm').addEventListener('click', () => {
     if (modalCallback) modalCallback(document.getElementById('custom-modal-input').value); closeCustomModal();
 });
-document.getElementById('custom-modal-input').addEventListener('keydfunction syncSelectionToVisual() {
+document.getElementById('custom-modal-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); document.getElementById('custom-modal-confirm').click(); }
+    if (e.key === 'Escape') { e.preventDefault(); closeCustomModal(); }
+});
+
+let isSyncingSelection = false;
+
+function syncSelectionToVisual() {
     if (isSyncingSelection || isSyncingVisual) return;
     const tab = getActive();
     if (!tab || tab.mode !== 'split') return;
