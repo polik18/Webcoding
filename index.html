@@ -96,6 +96,10 @@
     <!-- qrcodejs for QR Code generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
+    <!-- Markdown Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://unpkg.com/turndown/dist/turndown.js"></script>
+
     <!-- Custom Style -->
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -115,8 +119,14 @@
 
                 <!-- Group 1: File Operations -->
                 <div class="flex items-center gap-1 bg-gray-50 dark:bg-gray-900/50 p-1 rounded-lg border border-gray-200 dark:border-gray-700">
-                    <button onclick="openFile()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition" title="Open" data-i18n-title="nav.openTitle">
-                        <i class="fa-regular fa-folder-open"></i> <span class="hidden sm:inline" data-i18n="nav.openBtn"></span>
+                    <button onclick="openFile()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition" title="開啟檔案" data-i18n-title="nav.openTitle">
+                        <i class="fa-regular fa-file"></i>
+                    </button>
+                    <button onclick="openFolder()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition" title="開啟資料夾">
+                        <i class="fa-regular fa-folder-open"></i>
+                    </button>
+                    <button onclick="openRecentModal()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition" title="最近存取">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
                     </button>
                     <!-- New File Dropdown -->
                     <div class="relative" id="new-file-menu-wrapper">
@@ -182,16 +192,19 @@
 
                 <!-- Group 3: Contextual Tools (Hidden by default) -->
                 <div id="contextual-tools" class="flex items-center gap-1">
-                    <button id="btn-ocr" onclick="openOcrDialog()" class="hidden px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded transition" title="OCR 文字辨識">
-                        <i class="fa-solid fa-language text-violet-500"></i> <span class="hidden sm:inline">OCR</span>
+                    <button id="btn-seo" onclick="openSeoModal()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded transition" title="SEO 工具 (Sitemap & Robots.txt)">
+                        <i class="fa-solid fa-globe text-blue-500"></i> <span class="hidden sm:inline">SEO</span>
                     </button>
-                    <button id="btn-qr" onclick="openQrModal()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded transition" title="QR Code 工具">
-                        <i class="fa-solid fa-qrcode text-emerald-500"></i> <span class="hidden sm:inline">QR Code</span>
+                    <button id="btn-ocr" onclick="openOcrModal()" class="hidden px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded transition" title="OCR 文字辨識" data-i18n-title="nav.ocrTitle">
+                        <i class="fa-solid fa-language text-violet-500"></i> <span class="hidden sm:inline" data-i18n="nav.ocrBtn">OCR</span>
                     </button>
-                    <button onclick="exportDocx && exportDocx()" id="btn-export-docx" class="hidden px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded transition shadow-sm" title="Export DOCX">
+                    <button id="btn-qr" onclick="openQrModal()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded transition" title="QR Code 工具" data-i18n-title="nav.qrTitle">
+                        <i class="fa-solid fa-qrcode text-emerald-500"></i> <span class="hidden sm:inline" data-i18n="nav.qrBtn">QR Code</span>
+                    </button>
+                    <button onclick="exportDocx && exportDocx()" id="btn-export-docx" class="hidden px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded transition shadow-sm" title="Export DOCX" data-i18n-title="nav.exportDocxTitle">
                         <i class="fa-solid fa-file-word"></i> <span class="hidden sm:inline">Export DOCX</span>
                     </button>
-                    <button onclick="exportDocxToPdf && exportDocxToPdf()" id="btn-export-pdf-doc" class="hidden px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-red-600 hover:bg-red-700 text-white rounded transition shadow-sm" title="Export PDF">
+                    <button onclick="exportDocxToPdf && exportDocxToPdf()" id="btn-export-pdf-doc" class="hidden px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-red-600 hover:bg-red-700 text-white rounded transition shadow-sm" title="Export PDF" data-i18n-title="nav.exportPdfTitle">
                         <i class="fa-solid fa-file-pdf"></i> <span class="hidden sm:inline">Export PDF</span>
                     </button>
                 </div>
@@ -592,17 +605,31 @@
 
             <div id="qr-panel-scan" class="hidden p-6 overflow-y-auto">
                 <div class="space-y-6">
-                    <div class="grid grid-cols-2 gap-4">
-                        <button onclick="triggerQrFileUpload()" class="flex flex-col items-center justify-center gap-3 p-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-2xl hover:border-emerald-500 dark:hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/10 transition-all group">
-                            <i class="fa-solid fa-file-image text-3xl text-gray-400 group-hover:text-emerald-500"></i>
-                            <span class="text-sm font-medium text-gray-600 dark:text-gray-400 group-hover:text-emerald-600">上傳圖片</span>
+                    <div class="grid grid-cols-3 gap-3">
+                        <button onclick="startQrCamera()" class="flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-violet-500 dark:hover:border-violet-500 hover:bg-violet-50 dark:hover:bg-violet-900/10 transition-all group">
+                            <i class="fa-solid fa-camera text-2xl text-gray-400 group-hover:text-violet-500"></i>
+                            <span class="text-xs font-medium text-gray-600 dark:text-gray-400 group-hover:text-violet-600 text-center">開啟相機</span>
+                        </button>
+                        <button onclick="triggerQrFileUpload()" class="flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-emerald-500 dark:hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/10 transition-all group">
+                            <i class="fa-solid fa-file-image text-2xl text-gray-400 group-hover:text-emerald-500"></i>
+                            <span class="text-xs font-medium text-gray-600 dark:text-gray-400 group-hover:text-emerald-600 text-center">上傳圖片</span>
                             <input type="file" id="qr-file-input" class="hidden" accept="image/*" onchange="handleQrFileUpload(event)">
                         </button>
-                        <button onclick="triggerQrPaste()" class="flex flex-col items-center justify-center gap-3 p-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-2xl hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all group">
-                            <i class="fa-solid fa-clipboard text-3xl text-gray-400 group-hover:text-blue-500"></i>
-                            <span class="text-sm font-medium text-gray-600 dark:text-gray-400 group-hover:text-blue-600">貼上圖片</span>
+                        <button onclick="triggerQrPaste()" class="flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all group">
+                            <i class="fa-solid fa-clipboard text-2xl text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="text-xs font-medium text-gray-600 dark:text-gray-400 group-hover:text-blue-600 text-center">貼上圖片</span>
                         </button>
                     </div>
+                    
+                    <div id="qr-camera-container" class="hidden flex flex-col items-center gap-3">
+                        <div class="relative w-full max-w-[300px] aspect-square rounded-xl overflow-hidden bg-black shadow-inner border border-gray-200 dark:border-gray-700">
+                            <video id="qr-video" class="w-full h-full object-cover" playsinline></video>
+                            <div class="absolute inset-0 border-4 border-white/30"></div>
+                            <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[70%] border-2 border-emerald-400 rounded-lg shadow-[0_0_0_1000px_rgba(0,0,0,0.5)]"></div>
+                        </div>
+                        <button onclick="stopQrCamera()" class="px-4 py-2 text-sm bg-red-100 text-red-600 hover:bg-red-200 rounded-lg font-bold transition">關閉相機</button>
+                    </div>
+                    
                     
                     <div id="qr-scan-result-container" class="hidden space-y-3">
                         <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">解碼結果</label>
@@ -626,7 +653,208 @@
         </div>
     </div>
 
+    <!-- OCR Tool Modal -->
+    <div id="ocr-modal" class="hidden fixed inset-0 z-[300] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col max-h-[90vh]">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-language text-violet-500 text-xl"></i>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white" data-i18n="nav.ocrTitle">圖片文字辨識 (OCR)</h3>
+                </div>
+                <button onclick="closeOcrModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto space-y-6">
+                <!-- Language Selection -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">辨識語言</label>
+                    <select id="ocr-lang-select" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-violet-500 outline-none transition">
+                        <option value="chi_tra+eng">繁體中文 + English</option>
+                        <option value="chi_sim+eng">简体中文 + English</option>
+                        <option value="eng">English Only</option>
+                        <option value="jpn">日本語</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3">
+                    <button onclick="startOcrCamera()" class="flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-violet-500 dark:hover:border-violet-500 hover:bg-violet-50 dark:hover:bg-violet-900/10 transition-all group">
+                        <i class="fa-solid fa-camera text-2xl text-gray-400 group-hover:text-violet-500"></i>
+                        <span class="text-xs font-medium text-gray-600 dark:text-gray-400 group-hover:text-violet-600 text-center">相機拍照</span>
+                    </button>
+                    <button onclick="triggerOcrFileUpload()" class="flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-emerald-500 dark:hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/10 transition-all group">
+                        <i class="fa-solid fa-file-image text-2xl text-gray-400 group-hover:text-emerald-500"></i>
+                        <span class="text-xs font-medium text-gray-600 dark:text-gray-400 group-hover:text-emerald-600 text-center">上傳圖片</span>
+                        <input type="file" id="ocr-file-input" class="hidden" accept="image/*" onchange="handleOcrFileUpload(event)">
+                    </button>
+                    <button onclick="triggerOcrPaste()" class="flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all group">
+                        <i class="fa-solid fa-clipboard text-2xl text-gray-400 group-hover:text-blue-500"></i>
+                        <span class="text-xs font-medium text-gray-600 dark:text-gray-400 group-hover:text-blue-600 text-center">貼上圖片</span>
+                    </button>
+                </div>
+
+                <div id="ocr-camera-container" class="hidden flex-col items-center gap-3">
+                    <div class="relative w-full max-w-[400px] aspect-video rounded-xl overflow-hidden bg-black shadow-inner border border-gray-200 dark:border-gray-700">
+                        <video id="ocr-video" class="w-full h-full object-cover" playsinline></video>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="takeOcrPhoto()" class="px-6 py-2 text-sm bg-violet-600 text-white hover:bg-violet-700 rounded-lg font-bold shadow-lg shadow-violet-600/30 transition">拍照辨識</button>
+                        <button onclick="stopOcrCamera()" class="px-4 py-2 text-sm bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg font-bold transition">取消</button>
+                    </div>
+                </div>
+
+                <div id="ocr-loading" class="hidden flex-col items-center justify-center p-6 bg-violet-50 dark:bg-violet-900/20 rounded-xl border border-violet-100 dark:border-violet-800">
+                    <i class="fa-solid fa-circle-notch fa-spin text-4xl text-violet-500 mb-4"></i>
+                    <p class="text-sm font-bold text-violet-700 dark:text-violet-300" id="ocr-loading-text">正在分析圖片文字，這可能需要幾秒鐘...</p>
+                    <p class="text-xs text-violet-500/70 dark:text-violet-400/70 mt-2 text-center">初次使用特定語言可能需下載語言模型包</p>
+                </div>
+            </div>
+            
+            <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 text-center">
+                <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Powered by Tesseract.js</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Access Modal -->
+    <div id="recent-modal" class="hidden fixed inset-0 z-[300] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col max-h-[90vh]">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-blue-500 text-xl"></i>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">最近存取 (Recent Projects)</h3>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="clearRecentHistory()" class="px-3 py-1 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition" title="清除紀錄">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                    <button onclick="closeRecentModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-6 overflow-y-auto bg-gray-50 dark:bg-gray-900/50">
+                <div id="recent-list-container" class="space-y-2">
+                    <!-- Dynamic list items will be injected here -->
+                    <div class="text-center text-gray-500 dark:text-gray-400 py-8 text-sm">
+                        <i class="fa-solid fa-folder-open text-3xl mb-3 text-gray-300 dark:text-gray-600 block"></i>
+                        目前沒有最近存取的紀錄。<br>當您開啟資料夾或儲存檔案時，會自動記錄於此。
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SEO Tools Modal -->
+    <div id="seo-modal" class="hidden fixed inset-0 z-[300] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col max-h-[90vh]">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-globe text-blue-500 text-xl"></i>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">網站 SEO 工具</h3>
+                </div>
+                <button onclick="closeSeoModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="flex border-b border-gray-200 dark:border-gray-700">
+                <button id="seo-tab-sitemap" onclick="switchSeoTab('sitemap')" class="flex-1 py-3 text-sm font-bold border-b-2 border-blue-500 text-blue-600 transition-colors">Sitemap 產生器</button>
+                <button id="seo-tab-robots" onclick="switchSeoTab('robots')" class="flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">Robots.txt 產生器</button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto">
+                <!-- Sitemap Panel -->
+                <div id="seo-panel-sitemap" class="p-6 space-y-6">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">網站根網址 (Base URL)</label>
+                        <input type="url" id="seo-sitemap-baseurl" placeholder="https://www.yourdomain.com" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition" value="https://example.com">
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">更新頻率 (Changefreq)</label>
+                            <select id="seo-sitemap-freq" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none">
+                                <option value="always">Always</option>
+                                <option value="hourly">Hourly</option>
+                                <option value="daily" selected>Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
+                                <option value="yearly">Yearly</option>
+                                <option value="never">Never</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">優先權 (Priority)</label>
+                            <select id="seo-sitemap-priority" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none">
+                                <option value="1.0">1.0 (Highest)</option>
+                                <option value="0.8" selected>0.8 (High)</option>
+                                <option value="0.5">0.5 (Normal)</option>
+                                <option value="0.3">0.3 (Low)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">網頁路徑清單</label>
+                        <textarea id="seo-sitemap-paths" rows="4" placeholder="/index.html&#10;/about.html&#10;/contact/" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition font-mono text-sm"></textarea>
+                        <div class="mt-2 text-right">
+                            <button onclick="autoScanSitemap()" class="px-4 py-1.5 text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg font-bold transition">
+                                <i class="fa-solid fa-magnifying-glass mr-1"></i> 自動掃描工作區檔案
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button onclick="generateSitemap()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-600/20 transition-all active:scale-95">產生並儲存 sitemap.xml</button>
+                </div>
+
+                <!-- Robots.txt Panel -->
+                <div id="seo-panel-robots" class="hidden p-6 space-y-6">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">全域訪問權限 (User-agent: *)</label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center gap-2 cursor-pointer group">
+                                <input type="radio" name="seo-robots-global" value="allow_all" checked class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600">
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-200 group-hover:text-blue-600">全部開放 (預設)</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer group">
+                                <input type="radio" name="seo-robots-global" value="disallow_all" class="w-4 h-4 text-red-600 border-gray-300 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600">
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-200 group-hover:text-red-600">完全阻擋</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">阻擋特定爬蟲 (Disallow Bots)</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="bot-gpt" class="seo-bot-checkbox rounded text-blue-600" value="GPTBot"><span class="text-sm text-gray-700 dark:text-gray-300">GPTBot (OpenAI)</span></label>
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="bot-cc" class="seo-bot-checkbox rounded text-blue-600" value="CCBot"><span class="text-sm text-gray-700 dark:text-gray-300">CCBot (CommonCrawl)</span></label>
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="bot-baidu" class="seo-bot-checkbox rounded text-blue-600" value="Baiduspider"><span class="text-sm text-gray-700 dark:text-gray-300">Baiduspider</span></label>
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="bot-yandex" class="seo-bot-checkbox rounded text-blue-600" value="Yandex"><span class="text-sm text-gray-700 dark:text-gray-300">Yandex</span></label>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">阻擋特定目錄 (Disallow Paths)</label>
+                        <textarea id="seo-robots-paths" rows="3" placeholder="/admin/&#10;/private/&#10;/api/" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition font-mono text-sm"></textarea>
+                        <p class="text-[10px] text-gray-400 mt-1">一行一個目錄，例如 /admin/ 或是 /login.html</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Sitemap 網址 (選擇性)</label>
+                        <input type="url" id="seo-robots-sitemap" placeholder="https://www.yourdomain.com/sitemap.xml" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                    </div>
+                    
+                    <button onclick="generateRobotsTxt()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-600/20 transition-all active:scale-95">產生並儲存 robots.txt</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Core Scripts -->
+    <script src="js/recent.js"></script>
     <script src="js/i18n.js"></script>
     <script src="js/filesystem.js"></script>
     <script src="js/editor.js"></script>

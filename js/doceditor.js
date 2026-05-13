@@ -93,6 +93,116 @@ document.addEventListener('mouseup', () => {
     _isDragging = false;
 });
 
+// --- Spreadsheet Formula Engine ---
+function colLetterToIndex(letters) {
+    let index = 0;
+    for (let i = 0; i < letters.length; i++) {
+        index = index * 26 + (letters.charCodeAt(i) - 64);
+    }
+    return index - 1;
+}
+
+function indexToColLetter(index) {
+    let letter = '';
+    while (index >= 0) {
+        letter = String.fromCharCode((index % 26) + 65) + letter;
+        index = Math.floor(index / 26) - 1;
+    }
+    return letter;
+}
+
+function evaluateFormula(formula, visited = new Set()) {
+    if (typeof formula !== 'string' || !formula.startsWith('=')) {
+        if (formula === '' || formula === null || formula === undefined) return '';
+        const num = Number(formula);
+        return isNaN(num) ? formula : num;
+    }
+
+    const expr = formula.substring(1).toUpperCase();
+    
+    let hasError = false;
+    let errorMsg = '';
+
+    const resolvedExpr = expr.replace(/[A-Z]+[0-9]+/g, (match) => {
+        if (visited.has(match)) {
+            hasError = true;
+            errorMsg = '#CIRC!';
+            return '0';
+        }
+        
+        const colMatch = match.match(/[A-Z]+/)[0];
+        const rowMatch = match.match(/[0-9]+/)[0];
+        
+        const colIdx = colLetterToIndex(colMatch);
+        const rowIdx = parseInt(rowMatch, 10) - 1;
+        
+        if (rowIdx < 0 || colIdx < 0 || !_sheetData[rowIdx] || _sheetData[rowIdx][colIdx] === undefined) {
+            return '0'; 
+        }
+        
+        const cellValue = _sheetData[rowIdx][colIdx];
+        
+        visited.add(match);
+        let val;
+        try {
+            val = evaluateFormula(cellValue, visited);
+        } catch (e) {
+            hasError = true;
+            errorMsg = e.message;
+            val = '0';
+        }
+        visited.delete(match);
+        
+        if (val === '#CIRC!' || val === '#VALUE!' || val === '#DIV/0!' || val === '#ERROR!') {
+            hasError = true;
+            errorMsg = val;
+            return '0';
+        }
+        
+        if (typeof val !== 'number' && isNaN(Number(val))) {
+             return '0';
+        }
+        return val === '' ? '0' : String(Number(val));
+    });
+
+    if (hasError) throw new Error(errorMsg);
+
+    try {
+        if (!/^[0-9+\-*/().\s]+$/.test(resolvedExpr)) {
+            throw new Error('#VALUE!');
+        }
+        const result = new Function('return ' + resolvedExpr)();
+        
+        if (!isFinite(result)) throw new Error('#DIV/0!');
+        if (isNaN(result)) throw new Error('#VALUE!');
+        
+        return Math.round(result * 1000000) / 1000000;
+        
+    } catch (e) {
+        throw new Error(e.message.startsWith('#') ? e.message : '#ERROR!');
+    }
+}
+
+function updateAllCellDisplays() {
+    document.querySelectorAll('#spreadsheet-table td[data-row]').forEach(td => {
+        if (document.activeElement === td) return; // Skip currently editing cell
+        const r = parseInt(td.dataset.row);
+        const c = parseInt(td.dataset.col);
+        const rawValue = _sheetData[r] && _sheetData[r][c] !== undefined ? _sheetData[r][c] : '';
+        
+        if (typeof rawValue === 'string' && rawValue.startsWith('=')) {
+            try {
+                td.textContent = evaluateFormula(rawValue, new Set([indexToColLetter(c) + (r + 1)]));
+            } catch(e) {
+                td.textContent = e.message;
+            }
+        } else {
+            td.textContent = rawValue;
+        }
+    });
+}
+// ------------------------------------
+
 function loadSpreadsheet(buffer, filename) {
     _sheetFilename = filename;
     let wb;
@@ -189,7 +299,18 @@ function renderSpreadsheet() {
             const td = document.createElement('td');
             td.contentEditable = 'true';
             td.className = ri === 0 ? 'sheet-cell sheet-header border border-gray-300 dark:border-gray-700 px-2 py-1 outline-none' : 'sheet-cell border border-gray-300 dark:border-gray-700 px-2 py-1 outline-none';
-            td.textContent = row[ci] !== undefined ? row[ci] : '';
+            
+            const rawValue = row[ci] !== undefined ? row[ci] : '';
+            if (typeof rawValue === 'string' && rawValue.startsWith('=')) {
+                try {
+                    td.textContent = evaluateFormula(rawValue, new Set([indexToColLetter(ci) + (ri + 1)]));
+                } catch(e) {
+                    td.textContent = e.message;
+                }
+            } else {
+                td.textContent = rawValue;
+            }
+            
             td.dataset.row = ri;
             td.dataset.col = ci;
             td.addEventListener('input', () => {
@@ -223,12 +344,38 @@ function renderSpreadsheet() {
                 }
             });
             td.addEventListener('focus', () => {
+                // Show raw formula when focused
+                const rawVal = _sheetData[ri] && _sheetData[ri][ci] !== undefined ? _sheetData[ri][ci] : '';
+                if (typeof rawVal === 'string' && rawVal.startsWith('=')) {
+                    td.textContent = rawVal;
+                    // Move cursor to the end
+                    const range = document.createRange();
+                    const sel = window.getSelection();
+                    range.selectNodeContents(td);
+                    range.collapse(false);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                }
+                
                 _lastSelectedCol = ci;
                 if (!_isDragging) {
                     _selStart = {r: ri, c: ci};
                     _selEnd = {r: ri, c: ci};
                     _applySelection();
                 }
+            });
+            
+            td.addEventListener('blur', () => {
+                // Save any raw text typed into _sheetData
+                while (_sheetData.length <= ri) _sheetData.push([]);
+                while (_sheetData[ri].length <= ci) _sheetData[ri].push('');
+                _sheetData[ri][ci] = td.textContent;
+                
+                // Re-evaluate all formulas
+                updateAllCellDisplays();
+                
+                clearTimeout(_sheetSaveTimer);
+                _sheetSaveTimer = setTimeout(_saveSheetToTab, 800);
             });
             
             tr.appendChild(td);
@@ -357,7 +504,13 @@ window.ssMath = function(type) {
 
 window.ssExport = function(fmt) {
     _syncSheetData();
-    const ws = XLSX.utils.aoa_to_sheet(_sheetData);
+    const exportData = _sheetData.map(row => row.map(cell => {
+        if (typeof cell === 'string' && cell.startsWith('=')) {
+            return { t: 'n', f: cell.substring(1).toUpperCase() };
+        }
+        return cell;
+    }));
+    const ws = XLSX.utils.aoa_to_sheet(exportData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
     const base = _sheetFilename.replace(/\.[^.]+$/, '');
@@ -394,7 +547,13 @@ window.ssExportAs = function() {
     const base = _sheetFilename.replace(/\.[^.]+$/, '');
     showSaveDialog(base + '.xlsx', ['xlsx','csv'], (filename) => {
         const ext = filename.split('.').pop().toLowerCase();
-        const ws = XLSX.utils.aoa_to_sheet(_sheetData);
+        const exportData = _sheetData.map(row => row.map(cell => {
+            if (typeof cell === 'string' && cell.startsWith('=')) {
+                return { t: 'n', f: cell.substring(1).toUpperCase() };
+            }
+            return cell;
+        }));
+        const ws = XLSX.utils.aoa_to_sheet(exportData);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
         if (ext === 'csv') {
@@ -1004,3 +1163,292 @@ window.openQrResultAsTab = function() {
     const text = document.getElementById('qr-scan-result').textContent;
     if (typeof tabManager !== 'undefined') { tabManager.createNewTab('qr-result.txt', text, false); window.closeQrModal(); }
 };
+
+// --- Camera QR Code Logic ---
+let _qrVideoStream = null;
+let _qrCameraFrameId = null;
+
+window.startQrCamera = async function() {
+    const video = document.getElementById('qr-video');
+    const container = document.getElementById('qr-camera-container');
+    const resultContainer = document.getElementById('qr-scan-result-container');
+    
+    container.classList.remove('hidden');
+    resultContainer.classList.add('hidden');
+    
+    try {
+        _qrVideoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        video.srcObject = _qrVideoStream;
+        video.setAttribute("playsinline", true); // required for iOS Safari
+        video.play();
+        requestAnimationFrame(tickQrCamera);
+    } catch (err) {
+        showToast('無法存取相機: ' + err.message, 'error');
+        stopQrCamera();
+    }
+};
+
+window.stopQrCamera = function() {
+    if (_qrVideoStream) {
+        _qrVideoStream.getTracks().forEach(track => track.stop());
+        _qrVideoStream = null;
+    }
+    if (_qrCameraFrameId) {
+        cancelAnimationFrame(_qrCameraFrameId);
+        _qrCameraFrameId = null;
+    }
+    document.getElementById('qr-camera-container').classList.add('hidden');
+};
+
+function tickQrCamera() {
+    const video = document.getElementById('qr-video');
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = typeof jsQR !== 'undefined' ? jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" }) : null;
+        
+        if (code && code.data) {
+            stopQrCamera();
+            
+            // Show result
+            document.getElementById('qr-scan-result-container').classList.remove('hidden');
+            document.getElementById('qr-scan-result').textContent = code.data;
+            showToast('掃描成功！', 'success');
+            
+            // Check if it's a URL
+            const linkBtn = document.getElementById('qr-result-link-btn');
+            try {
+                new URL(code.data);
+                linkBtn.classList.remove('hidden');
+                linkBtn.onclick = () => window.open(code.data, '_blank');
+            } catch(e) {
+                linkBtn.classList.add('hidden');
+            }
+            return; // Stop ticking
+        }
+    }
+    _qrCameraFrameId = requestAnimationFrame(tickQrCamera);
+}
+
+// Cleanup camera when closing QR modal
+const originalCloseQrModal = window.closeQrModal;
+window.closeQrModal = function() {
+    stopQrCamera();
+    if (originalCloseQrModal) originalCloseQrModal();
+};
+
+// --- OCR Tool Logic ---
+let _ocrVideoStream = null;
+
+window.openOcrModal = function() {
+    document.getElementById('ocr-modal').classList.remove('hidden');
+    document.getElementById('ocr-camera-container').classList.add('hidden');
+    document.getElementById('ocr-loading').classList.add('hidden');
+};
+
+window.closeOcrModal = function() {
+    stopOcrCamera();
+    document.getElementById('ocr-modal').classList.add('hidden');
+};
+
+window.startOcrCamera = async function() {
+    const video = document.getElementById('ocr-video');
+    const container = document.getElementById('ocr-camera-container');
+    container.classList.remove('hidden');
+    container.classList.add('flex');
+    
+    try {
+        _ocrVideoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        video.srcObject = _ocrVideoStream;
+        video.setAttribute("playsinline", true);
+        video.play();
+    } catch (err) {
+        showToast('無法存取相機: ' + err.message, 'error');
+        stopOcrCamera();
+    }
+};
+
+window.stopOcrCamera = function() {
+    if (_ocrVideoStream) {
+        _ocrVideoStream.getTracks().forEach(track => track.stop());
+        _ocrVideoStream = null;
+    }
+    const container = document.getElementById('ocr-camera-container');
+    container.classList.add('hidden');
+    container.classList.remove('flex');
+};
+
+window.takeOcrPhoto = function() {
+    const video = document.getElementById('ocr-video');
+    if (!video || !video.videoWidth) return;
+    
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    
+    stopOcrCamera();
+    const dataUrl = canvas.toDataURL('image/png');
+    performOcr(dataUrl);
+};
+
+window.triggerOcrFileUpload = function() { document.getElementById('ocr-file-input').click(); };
+window.handleOcrFileUpload = function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => performOcr(ev.target.result);
+    reader.readAsDataURL(file);
+};
+window.triggerOcrPaste = function() { showToast('請直接按下 Ctrl+V (或 Cmd+V) 貼上圖片', 'info'); };
+
+// Listen for paste anywhere in the OCR modal or Document
+document.addEventListener('paste', function(e) {
+    if (!document.getElementById('ocr-modal').classList.contains('hidden') || !document.getElementById('qr-modal').classList.contains('hidden')) {
+        const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+        for (let index in items) {
+            const item = items[index];
+            if (item.kind === 'file') {
+                const blob = item.getAsFile();
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    if (!document.getElementById('ocr-modal').classList.contains('hidden')) {
+                        performOcr(event.target.result);
+                    } else if (!document.getElementById('qr-modal').classList.contains('hidden')) {
+                        window.decodeQrFromImage(event.target.result);
+                    }
+                };
+                reader.readAsDataURL(blob);
+                return; // only handle one image
+            }
+        }
+    }
+});
+
+async function performOcr(imageDataUrl) {
+    if (typeof Tesseract === 'undefined') {
+        showToast('Tesseract.js OCR 引擎尚未載入', 'error');
+        return;
+    }
+    
+    const loadingEl = document.getElementById('ocr-loading');
+    loadingEl.classList.remove('hidden');
+    loadingEl.classList.add('flex');
+    
+    const lang = document.getElementById('ocr-lang-select').value || 'chi_tra+eng';
+    
+    try {
+        const result = await Tesseract.recognize(imageDataUrl, lang);
+        
+        loadingEl.classList.add('hidden');
+        loadingEl.classList.remove('flex');
+        
+        if (!result.data.text.trim()) {
+            showToast('找不到任何文字', 'info');
+            return;
+        }
+        
+        // Auto-create new file and open it
+        const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '').split('.')[0];
+        const filename = `OCR_Result_${dateStr}.txt`;
+        
+        closeOcrModal();
+        
+        if (typeof tabManager !== 'undefined') {
+            tabManager.createNewTab(filename, result.data.text, false);
+            showToast('OCR 辨識完成', 'success');
+        } else {
+            alert("OCR Result:\n\n" + result.data.text);
+        }
+        
+    } catch (e) {
+        loadingEl.classList.add('hidden');
+        loadingEl.classList.remove('flex');
+        showToast('OCR 辨識失敗: ' + e.message, 'error');
+    }
+}
+
+/* ═══════════════════════════════════════════════════════
+   SPREADSHEET FORMULAS
+   ═══════════════════════════════════════════════════════ */
+
+function colLetterToIndex(letter) {
+    let index = 0;
+    for (let i = 0; i < letter.length; i++) {
+        index = index * 26 + (letter.charCodeAt(i) - 64);
+    }
+    return index - 1;
+}
+
+function indexToColLetter(index) {
+    let letter = '';
+    while (index >= 0) {
+        letter = String.fromCharCode((index % 26) + 65) + letter;
+        index = Math.floor(index / 26) - 1;
+    }
+    return letter;
+}
+
+function evaluateFormula(formula, seen = new Set()) {
+    if (typeof formula !== 'string' || !formula.startsWith('=')) return formula;
+    let expression = formula.substring(1).toUpperCase();
+    
+    // Replace cell references (e.g., A1, B12) with their values
+    const cellRefRegex = /([A-Z]+)([0-9]+)/g;
+    
+    expression = expression.replace(cellRefRegex, (match, colLetter, rowNum) => {
+        const col = colLetterToIndex(colLetter);
+        const row = parseInt(rowNum) - 1;
+        
+        const refId = colLetter + rowNum;
+        if (seen.has(refId)) throw new Error('#REF!'); // Circular reference
+        
+        let val = (_sheetData[row] && _sheetData[row][col] !== undefined) ? _sheetData[row][col] : 0;
+        
+        if (typeof val === 'string' && val.startsWith('=')) {
+            const newSeen = new Set(seen);
+            newSeen.add(refId);
+            val = evaluateFormula(val, newSeen);
+        }
+        
+        const num = parseFloat(val);
+        return isNaN(num) ? 0 : num;
+    });
+    
+    try {
+        // Basic math evaluation
+        if (/[^0-9.+\-*/%() ]/.test(expression)) {
+            return '#VALUE!';
+        }
+        return Function('"use strict";return (' + expression + ')')();
+    } catch (e) {
+        return '#ERR!';
+    }
+}
+
+function updateAllCellDisplays() {
+    document.querySelectorAll('#spreadsheet-table td[data-row]').forEach(td => {
+        const r = parseInt(td.dataset.row);
+        const c = parseInt(td.dataset.col);
+        const rawValue = _sheetData[r] && _sheetData[r][c] !== undefined ? _sheetData[r][c] : '';
+        
+        if (document.activeElement === td) return;
+        
+        if (typeof rawValue === 'string' && rawValue.startsWith('=')) {
+            try {
+                const result = evaluateFormula(rawValue, new Set([indexToColLetter(c) + (r + 1)]));
+                td.textContent = result;
+            } catch (e) {
+                td.textContent = e.message;
+            }
+        } else {
+            td.textContent = rawValue;
+        }
+    });
+}
+

@@ -487,7 +487,19 @@ function switchToSpreadsheet() {
 function syncCodeToVisual() {
     const frame = document.getElementById('visual-frame');
     const doc = frame.contentDocument || frame.contentWindow.document;
-    doc.open(); doc.write(editor.getValue()); doc.close();
+    
+    let content = editor.getValue();
+    const tab = getActive();
+    
+    // Check if it's a markdown file
+    if (tab && (tab.docType === 'md' || tab.docType === 'markdown')) {
+        if (typeof marked !== 'undefined') {
+            // Apply markdown to HTML conversion with a basic wrapper for styling
+            content = '<!DOCTYPE html>\n<html>\n<head>\n<style>\nbody { font-family: sans-serif; line-height: 1.6; padding: 20px; }\nblockquote { border-left: 4px solid #ccc; margin: 0; padding-left: 16px; color: #666; }\ncode { background: #f4f4f4; padding: 2px 4px; border-radius: 4px; font-family: monospace; }\npre { background: #f4f4f4; padding: 10px; overflow-x: auto; }\n</style>\n</head>\n<body>\n' + marked.parse(content) + '\n</body>\n</html>';
+        }
+    }
+    
+    doc.open(); doc.write(content); doc.close();
     if (doc.body) doc.body.contentEditable = true;
 }
 
@@ -506,17 +518,32 @@ function formatHTML(html) {
 }
 
 let syncTimeout = null;
+let turndownService = null;
+
 function syncVisualToCode() {
     clearTimeout(syncTimeout);
     syncTimeout = setTimeout(() => {
         const doc = document.getElementById('visual-frame').contentWindow.document;
-        const htmlContent = doc.documentElement.innerHTML;
-        let cleanHTML = '<!DOCTYPE html>\n<html>\n' + htmlContent.replace(/ contenteditable="true"/g, '') + '\n</html>';
-        cleanHTML = formatHTML(cleanHTML);
-        
+        const tab = getActive();
         const cursorPos = editor.getCursor();
         isProgrammaticChange = true;
-        editor.setValue(cleanHTML); editor.setCursor(cursorPos);
+        
+        if (tab && (tab.docType === 'md' || tab.docType === 'markdown')) {
+            if (typeof TurndownService !== 'undefined') {
+                if (!turndownService) {
+                    turndownService = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' });
+                }
+                const markdownContent = turndownService.turndown(doc.body.innerHTML);
+                editor.setValue(markdownContent);
+            }
+        } else {
+            const htmlContent = doc.documentElement.innerHTML;
+            let cleanHTML = '<!DOCTYPE html>\n<html>\n' + htmlContent.replace(/ contenteditable="true"/g, '') + '\n</html>';
+            cleanHTML = formatHTML(cleanHTML);
+            editor.setValue(cleanHTML);
+        }
+        
+        editor.setCursor(cursorPos);
         isProgrammaticChange = false;
         tabManager.markUnsaved();
     }, 300);
@@ -812,7 +839,68 @@ function executeDownload(content, filename) {
     showToast(t('messages.toastSaved') || 'Saved successfully', 'success');
 }
 
-function openFile() { const input = document.createElement('input'); input.type = 'file'; input.onchange = e => { const file = e.target.files[0]; if (file) loadFileContent(file); }; input.click(); }
+async function openFile() {
+    if ('showOpenFilePicker' in window) {
+        try {
+            const [fileHandle] = await window.showOpenFilePicker();
+            const file = await fileHandle.getFile();
+            file.handle = fileHandle; // Attach handle for future saves
+            
+            // Auto add to recent history
+            if (typeof addToRecentHistory === 'function') {
+                addToRecentHistory(fileHandle, 'file');
+            }
+            
+            loadFileContent(file);
+        } catch (e) {
+            console.log('User cancelled or API failed:', e);
+        }
+    } else {
+        // Fallback for older browsers
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.onchange = e => {
+            const file = e.target.files[0];
+            if (file) loadFileContent(file);
+        };
+        input.click();
+    }
+}
+
+async function openFolder() {
+    if ('showDirectoryPicker' in window) {
+        try {
+            const dirHandle = await window.showDirectoryPicker();
+            
+            if (typeof addToRecentHistory === 'function') {
+                addToRecentHistory(dirHandle, 'directory');
+            }
+            
+            if (confirm('這將會關閉目前所有的分頁並匯入該資料夾，確定嗎？')) {
+                if (typeof fs !== 'undefined') fs.root.children = [];
+                if (typeof tabManager !== 'undefined') {
+                    tabManager.tabs = [];
+                    document.getElementById('tabs-container').innerHTML = '';
+                    document.getElementById('editor-container').classList.add('hidden');
+                    document.getElementById('visual-container').classList.add('hidden');
+                }
+                
+                showToast('處理匯入檔案中...', 'info');
+                await processDirectoryHandle(dirHandle, 'root');
+                
+                if (typeof fs !== 'undefined') {
+                    fs.save();
+                    fs.renderTree();
+                }
+                showToast('資料夾匯入完成', 'success');
+            }
+        } catch (e) {
+            console.log('User cancelled or API failed:', e);
+        }
+    } else {
+        showToast('您的瀏覽器不支援直接開啟資料夾，請直接拖曳資料夾進入視窗', 'info');
+    }
+}
 
 window.toggleSaveMenu = function(e) {
     if (e) e.stopPropagation();
@@ -830,7 +918,7 @@ document.addEventListener('click', (e) => {
     menu.classList.add('hidden');
 });
 
-function saveFile() {
+async function saveFile() {
     const tab = getActive();
     if (!tab) return;
 
@@ -841,20 +929,71 @@ function saveFile() {
 
     const content = editor.getValue(tab.eol);
 
+    // If it has a persistent FileSystemHandle attached to the node
+    let node = null;
     if (tab.fsId && window.fileSystem) {
-        const node = fileSystem.getNode(tab.fsId);
-        if (node) {
-            node.content = content;
-            fileSystem.save();
-            tab.isUnsaved = false;
-            tabManager.renderTabs();
-            updateUI();
-            showToast(t('messages.toastSaved') || 'Saved successfully', 'success');
-            return;
+        node = fileSystem.getNode(tab.fsId);
+        if (node && node.handle) {
+            try {
+                // Verify write permission
+                const granted = await verifyPermission(node.handle, true);
+                if (granted) {
+                    const writable = await node.handle.createWritable();
+                    await writable.write(content);
+                    await writable.close();
+                    
+                    node.content = content;
+                    fileSystem.save();
+                    tab.isUnsaved = false;
+                    tabManager.renderTabs();
+                    updateUI();
+                    showToast('已直接存入實體檔案', 'success');
+                    
+                    if (typeof addToRecentHistory === 'function') addToRecentHistory(node.handle, 'file');
+                    return;
+                }
+            } catch (e) {
+                console.error("Failed to save to existing handle:", e);
+                // Fallthrough to regular save if handle fails
+            }
         }
     }
 
-    // Fallback if not in FS: trigger Download As
+    // Modern API: showSaveFilePicker
+    if ('showSaveFilePicker' in window) {
+        try {
+            const handle = await window.showSaveFilePicker({
+                suggestedName: tab.name
+            });
+            const writable = await handle.createWritable();
+            await writable.write(content);
+            await writable.close();
+            
+            // Attach handle to node if it exists
+            if (node) node.handle = handle;
+            
+            tab.isUnsaved = false;
+            tabManager.renderTabs();
+            updateUI();
+            showToast('已成功另存實體檔案', 'success');
+            
+            if (typeof addToRecentHistory === 'function') addToRecentHistory(handle, 'file');
+            return;
+        } catch (e) {
+            console.log('User cancelled save:', e);
+            return; // Cancelled
+        }
+    }
+
+    // Fallback if not in FS or browser doesn't support File System Access API
+    if (node) {
+        node.content = content;
+        fileSystem.save();
+        tab.isUnsaved = false;
+        tabManager.renderTabs();
+        updateUI();
+        showToast(t('messages.toastSaved') || 'Saved successfully', 'success');
+    }
     downloadFileAs();
 }
 
@@ -1355,7 +1494,92 @@ let dragCounter = 0; const overlay = document.getElementById('drop-overlay');
 window.addEventListener('dragenter', (e) => { e.preventDefault(); dragCounter++; if (dragCounter === 1) overlay.classList.remove('hidden'); });
 window.addEventListener('dragleave', (e) => { e.preventDefault(); dragCounter--; if (dragCounter === 0) overlay.classList.add('hidden'); });
 window.addEventListener('dragover', (e) => e.preventDefault());
-window.addEventListener('drop', (e) => { e.preventDefault(); dragCounter = 0; overlay.classList.add('hidden'); const item = e.dataTransfer.items[0]; if (item && item.kind === 'file') { const file = item.getAsFile(); if (file) loadFileContent(file); } });
+window.addEventListener('drop', async (e) => { 
+    e.preventDefault(); 
+    dragCounter = 0; 
+    overlay.classList.add('hidden'); 
+    
+    if (e.dataTransfer.items) {
+        showToast('處理匯入檔案中...', 'info');
+        
+        // Helper to read directory entries
+        const readDir = (dirEntry) => {
+            return new Promise((resolve) => {
+                const reader = dirEntry.createReader();
+                let entries = [];
+                const readEntries = () => {
+                    reader.readEntries((results) => {
+                        if (!results.length) {
+                            resolve(entries);
+                        } else {
+                            entries = entries.concat(results);
+                            readEntries();
+                        }
+                    });
+                };
+                readEntries();
+            });
+        };
+
+        // Recursive helper to process entries
+        const processEntry = async (entry, parentId) => {
+            if (entry.isFile) {
+                return new Promise((resolve) => {
+                    entry.file((file) => {
+                        const reader = new FileReader();
+                        reader.onload = async (e) => {
+                            const ext = file.name.split('.').pop().toLowerCase();
+                            // For images and pdfs, we could handle differently, but here we just store as string or pass to fs
+                            // Wait, fs.createFile takes (name, content, parentId)
+                            const content = e.target.result;
+                            fs.createFile(file.name, content, parentId);
+                            resolve();
+                        };
+                        // Read as text, or if binary read as ArrayBuffer/DataURL
+                        // Simple check for text files:
+                        if (['png', 'jpg', 'jpeg', 'gif', 'pdf', 'zip', 'xlsx'].includes(ext)) {
+                            reader.readAsDataURL(file); // Data URL for binary
+                        } else {
+                            reader.readAsText(file);
+                        }
+                    });
+                });
+            } else if (entry.isDirectory) {
+                // Create folder in fs
+                const folderId = 'folder_' + Date.now() + Math.random().toString(36).substr(2, 9);
+                fs.createFolder(entry.name, parentId, folderId);
+                
+                const entries = await readDir(entry);
+                for (const child of entries) {
+                    await processEntry(child, folderId);
+                }
+            }
+        };
+
+        const items = e.dataTransfer.items;
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            if (item.kind === 'file') {
+                const entry = item.webkitGetAsEntry();
+                if (entry) {
+                    await processEntry(entry, 'root');
+                } else {
+                    // Fallback for browsers that don't support webkitGetAsEntry
+                    const file = item.getAsFile();
+                    if (file) loadFileContent(file);
+                }
+            }
+        }
+        
+        if (typeof renderExplorer === 'function') renderExplorer();
+        showToast('檔案匯入完成', 'success');
+        
+    } else {
+        // Fallback to older DataTransfer API
+        const files = e.dataTransfer.files;
+        if (files.length > 0) loadFileContent(files[0]);
+    }
+});
 
 function formatCode() {
     if (getActive().mode === 'visual') return showToast(t('messages.noRunVis'), "error");
@@ -1521,5 +1745,143 @@ window.qrImportContent = function(type) {
         input.value = editor.getValue();
     } else if (type === 'link') {
         input.value = window.location.href;
+    }
+};
+
+// --- SEO Tools Modal Logic ---
+window.openSeoModal = function() {
+    const modal = document.getElementById('seo-modal');
+    modal.classList.remove('hidden');
+    window.switchSeoTab('sitemap');
+};
+
+window.closeSeoModal = function() {
+    document.getElementById('seo-modal').classList.add('hidden');
+};
+
+window.switchSeoTab = function(tab) {
+    const sitemapTab = document.getElementById('seo-tab-sitemap');
+    const robotsTab = document.getElementById('seo-tab-robots');
+    const sitemapPanel = document.getElementById('seo-panel-sitemap');
+    const robotsPanel = document.getElementById('seo-panel-robots');
+
+    if (tab === 'sitemap') {
+        sitemapTab.classList.add('border-blue-500', 'text-blue-600');
+        sitemapTab.classList.remove('border-transparent', 'text-gray-500');
+        robotsTab.classList.remove('border-blue-500', 'text-blue-600');
+        robotsTab.classList.add('border-transparent', 'text-gray-500');
+        sitemapPanel.classList.remove('hidden');
+        robotsPanel.classList.add('hidden');
+    } else {
+        robotsTab.classList.add('border-blue-500', 'text-blue-600');
+        robotsTab.classList.remove('border-transparent', 'text-gray-500');
+        sitemapTab.classList.remove('border-blue-500', 'text-blue-600');
+        sitemapTab.classList.add('border-transparent', 'text-gray-500');
+        robotsPanel.classList.remove('hidden');
+        sitemapPanel.classList.add('hidden');
+    }
+};
+
+window.autoScanSitemap = function() {
+    let htmlFiles = [];
+    const scanNode = (node, path) => {
+        if (node.type === 'file' && node.name.toLowerCase().endsWith('.html')) {
+            htmlFiles.push((path + node.name).replace(/^\//, ''));
+        } else if (node.type === 'folder' && node.children) {
+            node.children.forEach(child => scanNode(child, path + node.name + '/'));
+        }
+    };
+    
+    if (fs && fs.root) {
+        fs.root.children.forEach(child => scanNode(child, '/'));
+    }
+    
+    if (htmlFiles.length === 0) {
+        showToast('工作區內沒有找到 .html 檔案', 'info');
+        return;
+    }
+    
+    document.getElementById('seo-sitemap-paths').value = htmlFiles.map(f => '/' + f).join('\n');
+    showToast(`成功掃描到 ${htmlFiles.length} 個 HTML 檔案`, 'success');
+};
+
+window.generateSitemap = function() {
+    let baseUrl = document.getElementById('seo-sitemap-baseurl').value.trim();
+    if (!baseUrl) baseUrl = 'https://example.com';
+    if (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
+    
+    const freq = document.getElementById('seo-sitemap-freq').value;
+    const priority = document.getElementById('seo-sitemap-priority').value;
+    const pathsRaw = document.getElementById('seo-sitemap-paths').value.split('\n');
+    
+    const paths = pathsRaw.map(p => p.trim()).filter(p => p.length > 0);
+    
+    if (paths.length === 0) {
+        showToast('請輸入至少一個網頁路徑', 'error');
+        return;
+    }
+    
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+    xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+    
+    paths.forEach(path => {
+        if (!path.startsWith('/')) path = '/' + path;
+        const loc = baseUrl + path;
+        xml += `  <url>\n`;
+        xml += `    <loc>${loc}</loc>\n`;
+        xml += `    <changefreq>${freq}</changefreq>\n`;
+        xml += `    <priority>${priority}</priority>\n`;
+        xml += `  </url>\n`;
+    });
+    
+    xml += `</urlset>`;
+    
+    window.closeSeoModal();
+    if (typeof tabManager !== 'undefined') {
+        tabManager.createNewTab('sitemap.xml', xml, false);
+        showToast('sitemap.xml 建立成功，請記得存檔', 'success');
+    }
+};
+
+window.generateRobotsTxt = function() {
+    const globalRule = document.querySelector('input[name="seo-robots-global"]:checked').value;
+    const bots = Array.from(document.querySelectorAll('.seo-bot-checkbox:checked')).map(cb => cb.value);
+    const pathsRaw = document.getElementById('seo-robots-paths').value.split('\n');
+    const paths = pathsRaw.map(p => p.trim()).filter(p => p.length > 0);
+    const sitemapUrl = document.getElementById('seo-robots-sitemap').value.trim();
+    
+    let txt = '';
+    
+    // Specific Bots Disallow rules
+    if (bots.length > 0) {
+        bots.forEach(bot => {
+            txt += `User-agent: ${bot}\n`;
+            txt += `Disallow: /\n\n`;
+        });
+    }
+    
+    // Global rule
+    txt += `User-agent: *\n`;
+    if (globalRule === 'disallow_all') {
+        txt += `Disallow: /\n`;
+    } else {
+        if (paths.length > 0) {
+            paths.forEach(p => {
+                if (!p.startsWith('/')) p = '/' + p;
+                txt += `Disallow: ${p}\n`;
+            });
+        } else {
+            txt += `Allow: /\n`;
+        }
+    }
+    
+    if (sitemapUrl) {
+        txt += `\nSitemap: ${sitemapUrl}\n`;
+    }
+    
+    window.closeSeoModal();
+    if (typeof tabManager !== 'undefined') {
+        tabManager.createNewTab('robots.txt', txt, false);
+        showToast('robots.txt 建立成功，請記得存檔', 'success');
     }
 };
