@@ -62,8 +62,15 @@ i18next
     });
 
 function updateLanguageUI() {
+    // If translations failed to load (e.g. CORS), i18next returns the key itself.
+    // We should NOT overwrite the UI with technical keys.
+    if (i18next.t('nav.saveBtn') === 'nav.saveBtn') {
+        console.warn('Translations not loaded properly. Skipping UI update.');
+        return;
+    }
+
     const rtlLangs = ['ar', 'he'];
-    const currentLang = i18next.language.split('-')[0];
+    const currentLang = i18next.language ? i18next.language.split('-')[0] : 'en';
     
     if (rtlLangs.includes(currentLang)) {
         document.documentElement.setAttribute('dir', 'rtl');
@@ -104,13 +111,16 @@ const _FALLBACKS = {
     'nav.resetAllTitle': 'Reset All',
     'nav.renameNode': 'Rename',
     'nav.renameTitle': 'Rename',
+    'nav.defaultFile': 'untitled.txt',
+    'content.default': 'Welcome to WebPad++\n===================\n\nYou are running in offline mode. Translations may not be fully loaded.',
     'messages.errDuplicate': 'already exists in this folder',
     'messages.confirmReset': '⚠️ This will permanently delete ALL files, tabs and settings. This action CANNOT be undone!',
     'messages.errDeleteRoot': 'Cannot delete root folder or no file selected.',
     'messages.confirmDeleteMsg': 'Are you sure you want to delete',
     'messages.cancel': 'Cancel',
     'messages.confirm': 'OK',
-    'messages.renameMsg': 'Enter a name (with extension, e.g. index.html):'
+    'messages.renameMsg': 'Enter a name (with extension, e.g. index.html):',
+    'messages.msgPerfect': 'No issues found!'
 };
 window.t = (key, opts) => {
     const result = i18next.t(key, opts);
