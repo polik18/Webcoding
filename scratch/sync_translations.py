@@ -28,7 +28,16 @@ NEW_KEYS = {
         "resultLabel": "Recognition Result (Editable)",
         "camera": "Take Photo",
         "upload": "Upload Image",
-        "paste": "Paste Image"
+        "paste": "Paste Image",
+        "modeLabel": "Recognition Mode",
+        "modeDoc": "Document (Scan/Screenshot)",
+        "modePhoto": "Photo (Mobile Camera)",
+        "modeLine": "Single Line (Label/Receipt)",
+        "modeDesc": "Document mode works best for flat and structured text.",
+        "gvisionTitle": "Google Vision API",
+        "gvisionHighAcc": "High Accuracy",
+        "gvisionDesc": "Enter API Key to use Google Cloud Vision engine. Up to 99% accuracy for Traditional Chinese. Free 1000 requests/month.",
+        "gvisionLink": "How to get a free API Key"
     },
     "recent": {
         "title": "Recent Access",

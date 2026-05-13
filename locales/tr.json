@@ -141,7 +141,16 @@
     "resultLabel": "Tanıma Sonucu (Düzenlenebilir)",
     "camera": "Fotoğraf Çek",
     "upload": "Resim Yükle",
-    "paste": "Resmi Yapıştır"
+    "paste": "Resmi Yapıştır",
+    "modeLabel": "Tanıma Modu",
+    "modeDoc": "Belge (Tarama/Ekran Görüntüsü)",
+    "modePhoto": "Fotoğraf (Mobil Kamera)",
+    "modeLine": "Tek Satır (Etiket/Fiş)",
+    "modeDesc": "Belge modu, düz ve yapılandırılmış metinlerde en iyi sonucu verir.",
+    "gvisionTitle": "Google Vizyon API'sı",
+    "gvisionHighAcc": "Yüksek Doğruluk",
+    "gvisionDesc": "Google Cloud Vision motorunu kullanmak için API Anahtarını girin. Geleneksel Çince için %99'a varan doğruluk. Ayda 1000 istek ücretsiz.",
+    "gvisionLink": "Ücretsiz API Anahtarı nasıl alınır?"
   },
   "recent": {
     "title": "Son Erişim",
