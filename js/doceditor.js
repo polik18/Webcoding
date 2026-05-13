@@ -884,7 +884,7 @@ window.pdfExportOCRText = async function() {
             const dataUrl = canvases[i].toDataURL('image/png');
             // Using English + Traditional Chinese
             const result = await Tesseract.recognize(dataUrl, 'eng+chi_tra');
-            allText += result.data.text + '\n\n';
+            allText += window.cleanOcrText(result.data.text) + '\n\n';
         } catch (e) {
             console.error('OCR Error on page', i+1, e);
         }
@@ -932,6 +932,19 @@ window.exportDocxToPdf = async function() {
 /* ═══════════════════════════════════════════════════════
    OCR  (Image → Text, supports Chinese)
 ═══════════════════════════════════════════════════════ */
+
+window.cleanOcrText = function(text) {
+    if (!text) return text;
+    let cleanedText = text;
+    let prev;
+    do {
+        prev = cleanedText;
+        // Matches exactly one space between Chinese/Fullwidth characters and removes it.
+        // It won't match 2 spaces or more.
+        cleanedText = cleanedText.replace(/([\u3000-\u303F\u4e00-\u9fa5\uFF00-\uFFEF]) ([\u3000-\u303F\u4e00-\u9fa5\uFF00-\uFFEF])/g, '$1$2');
+    } while (cleanedText !== prev);
+    return cleanedText;
+};
 
 // Open OCR from an image DataURL or launch file-picker
 window.openOcrDialog = async function(imageDataUrl) {
@@ -995,7 +1008,7 @@ window.openOcrDialog = async function(imageDataUrl) {
         if (isCancelled) return;
         
         const result = await worker.recognize(imageDataUrl);
-        const text = result.data.text || '';
+        const text = window.cleanOcrText(result.data.text || '');
         await worker.terminate();
 
         if (modal) modal.classList.add('hidden');
@@ -1407,7 +1420,8 @@ async function enhanceImageForOcr(dataUrl) {
             for (let i = 0; i < data.length; i += 4) {
                 const r = data[i]; const g = data[i+1]; const b = data[i+2];
                 const gray = 0.299 * r + 0.587 * g + 0.114 * b;
-                let c = (gray - 128) * 1.3 + 128; // Boost contrast
+                // Boost contrast significantly to make it more binary, improving OCR
+                let c = (gray - 128) * 2.5 + 128; 
                 c = Math.max(0, Math.min(255, c));
                 data[i] = data[i+1] = data[i+2] = c;
             }
@@ -1438,25 +1452,20 @@ async function performOcr(imageDataUrl, autoSave = false) {
         loadingEl.classList.add('hidden');
         loadingEl.classList.remove('flex');
         
-        if (!result.data.text.trim()) {
+        const cleanedText = window.cleanOcrText(result.data.text);
+        
+        if (!cleanedText.trim()) {
             showToast('找不到任何文字', 'info');
             return;
         }
         
-        if (autoSave) {
-            const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '').split('.')[0];
-            const filename = `OCR_Result_${dateStr}.txt`;
-            closeOcrModal();
-            if (typeof tabManager !== 'undefined') {
-                tabManager.createNewTab(filename, result.data.text, false);
-                showToast('OCR 辨識並匯出完成', 'success');
-            }
-        } else {
-            // Show result view for manual editing
-            document.getElementById('ocr-result-img').src = imageDataUrl;
-            document.getElementById('ocr-result-text').value = result.data.text;
-            switchOcrView('result');
-            showToast('辨識完成', 'success');
+        // Force autoSave logic (ignore autoSave flag)
+        const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '').split('.')[0];
+        const filename = `OCR_Result_${dateStr}.txt`;
+        closeOcrModal();
+        if (typeof tabManager !== 'undefined') {
+            tabManager.createNewTab(filename, cleanedText, false);
+            showToast('OCR 辨識並匯出完成', 'success');
         }
         
     } catch (e) {
