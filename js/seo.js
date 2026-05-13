@@ -203,7 +203,11 @@ window.generateSitemap = function() {
     });
     xml += `</urlset>`;
 
-    _showSeoOutput('sitemap.xml', xml);
+    if (typeof tabManager !== 'undefined') {
+        tabManager.createNewTab('sitemap.xml', xml, false);
+        window.closeSeoModal && window.closeSeoModal();
+        typeof showToast === 'function' && showToast(`sitemap.xml 已在新頁籤開啟`, 'success');
+    }
 };
 
 // ─── Generate Robots.txt ─────────────────────────────────────────────────────
@@ -226,45 +230,10 @@ window.generateRobotsTxt = function() {
     if (sitemapUrl && sitemapUrl !== '/sitemap.xml') txt += `\nSitemap: ${sitemapUrl}\n`;
     if (extraAgents) txt += `\n${extraAgents}\n`;
 
-    _showSeoOutput('robots.txt', txt);
-};
-
-// ─── Output Preview / Download / Open ───────────────────────────────────────
-function _showSeoOutput(filename, content) {
-    const area = document.getElementById('seo-output-preview');
-    const code = document.getElementById('seo-output-code');
-    const name = document.getElementById('seo-output-filename');
-    if (!area) return;
-    area.classList.remove('hidden');
-    if (code) code.textContent = content;
-    if (name) name.textContent = filename;
-    area._filename = filename;
-    area._content  = content;
-    area.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
-
-window.downloadSeoOutput = function() {
-    const area = document.getElementById('seo-output-preview');
-    if (!area) return;
-    const filename = area._filename || 'output.txt';
-    const content  = area._content  || document.getElementById('seo-output-code')?.textContent || '';
-    const a = Object.assign(document.createElement('a'), {
-        href: URL.createObjectURL(new Blob([content], { type: 'text/plain;charset=utf-8' })),
-        download: filename
-    });
-    a.click(); URL.revokeObjectURL(a.href);
-    typeof showToast === 'function' && showToast(`✅ ${filename} 已下載`, 'success');
-};
-
-window.openSeoOutputAsTab = function() {
-    const area = document.getElementById('seo-output-preview');
-    if (!area) return;
-    const filename = area._filename || 'output.txt';
-    const content  = area._content  || document.getElementById('seo-output-code')?.textContent || '';
     if (typeof tabManager !== 'undefined') {
-        tabManager.createNewTab(filename, content, false);
+        tabManager.createNewTab('robots.txt', txt, false);
         window.closeSeoModal && window.closeSeoModal();
-        typeof showToast === 'function' && showToast(`${filename} 已在新頁籤開啟`, 'success');
+        typeof showToast === 'function' && showToast(`robots.txt 已在新頁籤開啟`, 'success');
     }
 };
 

@@ -575,13 +575,27 @@ function syncCodeToVisual() {
     `;
 
     const isMarkdown = tab && (tab.name.toLowerCase().endsWith('.md') || tab.name.toLowerCase().endsWith('.markdown') || tab.docType === 'md');
-    const isHtml = tab && (tab.name.toLowerCase().endsWith('.html') || tab.name.toLowerCase().endsWith('.htm') || tab.docType === 'docx' || tab.docType === 'odt' || tab.docType === 'pdf-text');
+    let isHtml = tab && (tab.name.toLowerCase().endsWith('.html') || tab.name.toLowerCase().endsWith('.htm') || tab.docType === 'docx' || tab.docType === 'odt' || tab.docType === 'pdf-text');
+    
+    // Content Sniffing: If it looks like HTML, treat it as HTML even if it's a .txt or untitled file
+    if (!isMarkdown && !isHtml && content.trim().startsWith('<')) {
+        if (/<(html|doctype|body|div|span|p|h[1-6]|a|img|table|ul|li|section|header|footer|nav|style)[>\s]/i.test(content)) {
+            isHtml = true;
+        }
+    }
     
     let htmlContent;
     if (isMarkdown) {
         htmlContent = typeof marked !== 'undefined' ? marked.parse(content) : content;
     } else if (isHtml) {
-        htmlContent = content;
+        let bodyContent = content;
+        // If content contains a full HTML document, extract only the body content
+        // to avoid putting <html> and <head> inside doc.body.innerHTML
+        const bodyMatch = content.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+        if (bodyMatch) {
+            bodyContent = bodyMatch[1];
+        }
+        htmlContent = bodyContent;
     } else {
         const escapedContent = content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         htmlContent = `<pre><code style="font-family: 'JetBrains Mono', monospace;">${escapedContent}</code></pre>`;

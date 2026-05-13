@@ -976,25 +976,7 @@
                     <div class="space-y-2" id="seo-audit-results"></div>
                 </div>
 
-                <!-- ═══ SHARED OUTPUT PREVIEW ═══ -->
-                <div id="seo-output-preview" class="hidden space-y-3 border-t border-gray-200 dark:border-gray-700 pt-4">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <i class="fa-solid fa-file-code text-blue-500"></i>
-                            <span id="seo-output-filename" class="text-sm font-bold text-gray-800 dark:text-white"></span>
-                            <span class="text-xs text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full font-bold">產生成功</span>
-                        </div>
-                        <div class="flex gap-2">
-                            <button onclick="openSeoOutputAsTab()" class="px-3 py-1.5 text-xs bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-bold transition flex items-center gap-1">
-                                <i class="fa-solid fa-file-pen"></i> 在編輯器開啟
-                            </button>
-                            <button onclick="downloadSeoOutput()" class="px-3 py-1.5 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition shadow-sm flex items-center gap-1">
-                                <i class="fa-solid fa-download"></i> 下載檔案
-                            </button>
-                        </div>
-                    </div>
-                    <pre id="seo-output-code" class="w-full max-h-48 overflow-auto p-4 bg-gray-900 text-green-300 rounded-xl text-xs font-mono leading-relaxed whitespace-pre-wrap border border-gray-700"></pre>
-                </div>
+
 
             </div>
 
@@ -1005,119 +987,6 @@
         </div>
     </div>
 
-
-            
-            <div class="p-6 overflow-y-auto bg-gray-50 dark:bg-gray-900/50 flex-1">
-                <!-- Sitemap Tab -->
-                <div id="seo-content-sitemap" class="space-y-4">
-                    <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800 flex items-start gap-3">
-                        <i class="fa-solid fa-circle-info text-blue-500 mt-1"></i>
-                        <p class="text-xs text-blue-700 dark:text-blue-300">
-                            Sitemap 會自動掃描您的工作區，將所有 HTML 檔案列入索引，幫助搜尋引擎更快發現您的網頁。
-                        </p>
-                    </div>
-                    
-                    <div class="space-y-2">
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">網站基本路徑 (Base URL)</label>
-                        <input type="text" id="sitemap-base-url" placeholder="https://example.com/" class="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="space-y-2">
-                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">更新頻率</label>
-                            <select id="sitemap-changefreq" class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                                <option value="always">Always</option>
-                                <option value="hourly">Hourly</option>
-                                <option value="daily" selected>Daily</option>
-                                <option value="weekly">Weekly</option>
-                                <option value="monthly">Monthly</option>
-                            </select>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">優先權 (Priority)</label>
-                            <input type="number" id="sitemap-priority" value="0.8" step="0.1" min="0" max="1.0" class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                        </div>
-                    </div>
-                    
-                    <button onclick="generateSitemap()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i> 產生 sitemap.xml
-                    </button>
-                </div>
-
-                <!-- Robots.txt Tab -->
-                <div id="seo-content-robots" class="hidden space-y-4">
-                    <div class="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-                        <div>
-                            <div class="font-bold text-gray-900 dark:text-white">全面開放 (Allow All)</div>
-                            <div class="text-xs text-gray-500">允許所有搜尋引擎爬蟲存取您的網站</div>
-                        </div>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="robots-allow-all" checked class="sr-only peer">
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                        </label>
-                    </div>
-
-                    <div class="space-y-2">
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">禁止爬取的路徑 (Disallow Paths)</label>
-                        <textarea id="robots-disallow" placeholder="/admin/\n/private/" class="w-full h-24 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
-                    </div>
-
-                    <button onclick="generateRobotsTxt()" class="w-full py-3 bg-gray-900 dark:bg-blue-600 hover:bg-black dark:hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-robot"></i> 產生 robots.txt
-                    </button>
-                </div>
-
-                <!-- SEO Audit Tab -->
-                <div id="seo-content-audit" class="hidden space-y-6">
-                    <div class="flex items-center justify-between">
-                        <div class="text-sm font-bold text-gray-700 dark:text-gray-300" data-i18n="seo.auditTitle">頁面診斷報告 (Current Page Audit)</div>
-                        <button onclick="runSeoAudit()" class="px-3 py-1 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-lg transition shadow-sm flex items-center gap-1">
-                            <i class="fa-solid fa-rotate"></i> <span data-i18n="seo.reanalyze">重新分析</span>
-                        </button>
-                    </div>
-
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 flex items-center gap-6 shadow-sm">
-                        <div class="relative w-24 h-24 flex-shrink-0">
-                            <svg class="w-full h-full" viewBox="0 0 36 36">
-                                <path class="text-gray-100 dark:text-gray-700 stroke-current" stroke-width="3" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                <path id="seo-score-circle" class="text-emerald-500 stroke-current transition-all duration-1000" stroke-dasharray="0, 100" stroke-width="3" stroke-linecap="round" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                            </svg>
-                            <div class="absolute inset-0 flex items-center justify-center">
-                                <span id="seo-score-text" class="text-2xl font-black text-gray-900 dark:text-white">--</span>
-                            </div>
-                        </div>
-                        <div>
-                            <div id="seo-score-label" class="text-lg font-bold text-gray-900 dark:text-white" data-i18n="seo.notAnalyzed">尚未分析</div>
-                            <div class="text-xs text-gray-500" data-i18n="seo.clickToAnalyze">點擊「重新分析」來獲取優化建議</div>
-                        </div>
-                    </div>
-
-                    <div class="space-y-2">
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider" data-i18n="seo.previewTitle">搜尋結果預覽 (Google SERP Preview)</label>
-                        <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
-                            <div id="preview-google-url" class="text-[14px] text-gray-600 dark:text-gray-400 mb-1 truncate flex items-center gap-1">
-                                <i class="fa-solid fa-globe text-[12px]"></i> example.com › page
-                            </div>
-                            <div id="preview-google-title" class="text-[20px] text-blue-700 dark:text-blue-400 font-medium mb-1 hover:underline cursor-pointer">Page Title will appear here</div>
-                            <div id="preview-google-desc" class="text-[14px] text-gray-700 dark:text-gray-300 leading-normal line-clamp-2">
-                                這裡會顯示網頁的描述文字（Meta Description）。良好的描述可以大幅提升使用者的點擊率。
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="space-y-3" id="seo-audit-results"></div>
-                </div>
-            </div>
-            
-            <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">WebPad++ SEO Expert Engine v1.5</p>
-                <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                    <span class="text-[9px] text-emerald-600 font-bold">Real-time Analysis Active</span>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Core Scripts -->
     <script src="js/seo.js"></script>
