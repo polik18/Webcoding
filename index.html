@@ -176,7 +176,7 @@
                             <button onclick="window.exportCurrentAsPdf && window.exportCurrentAsPdf(); document.getElementById('save-menu').classList.add('hidden');" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
                                 <i class="fa-solid fa-file-pdf text-red-500 w-4"></i> <span data-i18n="nav.saveAsPdf">匯出為 PDF</span>
                             </button>
-                            <button onclick="window.exportDocxSmart && window.exportDocxSmart(); document.getElementById('save-menu').classList.add('hidden');" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                            <button onclick="exportDocx && exportDocx(); document.getElementById('save-menu').classList.add('hidden');" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
                                 <i class="fa-solid fa-file-word text-blue-600 w-4"></i> <span data-i18n="nav.saveAsDocx">匯出為 DOCX</span>
                             </button>
                         </div>
@@ -676,7 +676,7 @@
             
             <div class="flex-1 overflow-y-auto p-0 flex flex-col md:flex-row">
                 <!-- Sidebar / Settings -->
-                <div class="w-full md:w-64 bg-gray-50 dark:bg-gray-900/50 p-6 border-r border-gray-200 dark:border-gray-700 space-y-6 overflow-y-auto">
+                <div class="w-full md:w-64 bg-gray-50 dark:bg-gray-900/50 p-6 border-r border-gray-200 dark:border-gray-700 space-y-6">
                     <div class="space-y-2">
                         <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">辨識語言設定</label>
                         <select id="ocr-lang-select" class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-violet-500 outline-none transition">
@@ -686,16 +686,6 @@
                             <option value="jpn+eng">日本語 + English</option>
                             <option value="kor+eng">한국어 + English</option>
                         </select>
-                    </div>
-
-                    <div class="space-y-2">
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider" data-i18n="ocr.modeLabel">Recognition Mode</label>
-                        <select id="ocr-mode-select" class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-violet-500 outline-none transition">
-                            <option value="6" data-i18n="ocr.modeDoc">📄 Document (Scan/Screenshot)</option>
-                            <option value="3" data-i18n="ocr.modePhoto">📷 Photo (Mobile Camera)</option>
-                            <option value="7" data-i18n="ocr.modeLine">📝 Single Line (Label/Receipt)</option>
-                        </select>
-                        <p class="text-[10px] text-gray-400" data-i18n="ocr.modeDesc">Document mode works best for flat and structured text.</p>
                     </div>
 
                     <div class="space-y-3">
@@ -714,8 +704,6 @@
                         </button>
                         <input type="file" id="ocr-file-input" class="hidden" accept="image/*" onchange="handleOcrFileUpload(event)">
                     </div>
-
-
                 </div>
 
                 <!-- Main Content Area -->
@@ -854,29 +842,13 @@
                     <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800 flex items-start gap-3">
                         <i class="fa-solid fa-circle-info text-blue-500 mt-1"></i>
                         <p class="text-xs text-blue-700 dark:text-blue-300">
-                            請輸入您的網站基礎路徑和頁面清單，可手動輸入外部網站的路徑，也可點擊「自動掃描工作區」自動列入本地 HTML 檔案。
+                            Sitemap 會自動掃描您的工作區，將所有 HTML 檔案列入索引，幫助搜尋引擎更快發現您的網頁。
                         </p>
                     </div>
                     
                     <div class="space-y-2">
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">網站基礎路徑 (Base URL)</label>
-                        <input type="text" id="sitemap-base-url" placeholder="https://example.com" class="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between">
-                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">頁面路徑清單（每行一條）</label>
-                            <button onclick="autoScanSitemap()" class="flex items-center gap-1 text-xs px-2 py-1 bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 rounded-lg hover:bg-violet-200 transition">
-                                <i class="fa-solid fa-magnifying-glass"></i> 自動掃描工作區
-                            </button>
-                        </div>
-                        <textarea id="sitemap-paths" rows="6" placeholder="/
-/about
-/products
-/products/item-1
-/contact
-/blog" class="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none resize-y"></textarea>
-                        <p class="text-[10px] text-gray-400">外部網站：手動輸入路徑。本地工作區：點擊「自動掃描」自動填入。</p>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">網站基本路徑 (Base URL)</label>
+                        <input type="text" id="sitemap-base-url" placeholder="https://example.com/" class="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
                     
                     <div class="grid grid-cols-2 gap-4">
@@ -903,8 +875,6 @@
 
                 <!-- Robots.txt Tab -->
                 <div id="seo-content-robots" class="hidden space-y-4">
-
-                    <!-- Allow/Disallow All -->
                     <div class="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
                         <div>
                             <div class="font-bold text-gray-900 dark:text-white">全面開放 (Allow All)</div>
@@ -916,44 +886,9 @@
                         </label>
                     </div>
 
-                    <!-- Disallow Paths -->
                     <div class="space-y-2">
                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">禁止爬取的路徑 (Disallow Paths)</label>
-                        <textarea id="robots-disallow" placeholder="/admin/
-/private/
-/tmp/" class="w-full h-24 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
-                    </div>
-
-                    <!-- AI / Aggressive Bot Blocking -->
-                    <div class="space-y-2">
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">封鎖特定爬蟲 (Block Bots)</label>
-                        <div class="grid grid-cols-2 gap-2">
-                            <label class="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-red-400 transition text-xs">
-                                <input type="checkbox" class="robots-bot-check" value="GPTBot"> GPTBot (ChatGPT)
-                            </label>
-                            <label class="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-red-400 transition text-xs">
-                                <input type="checkbox" class="robots-bot-check" value="anthropic-ai"> anthropic-ai (Claude)
-                            </label>
-                            <label class="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-red-400 transition text-xs">
-                                <input type="checkbox" class="robots-bot-check" value="AhrefsBot"> AhrefsBot
-                            </label>
-                            <label class="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-red-400 transition text-xs">
-                                <input type="checkbox" class="robots-bot-check" value="SemrushBot"> SemrushBot
-                            </label>
-                            <label class="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-red-400 transition text-xs">
-                                <input type="checkbox" class="robots-bot-check" value="CCBot"> CCBot (Common Crawl)
-                            </label>
-                            <label class="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 cursor-pointer hover:border-red-400 transition text-xs">
-                                <input type="checkbox" class="robots-bot-check" value="MJ12bot"> MJ12bot
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Sitemap URL -->
-                    <div class="space-y-2">
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Sitemap URL <span class="text-gray-400 normal-case font-normal">(選填)</span></label>
-                        <input type="text" id="robots-sitemap-url" placeholder="https://example.com/sitemap.xml" class="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                        <p class="text-[10px] text-gray-400">建議填入，有助於 Google 更快發現您的 Sitemap</p>
+                        <textarea id="robots-disallow" placeholder="/admin/\n/private/" class="w-full h-24 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
                     </div>
 
                     <button onclick="generateRobotsTxt()" class="w-full py-3 bg-gray-900 dark:bg-blue-600 hover:bg-black dark:hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg transition flex items-center justify-center gap-2">
