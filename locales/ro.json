@@ -124,7 +124,11 @@
     "schemaTab": "Schema.org",
     "scoreTitle": "Scorul de audit SEO",
     "previewTitle": "Previzualizare Căutare Google",
-    "desc": "Analizați-vă conținutul pentru probleme tehnice SEO și previzualizați cum apare în rezultatele căutării."
+    "desc": "Analizați-vă conținutul pentru probleme tehnice SEO și previzualizați cum apare în rezultatele căutării.",
+    "auditTitle": "Auditul paginii curente",
+    "reanalyze": "Reanaliza",
+    "notAnalyzed": "Neanalizat",
+    "clickToAnalyze": "Faceți clic pe Reanalizați pentru a obține sugestii de optimizare"
   },
   "ocr": {
     "initialTitle": "Nicio imagine selectată",

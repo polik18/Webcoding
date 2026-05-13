@@ -125,7 +125,11 @@
     "schemaTab": "スキーマ.org",
     "scoreTitle": "SEO監査スコア",
     "previewTitle": "Google 検索プレビュー",
-    "desc": "SEO の技術的な問題についてコンテンツを分析し、検索結果にコンテンツがどのように表示されるかをプレビューします。"
+    "desc": "SEO の技術的な問題についてコンテンツを分析し、検索結果にコンテンツがどのように表示されるかをプレビューします。",
+    "auditTitle": "現在のページの監査",
+    "reanalyze": "再分析する",
+    "notAnalyzed": "未分析",
+    "clickToAnalyze": "「再分析」をクリックして最適化の提案を取得します"
   },
   "ocr": {
     "initialTitle": "画像が選択されていません",

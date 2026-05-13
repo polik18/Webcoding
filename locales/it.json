@@ -124,7 +124,11 @@
     "schemaTab": "Schema.org",
     "scoreTitle": "Punteggio di controllo SEO",
     "previewTitle": "Anteprima di ricerca Google",
-    "desc": "Analizza i tuoi contenuti per individuare eventuali problemi tecnici SEO e visualizza in anteprima come appaiono nei risultati di ricerca."
+    "desc": "Analizza i tuoi contenuti per individuare eventuali problemi tecnici SEO e visualizza in anteprima come appaiono nei risultati di ricerca.",
+    "auditTitle": "Controllo della pagina corrente",
+    "reanalyze": "Rianalizzare",
+    "notAnalyzed": "Non analizzato",
+    "clickToAnalyze": "Fai clic su Rianalizza per ottenere suggerimenti di ottimizzazione"
   },
   "ocr": {
     "initialTitle": "Nessuna immagine selezionata",

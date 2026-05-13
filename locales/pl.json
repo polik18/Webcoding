@@ -124,7 +124,11 @@
     "schemaTab": "Schemat.org",
     "scoreTitle": "Wynik audytu SEO",
     "previewTitle": "Podgląd wyszukiwarki Google",
-    "desc": "Przeanalizuj swoją treść pod kątem technicznych problemów związanych z SEO i wyświetl podgląd jej wyglądu w wynikach wyszukiwania."
+    "desc": "Przeanalizuj swoją treść pod kątem technicznych problemów związanych z SEO i wyświetl podgląd jej wyglądu w wynikach wyszukiwania.",
+    "auditTitle": "Audyt bieżącej strony",
+    "reanalyze": "Przeanalizuj ponownie",
+    "notAnalyzed": "Nie analizowano",
+    "clickToAnalyze": "Kliknij opcję Przeanalizuj ponownie, aby uzyskać sugestie dotyczące optymalizacji"
   },
   "ocr": {
     "initialTitle": "Nie wybrano obrazu",

@@ -11,7 +11,11 @@ NEW_KEYS = {
         "schemaTab": "Schema.org",
         "scoreTitle": "SEO Audit Score",
         "previewTitle": "Google Search Preview",
-        "desc": "Analyze your content for technical SEO issues and preview how it appears in search results."
+        "desc": "Analyze your content for technical SEO issues and preview how it appears in search results.",
+        "auditTitle": "Current Page Audit",
+        "reanalyze": "Reanalyze",
+        "notAnalyzed": "Not Analyzed",
+        "clickToAnalyze": "Click Reanalyze to get optimization suggestions"
     },
     "ocr": {
         "initialTitle": "No Image Selected",
@@ -67,6 +71,7 @@ def main():
         dt_lang = lang_code
         if lang_code == "zh-TW": dt_lang = "zh-TW"
         elif lang_code == "zh-CN": dt_lang = "zh-CN"
+        elif lang_code == "he": dt_lang = "iw"  # Hebrew fix
         
         print(f"Checking {filename} (Lang: {dt_lang})...")
         

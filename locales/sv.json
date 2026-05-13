@@ -116,5 +116,37 @@
   },
   "content": {
     "default": "# Välkommen till WebPad++ 🚀\n\nWebPad++ är en kraftfull, helt webbläsarbaserad IDE. **Ingen backend krävs** — alla dina filer, flikar och inställningar lagras säkert direkt i din webbläsare.\n\n## ✨ Nya och avancerade funktioner\n\n* **Visuell redigerare (WYSIWYG)**: Växla sömlöst mellan kod- och visuella lägen. Dra och släpp mappar direkt i redigeraren och synkronisera vackert formaterad Markdown direkt!\n* **Smart Spreadsheet Engine**: Redigera `.xlsx`- och `.csv`-filer precis som Excel! Stöder dra för att välja, beräkningar (summa/genomsnitt), dynamisk sortering och realistisk formelutvärdering (t.ex. `=B3+C2*F2`).\n* **Bild OCR-textigenkänning**: Klicka på **OCR**-verktyget för att ta ett foto med din kamera, ladda upp eller klistra in en bild. Det kommer att automatiskt upptäcka flerspråkig text och spara den till en ny fil direkt!\n* **QR Code Suite**: Generera QR-koder för vilken text/URL som helst, eller använd din kamera för att skanna och avkoda befintliga QR-koder sömlöst.\n\n## 🛠 Kärnfunktioner\n\n* **Intelligent redigering**: Syntaxmarkering, IntelliSense, parantesmatchning och kodformatering med ett klick.\n* **Omedelbar exekvering**: Kör HTML (liveförhandsvisning i en ny flik), JavaScript (konsol) och Python (Pyodide).\n* **Delad förhandsgranskning och skillnad**: Jämför två valfria flikar sida vid sida eller förhandsgranska kodutdata i realtid.\n* **Avancerat dokumentstöd**: Visa, extrahera text och redigera PDF-filer, DOCX- och ODT-dokument med full exportkompatibilitet.\n* **Filhantering**: Skapa kapslade mappar, dra och släpp hela arbetsytakataloger, byt namn på, ta bort och exportera hela ditt projekt som en ZIP.\n\n## 📖 Snabbstartguide\n\n1. **Filutforskaren**: Klicka på `☰` för att hantera dina filer. Dra en hel mapp från din dator direkt till WebPad++!\n2. **Öppna dokument**: Dra en PDF-, DOCX- eller XLSX-fil till fönstret för att öppna den i dess dedikerade redigerare.\n3. **Kör kod**: Klicka på ▶️ **Kör** eller tryck på `Ctrl+Enter` för att testa din kod direkt.\n4. **Contextual Tools**: Klicka på den lila 🔠 **OCR**-knappen eller den gröna 📱 **QR Code**-knappen för avancerade verktyg.\n5. **Spara och exportera**: Använd rullgardinsmenyn Spara för att ladda ner din fil eller exportera dina dokument till DOCX/PDF.\n6. **Börja på nytt**: Klicka på den röda 🔄 **Återställ alla**-knappen för att rensa alla lokala data och starta om.\n\nGlad kodning! 🎉"
+  },
+  "seo": {
+    "auditTab": "Audit & Preview",
+    "sitemapTab": "Sitemap Generator",
+    "robotsTab": "Robots.txt",
+    "schemaTab": "Schema.org",
+    "scoreTitle": "SEO-revisionsresultat",
+    "previewTitle": "Google Search Preview",
+    "desc": "Analysera ditt innehåll för tekniska SEO-problem och förhandsgranska hur det visas i sökresultaten.",
+    "auditTitle": "Aktuell sida revision",
+    "reanalyze": "Analysera om",
+    "notAnalyzed": "Not Analyzed",
+    "clickToAnalyze": "Klicka på Analysera om för att få optimeringsförslag"
+  },
+  "ocr": {
+    "initialTitle": "No Image Selected",
+    "initialSub": "Välj en källa från vänster eller dra en bild hit",
+    "startBtn": "Starta igenkänning",
+    "resetBtn": "Börja om från början",
+    "saveBtn": "Spara till fil",
+    "langLabel": "Språkinställning",
+    "sourceLabel": "Ingångskälla",
+    "resultLabel": "Igenkänningsresultat (redigerbart)",
+    "camera": "Ta foto",
+    "upload": "Ladda upp bild",
+    "paste": "Klistra in bild"
+  },
+  "recent": {
+    "title": "Senaste åtkomst",
+    "clear": "Rensa historik",
+    "empty": "Inga nya uppgifter hittades.",
+    "desc": "Öppna snabbt dina nyligen öppnade filer och projektmappar igen."
   }
 }

@@ -124,7 +124,11 @@
     "schemaTab": "Schema.org",
     "scoreTitle": "SEO Audit Score",
     "previewTitle": "Google Keresés előnézete",
-    "desc": "Elemezze a tartalom technikai SEO-problémáját, és tekintse meg, hogyan jelenik meg a keresési eredmények között."
+    "desc": "Elemezze a tartalom technikai SEO-problémáját, és tekintse meg, hogyan jelenik meg a keresési eredmények között.",
+    "auditTitle": "Aktuális oldal ellenőrzése",
+    "reanalyze": "Újraelemzés",
+    "notAnalyzed": "Nincs elemzett",
+    "clickToAnalyze": "Az optimalizálási javaslatok megtekintéséhez kattintson az Újraelemzés gombra"
   },
   "ocr": {
     "initialTitle": "Nincs kép kiválasztva",

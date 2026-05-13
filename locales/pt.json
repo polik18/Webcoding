@@ -124,7 +124,11 @@
     "schemaTab": "Schema.org",
     "scoreTitle": "Pontuação de auditoria de SEO",
     "previewTitle": "Visualização da Pesquisa Google",
-    "desc": "Analise seu conteúdo em busca de problemas técnicos de SEO e visualize como ele aparece nos resultados de pesquisa."
+    "desc": "Analise seu conteúdo em busca de problemas técnicos de SEO e visualize como ele aparece nos resultados de pesquisa.",
+    "auditTitle": "Auditoria da página atual",
+    "reanalyze": "Reanalisar",
+    "notAnalyzed": "Não analisado",
+    "clickToAnalyze": "Clique em Reanalisar para obter sugestões de otimização"
   },
   "ocr": {
     "initialTitle": "Nenhuma imagem selecionada",

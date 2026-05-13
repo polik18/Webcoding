@@ -116,5 +116,37 @@
   },
   "content": {
     "default": "# Selamat datang di WebPad++ 🚀\n\nWebPad++ adalah IDE yang sepenuhnya berbasis browser dan kuat. **Tidak diperlukan backend** — semua file, tab, dan pengaturan Anda disimpan dengan aman langsung di browser Anda.\n\n## ✨ Fitur Baru & Lanjutan\n\n* **Visual Editor (WYSIWYG)**: Beralih dengan mulus antara mode Kode dan Visual. Seret dan lepas folder langsung ke editor, dan sinkronkan Markdown yang diformat dengan indah secara instan!\n* **Smart Spreadsheet Engine**: Edit file `.xlsx` & `.csv` seperti Excel! Mendukung drag-to-select, penghitungan (Jumlah/Rata-rata), pengurutan dinamis, dan evaluasi rumus langsung (misalnya `=B3+C2*F2`).\n* **Pengenalan Teks OCR Gambar**: Klik alat **OCR** ​​untuk mengambil foto dengan kamera Anda, mengunggah, atau menempelkan gambar. Ini akan secara otomatis mendeteksi teks multi-bahasa dan menyimpannya ke file baru secara instan!\n* **QR Code Suite**: Buat kode QR untuk teks/URL apa pun, atau gunakan kamera Anda untuk memindai dan mendekode kode QR yang ada dengan lancar.\n\n## 🛠 Kemampuan Inti\n\n* **Pengeditan Cerdas**: Penyorotan sintaksis, IntelliSense, pencocokan braket, dan pemformatan kode sekali klik.\n* **Eksekusi Instan**: Jalankan HTML (pratinjau langsung di tab baru), JavaScript (Konsol), dan Python (Pyodide).\n* **Pratinjau & Diff Terpisah**: Bandingkan dua tab secara berdampingan atau keluaran kode pratinjau secara real-time.\n* **Dukungan Dokumen Tingkat Lanjut**: Melihat, mengekstrak teks, dan mengedit dokumen PDF, DOCX, dan ODT dengan kompatibilitas ekspor penuh.\n* **Manajemen File**: Membuat folder bertumpuk, menarik dan melepas seluruh direktori ruang kerja, mengganti nama, menghapus, dan Mengekspor seluruh proyek Anda sebagai ZIP.\n\n## 📖 Panduan Memulai Cepat\n\n1. **File Explorer**: Klik `☰` untuk mengelola file Anda. Seret seluruh folder dari komputer Anda langsung ke WebPad++!\n2. **Buka Dokumen**: Seret file PDF, DOCX, atau XLSX ke jendela untuk membukanya di editor khusus.\n3. **Jalankan Kode**: Klik ▶️ **Jalankan** atau tekan `Ctrl+Enter` untuk langsung menguji kode Anda.\n4. **Alat Kontekstual**: Klik tombol ungu 🔠 **OCR** ​​atau tombol hijau 📱 **Kode QR** untuk utilitas tingkat lanjut.\n5. **Simpan & Ekspor**: Gunakan menu tarik-turun simpan untuk mengunduh file atau mengekspor dokumen Anda ke DOCX/PDF.\n6. **Mulai Baru**: Klik tombol merah 🔄 **Reset Semua** untuk menghapus semua data lokal dan memulai ulang.\n\nSelamat membuat kode! 🎉"
+  },
+  "seo": {
+    "auditTab": "Audit & Pratinjau",
+    "sitemapTab": "Pembuat Peta Situs",
+    "robotsTab": "Robots.txt",
+    "schemaTab": "Skema.org",
+    "scoreTitle": "Skor Audit SEO",
+    "previewTitle": "Pratinjau Google Penelusuran",
+    "desc": "Analisis konten Anda untuk mengetahui masalah teknis SEO dan pratinjau tampilannya di hasil pencarian.",
+    "auditTitle": "Audit Halaman Saat Ini",
+    "reanalyze": "Analisis ulang",
+    "notAnalyzed": "Tidak Dianalisis",
+    "clickToAnalyze": "Klik Analisis Ulang untuk mendapatkan saran pengoptimalan"
+  },
+  "ocr": {
+    "initialTitle": "Tidak Ada Gambar yang Dipilih",
+    "initialSub": "Pilih sumber dari kiri atau seret gambar ke sini",
+    "startBtn": "Mulai Pengakuan",
+    "resetBtn": "Mulai dari awal",
+    "saveBtn": "Simpan ke File",
+    "langLabel": "Pengaturan Bahasa",
+    "sourceLabel": "Sumber Masukan",
+    "resultLabel": "Hasil Pengakuan (Dapat Diedit)",
+    "camera": "Ambil Foto",
+    "upload": "Unggah Gambar",
+    "paste": "Tempel Gambar"
+  },
+  "recent": {
+    "title": "Akses Terbaru",
+    "clear": "Hapus Riwayat",
+    "empty": "Tidak ada catatan terbaru yang ditemukan.",
+    "desc": "Buka kembali file dan folder proyek yang baru Anda akses dengan cepat."
   }
 }

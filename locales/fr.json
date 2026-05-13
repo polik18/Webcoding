@@ -124,7 +124,11 @@
     "schemaTab": "Schéma.org",
     "scoreTitle": "Score d'audit SEO",
     "previewTitle": "Aperçu de la recherche Google",
-    "desc": "Analysez votre contenu pour détecter les problèmes techniques de référencement et prévisualisez son apparition dans les résultats de recherche."
+    "desc": "Analysez votre contenu pour détecter les problèmes techniques de référencement et prévisualisez son apparition dans les résultats de recherche.",
+    "auditTitle": "Audit de la page actuelle",
+    "reanalyze": "Réanalyser",
+    "notAnalyzed": "Non analysé",
+    "clickToAnalyze": "Cliquez sur Réanalyser pour obtenir des suggestions d'optimisation"
   },
   "ocr": {
     "initialTitle": "Aucune image sélectionnée",

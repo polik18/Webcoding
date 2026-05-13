@@ -125,7 +125,11 @@
     "schemaTab": "Schema.org",
     "scoreTitle": "SEO 감사 점수",
     "previewTitle": "Google 검색 미리보기",
-    "desc": "기술적인 SEO 문제에 대한 콘텐츠를 분석하고 해당 콘텐츠가 검색 결과에 어떻게 나타나는지 미리 봅니다."
+    "desc": "기술적인 SEO 문제에 대한 콘텐츠를 분석하고 해당 콘텐츠가 검색 결과에 어떻게 나타나는지 미리 봅니다.",
+    "auditTitle": "현재 페이지 감사",
+    "reanalyze": "재분석",
+    "notAnalyzed": "분석되지 않음",
+    "clickToAnalyze": "최적화 제안을 받으려면 재분석을 클릭하세요."
   },
   "ocr": {
     "initialTitle": "선택한 이미지가 없습니다.",

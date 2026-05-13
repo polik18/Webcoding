@@ -124,7 +124,11 @@
     "schemaTab": "Schema.org",
     "scoreTitle": "SEO-Audit-Score",
     "previewTitle": "Vorschau der Google-Suche",
-    "desc": "Analysieren Sie Ihre Inhalte auf technische SEO-Probleme und sehen Sie sich eine Vorschau an, wie sie in den Suchergebnissen angezeigt werden."
+    "desc": "Analysieren Sie Ihre Inhalte auf technische SEO-Probleme und sehen Sie sich eine Vorschau an, wie sie in den Suchergebnissen angezeigt werden.",
+    "auditTitle": "Aktuelle Seitenprüfung",
+    "reanalyze": "Analysieren Sie erneut",
+    "notAnalyzed": "Nicht analysiert",
+    "clickToAnalyze": "Klicken Sie auf „Erneut analysieren“, um Optimierungsvorschläge zu erhalten"
   },
   "ocr": {
     "initialTitle": "Kein Bild ausgewählt",

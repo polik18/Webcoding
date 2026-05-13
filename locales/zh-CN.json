@@ -124,7 +124,11 @@
     "schemaTab": "Schema.org",
     "scoreTitle": "SEO审核分数",
     "previewTitle": "谷歌搜索预览",
-    "desc": "分析您的内容是否存在技术 SEO 问题并预览其在搜索结果中的显示方式。"
+    "desc": "分析您的内容是否存在技术 SEO 问题并预览其在搜索结果中的显示方式。",
+    "auditTitle": "当前页面审核",
+    "reanalyze": "重新分析",
+    "notAnalyzed": "未分析",
+    "clickToAnalyze": "单击重新分析以获得优化建议"
   },
   "ocr": {
     "initialTitle": "未选择图像",

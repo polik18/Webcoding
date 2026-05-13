@@ -709,7 +709,7 @@
                 <!-- Main Content Area -->
                 <div class="flex-1 p-6 flex flex-col min-h-[300px]">
                     <!-- Step 1: Drop/Preview Area -->
-                    <div id="ocr-view-initial" class="flex-1 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl flex flex-col items-center justify-center p-8 text-center bg-gray-50/50 dark:bg-gray-800/30">
+                    <div id="ocr-view-initial" class="flex-1 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl flex flex-col items-center justify-center p-8 text-center bg-gray-50/50 dark:bg-gray-800/30 transition duration-200" ondragover="event.preventDefault(); this.classList.add('border-violet-500', 'bg-violet-50', 'dark:bg-violet-900/20');" ondragleave="event.preventDefault(); this.classList.remove('border-violet-500', 'bg-violet-50', 'dark:bg-violet-900/20');" ondrop="event.preventDefault(); this.classList.remove('border-violet-500', 'bg-violet-50', 'dark:bg-violet-900/20'); handleOcrDrop(event);">
                         <i class="fa-solid fa-cloud-arrow-up text-5xl text-gray-200 dark:text-gray-700 mb-4"></i>
                         <h4 class="text-sm font-bold text-gray-600 dark:text-gray-400">尚未選取圖片</h4>
                         <p class="text-xs text-gray-400 mt-2">請從左側選擇來源，或直接拖曳圖片到此處</p>
@@ -899,9 +899,9 @@
                 <!-- SEO Audit Tab -->
                 <div id="seo-content-audit" class="hidden space-y-6">
                     <div class="flex items-center justify-between">
-                        <div class="text-sm font-bold text-gray-700 dark:text-gray-300">頁面診斷報告 (Current Page Audit)</div>
+                        <div class="text-sm font-bold text-gray-700 dark:text-gray-300" data-i18n="seo.auditTitle">頁面診斷報告 (Current Page Audit)</div>
                         <button onclick="runSeoAudit()" class="px-3 py-1 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-lg transition shadow-sm flex items-center gap-1">
-                            <i class="fa-solid fa-rotate"></i> 重新分析
+                            <i class="fa-solid fa-rotate"></i> <span data-i18n="seo.reanalyze">重新分析</span>
                         </button>
                     </div>
 
@@ -916,13 +916,13 @@
                             </div>
                         </div>
                         <div>
-                            <div id="seo-score-label" class="text-lg font-bold text-gray-900 dark:text-white">尚未分析</div>
-                            <div class="text-xs text-gray-500">點擊「重新分析」來獲取優化建議</div>
+                            <div id="seo-score-label" class="text-lg font-bold text-gray-900 dark:text-white" data-i18n="seo.notAnalyzed">尚未分析</div>
+                            <div class="text-xs text-gray-500" data-i18n="seo.clickToAnalyze">點擊「重新分析」來獲取優化建議</div>
                         </div>
                     </div>
 
                     <div class="space-y-2">
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">搜尋結果預覽 (Google SERP Preview)</label>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider" data-i18n="seo.previewTitle">搜尋結果預覽 (Google SERP Preview)</label>
                         <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
                             <div id="preview-google-url" class="text-[14px] text-gray-600 dark:text-gray-400 mb-1 truncate flex items-center gap-1">
                                 <i class="fa-solid fa-globe text-[12px]"></i> example.com › page

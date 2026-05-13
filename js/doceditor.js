@@ -285,6 +285,22 @@ function renderSpreadsheet() {
     // Optional: make sure all rows have the same number of columns visually
     const maxCols = Math.max(..._sheetData.map(r => r.length), 26);
 
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    const cornerTh = document.createElement('th');
+    cornerTh.className = 'w-10 bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 select-none';
+    headerRow.appendChild(cornerTh);
+    for (let ci = 0; ci < maxCols; ci++) {
+        const th = document.createElement('th');
+        th.textContent = indexToColLetter(ci);
+        th.className = 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 px-2 py-1 select-none text-center font-bold';
+        headerRow.appendChild(th);
+    }
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+    
+    const tbody = document.createElement('tbody');
+
     _sheetData.forEach((row, ri) => {
         const tr = document.createElement('tr');
 
@@ -380,9 +396,10 @@ function renderSpreadsheet() {
             
             tr.appendChild(td);
         }
-        table.appendChild(tr);
+        tbody.appendChild(tr);
     });
 
+    table.appendChild(tbody);
     wrapper.appendChild(table);
     _applySelection();
 }
@@ -477,29 +494,20 @@ window.ssMath = function(type) {
         return;
     }
     
-    let sum = 0;
-    let count = 0;
+    const startCell = indexToColLetter(range.minC) + (range.minR + 1);
+    const endCell = indexToColLetter(range.maxC) + (range.maxR + 1);
+    const formulaStr = type === 'sum' ? `=SUM(${startCell}:${endCell})` : `=AVERAGE(${startCell}:${endCell})`;
     
-    for (let r = range.minR; r <= range.maxR; r++) {
-        for (let c = range.minC; c <= range.maxC; c++) {
-            if (_sheetData[r] && _sheetData[r][c] !== undefined) {
-                let val = _sheetData[r][c];
-                if (val && !isNaN(parseFloat(val))) {
-                    sum += parseFloat(val);
-                    count++;
-                }
-            }
-        }
-    }
+    let targetRow = range.maxR + 1;
+    while (_sheetData.length <= targetRow) _sheetData.push([]);
+    while (_sheetData[targetRow].length <= range.minC) _sheetData[targetRow].push('');
     
-    let resultText = '';
-    if (type === 'sum') {
-        resultText = `Sum: ${sum}`;
-    } else if (type === 'avg') {
-        resultText = count > 0 ? `Avg: ${(sum / count).toFixed(2)}` : 'Avg: 0';
-    }
+    _sheetData[targetRow][range.minC] = formulaStr;
     
-    showToast(`${resultText} (Selected ${count} cells)`, 'success');
+    _saveSheetToTab();
+    renderSpreadsheet();
+    
+    showToast(`寫入公式 ${formulaStr}`, 'success');
 };
 
 window.ssExport = function(fmt) {
@@ -1346,6 +1354,17 @@ window.handleOcrFileUpload = function(e) {
     reader.onload = ev => performOcr(ev.target.result);
     reader.readAsDataURL(file);
 };
+window.handleOcrDrop = function(e) {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (!file || !file.type.startsWith('image/')) {
+        showToast('請拖曳圖片檔案', 'error');
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = ev => performOcr(ev.target.result);
+    reader.readAsDataURL(file);
+};
 window.triggerOcrPaste = function() { showToast('請直接按下 Ctrl+V (或 Cmd+V) 貼上圖片', 'info'); };
 
 // Listen for paste anywhere in the OCR modal or Document
@@ -1371,6 +1390,35 @@ document.addEventListener('paste', function(e) {
     }
 });
 
+async function enhanceImageForOcr(dataUrl) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const scale = 2; // Upscale 2x
+            canvas.width = img.width * scale;
+            canvas.height = img.height * scale;
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i]; const g = data[i+1]; const b = data[i+2];
+                const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+                let c = (gray - 128) * 1.3 + 128; // Boost contrast
+                c = Math.max(0, Math.min(255, c));
+                data[i] = data[i+1] = data[i+2] = c;
+            }
+            ctx.putImageData(imageData, 0, 0);
+            resolve(canvas.toDataURL('image/jpeg', 0.95));
+        };
+        img.onerror = () => resolve(dataUrl);
+        img.src = dataUrl;
+    });
+}
+
 async function performOcr(imageDataUrl, autoSave = false) {
     if (typeof Tesseract === 'undefined') {
         showToast('Tesseract.js OCR 引擎尚未載入', 'error');
@@ -1384,7 +1432,8 @@ async function performOcr(imageDataUrl, autoSave = false) {
     const lang = document.getElementById('ocr-lang-select').value || 'chi_tra+eng';
     
     try {
-        const result = await Tesseract.recognize(imageDataUrl, lang);
+        const enhancedDataUrl = await enhanceImageForOcr(imageDataUrl);
+        const result = await Tesseract.recognize(enhancedDataUrl, lang);
         
         loadingEl.classList.add('hidden');
         loadingEl.classList.remove('flex');

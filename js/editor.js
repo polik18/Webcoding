@@ -370,6 +370,8 @@ document.addEventListener('DOMContentLoaded', () => {
             isSplitResizing = true;
             document.body.style.cursor = 'col-resize';
             document.body.style.userSelect = 'none';
+            const vf = document.getElementById('visual-frame');
+            if (vf) vf.style.pointerEvents = 'none';
         });
         document.addEventListener('mousemove', (e) => {
             if (!isSplitResizing) return;
@@ -395,6 +397,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 isSplitResizing = false;
                 document.body.style.cursor = '';
                 document.body.style.userSelect = '';
+                const vf = document.getElementById('visual-frame');
+                if (vf) vf.style.pointerEvents = '';
             }
         });
     }
@@ -590,8 +594,8 @@ function syncCodeToVisual() {
     }
     
     if (doc.body) {
-        doc.body.contentEditable = isHtml;
-        if (isHtml) {
+        doc.body.contentEditable = isHtml || isMarkdown;
+        if (isHtml || isMarkdown) {
             doc.body.removeEventListener('input', syncVisualToCode);
             doc.body.addEventListener('input', syncVisualToCode);
         } else {
@@ -1929,25 +1933,35 @@ window.autoScanSitemap = function() {
 };
 
 window.generateSitemap = function() {
-    let baseUrl = document.getElementById('seo-sitemap-baseurl').value.trim();
+    let baseUrl = document.getElementById('sitemap-base-url').value.trim();
     if (!baseUrl) baseUrl = 'https://example.com';
     if (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
     
-    const freq = document.getElementById('seo-sitemap-freq').value;
-    const priority = document.getElementById('seo-sitemap-priority').value;
-    const pathsRaw = document.getElementById('seo-sitemap-paths').value.split('\n');
+    const freq = document.getElementById('sitemap-changefreq').value;
+    const priority = document.getElementById('sitemap-priority').value;
     
-    const paths = pathsRaw.map(p => p.trim()).filter(p => p.length > 0);
+    let htmlFiles = [];
+    const scanNode = (node, path) => {
+        if (node.type === 'file' && node.name.toLowerCase().endsWith('.html')) {
+            htmlFiles.push((path + node.name).replace(/^\//, ''));
+        } else if (node.type === 'folder' && node.children) {
+            node.children.forEach(child => scanNode(child, path + node.name + '/'));
+        }
+    };
     
-    if (paths.length === 0) {
-        showToast('請輸入至少一個網頁路徑', 'error');
+    if (typeof fs !== 'undefined' && fs && fs.root) {
+        fs.root.children.forEach(child => scanNode(child, '/'));
+    }
+    
+    if (htmlFiles.length === 0) {
+        showToast('工作區內沒有找到任何 .html 檔案', 'error');
         return;
     }
     
     let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
     xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
     
-    paths.forEach(path => {
+    htmlFiles.forEach(path => {
         if (!path.startsWith('/')) path = '/' + path;
         const loc = baseUrl + path;
         xml += `  <url>\n`;
@@ -1959,7 +1973,7 @@ window.generateSitemap = function() {
     
     xml += `</urlset>`;
     
-    window.closeSeoModal();
+    if (typeof closeSeoModal === 'function') closeSeoModal();
     if (typeof tabManager !== 'undefined') {
         tabManager.createNewTab('sitemap.xml', xml, false);
         showToast('sitemap.xml 建立成功，請記得存檔', 'success');
@@ -1967,25 +1981,12 @@ window.generateSitemap = function() {
 };
 
 window.generateRobotsTxt = function() {
-    const globalRule = document.querySelector('input[name="seo-robots-global"]:checked').value;
-    const bots = Array.from(document.querySelectorAll('.seo-bot-checkbox:checked')).map(cb => cb.value);
-    const pathsRaw = document.getElementById('seo-robots-paths').value.split('\n');
+    const isAllowAll = document.getElementById('robots-allow-all').checked;
+    const pathsRaw = document.getElementById('robots-disallow').value.split('\n');
     const paths = pathsRaw.map(p => p.trim()).filter(p => p.length > 0);
-    const sitemapUrl = document.getElementById('seo-robots-sitemap').value.trim();
     
-    let txt = '';
-    
-    // Specific Bots Disallow rules
-    if (bots.length > 0) {
-        bots.forEach(bot => {
-            txt += `User-agent: ${bot}\n`;
-            txt += `Disallow: /\n\n`;
-        });
-    }
-    
-    // Global rule
-    txt += `User-agent: *\n`;
-    if (globalRule === 'disallow_all') {
+    let txt = `User-agent: *\n`;
+    if (!isAllowAll) {
         txt += `Disallow: /\n`;
     } else {
         if (paths.length > 0) {
@@ -1998,11 +1999,7 @@ window.generateRobotsTxt = function() {
         }
     }
     
-    if (sitemapUrl) {
-        txt += `\nSitemap: ${sitemapUrl}\n`;
-    }
-    
-    window.closeSeoModal();
+    if (typeof closeSeoModal === 'function') closeSeoModal();
     if (typeof tabManager !== 'undefined') {
         tabManager.createNewTab('robots.txt', txt, false);
         showToast('robots.txt 建立成功，請記得存檔', 'success');

@@ -116,5 +116,37 @@
   },
   "content": {
     "default": "# Chào mừng đến với WebPad++ 🚀\n\nWebPad++ là một IDE mạnh mẽ, hoàn toàn dựa trên trình duyệt. **Không cần phụ trợ** — tất cả các tệp, tab và cài đặt của bạn được lưu trữ an toàn ngay trong trình duyệt của bạn.\n\n## ✨ Tính năng mới & nâng cao\n\n* **Trình chỉnh sửa trực quan (WYSIWYG)**: Chuyển đổi liền mạch giữa chế độ Mã và Hình ảnh. Kéo và thả các thư mục trực tiếp vào trình chỉnh sửa và đồng bộ hóa Markdown được định dạng đẹp mắt ngay lập tức!\n* **Công cụ bảng tính thông minh**: Chỉnh sửa tệp `.xlsx` & `.csv` giống như Excel! Hỗ trợ kéo để chọn, tính toán (Tổng/Trung bình), sắp xếp động và đánh giá công thức trực tiếp (ví dụ: `=B3+C2*F2`).\n* **Nhận dạng văn bản OCR hình ảnh**: Nhấp vào công cụ **OCR** ​​để chụp ảnh bằng máy ảnh của bạn, tải lên hoặc dán hình ảnh. Nó sẽ tự động phát hiện văn bản đa ngôn ngữ và lưu nó vào một tệp mới ngay lập tức!\n* **Bộ mã QR**: Tạo mã QR cho bất kỳ văn bản/URL nào hoặc sử dụng máy ảnh của bạn để quét và giải mã mã QR hiện có một cách liền mạch.\n\n## 🛠 Năng lực cốt lõi\n\n* **Chỉnh sửa thông minh**: Làm nổi bật cú pháp, IntelliSense, khớp ngoặc và định dạng mã bằng một cú nhấp chuột.\n* **Thực thi tức thì**: Chạy HTML (xem trước trực tiếp trong tab mới), JavaScript (Bảng điều khiển) và Python (Pyodide).\n* **Split Preview & Diff**: So sánh bất kỳ hai tab nào cạnh nhau hoặc đầu ra mã xem trước trong thời gian thực.\n* **Hỗ trợ tài liệu nâng cao**: Xem, trích xuất văn bản và chỉnh sửa tài liệu PDF, DOCX và ODT với khả năng tương thích xuất hoàn toàn.\n* **Quản lý tệp**: Tạo các thư mục lồng nhau, kéo và thả toàn bộ thư mục không gian làm việc, đổi tên, xóa và Xuất toàn bộ dự án của bạn dưới dạng ZIP.\n\n## 📖 Hướng dẫn bắt đầu nhanh\n\n1. **File Explorer**: Nhấp vào `☰` để quản lý các tệp của bạn. Kéo toàn bộ thư mục từ máy tính của bạn thẳng vào WebPad++!\n2. **Mở tài liệu**: Kéo tệp PDF, DOCX hoặc XLSX vào cửa sổ để mở tệp đó trong trình chỉnh sửa chuyên dụng.\n3. **Chạy mã**: Nhấp vào ►️ **Chạy** hoặc nhấn `Ctrl+Enter` để kiểm tra mã của bạn ngay lập tức.\n4. **Công cụ theo ngữ cảnh**: Nhấp vào nút 🔠 **OCR** ​​màu tím hoặc nút 📱 **Mã QR** màu xanh lá cây để có các tiện ích nâng cao.\n5. **Lưu & Xuất**: Sử dụng menu thả xuống lưu để tải xuống tệp của bạn hoặc xuất tài liệu của bạn sang DOCX/PDF.\n6. **Bắt đầu mới**: Nhấp vào nút 🔄 **Đặt lại tất cả** màu đỏ để xóa tất cả dữ liệu cục bộ và khởi động lại.\n\nChúc mừng mã hóa! 🎉"
+  },
+  "seo": {
+    "auditTab": "Kiểm tra & Xem trước",
+    "sitemapTab": "Trình tạo sơ đồ trang web",
+    "robotsTab": "Robots.txt",
+    "schemaTab": "Schema.org",
+    "scoreTitle": "Điểm kiểm tra SEO",
+    "previewTitle": "Xem trước tìm kiếm của Google",
+    "desc": "Phân tích nội dung của bạn để tìm các vấn đề kỹ thuật SEO và xem trước cách nó xuất hiện trong kết quả tìm kiếm.",
+    "auditTitle": "Kiểm tra trang hiện tại",
+    "reanalyze": "Phân tích lại",
+    "notAnalyzed": "Không được phân tích",
+    "clickToAnalyze": "Nhấp vào Phân tích lại để nhận đề xuất tối ưu hóa"
+  },
+  "ocr": {
+    "initialTitle": "Không có hình ảnh nào được chọn",
+    "initialSub": "Chọn nguồn từ bên trái hoặc kéo hình ảnh vào đây",
+    "startBtn": "Bắt đầu nhận dạng",
+    "resetBtn": "Bắt đầu lại",
+    "saveBtn": "Lưu vào tập tin",
+    "langLabel": "Cài đặt ngôn ngữ",
+    "sourceLabel": "Nguồn đầu vào",
+    "resultLabel": "Kết quả nhận dạng (Có thể chỉnh sửa)",
+    "camera": "Chụp ảnh",
+    "upload": "Tải hình ảnh lên",
+    "paste": "Dán hình ảnh"
+  },
+  "recent": {
+    "title": "Truy cập gần đây",
+    "clear": "Xóa lịch sử",
+    "empty": "Không tìm thấy hồ sơ gần đây.",
+    "desc": "Nhanh chóng mở lại các tệp và thư mục dự án được truy cập gần đây của bạn."
   }
 }

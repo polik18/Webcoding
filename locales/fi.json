@@ -124,7 +124,11 @@
     "schemaTab": "Schema.org",
     "scoreTitle": "SEO tarkastuspisteet",
     "previewTitle": "Google-haun esikatselu",
-    "desc": "Analysoi sisältösi teknisten SEO-ongelmien varalta ja esikatsele, miten se näkyy hakutuloksissa."
+    "desc": "Analysoi sisältösi teknisten SEO-ongelmien varalta ja esikatsele, miten se näkyy hakutuloksissa.",
+    "auditTitle": "Nykyisen sivun tarkastus",
+    "reanalyze": "Analysoi uudelleen",
+    "notAnalyzed": "Ei analysoitu",
+    "clickToAnalyze": "Napsauta Analysoi uudelleen saadaksesi optimointiehdotuksia"
   },
   "ocr": {
     "initialTitle": "Kuvaa ei ole valittu",

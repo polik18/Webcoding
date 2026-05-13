@@ -124,7 +124,11 @@
     "schemaTab": "Schema.org",
     "scoreTitle": "SEO-auditscore",
     "previewTitle": "Voorbeeld van Google Zoeken",
-    "desc": "Analyseer uw inhoud op technische SEO-problemen en bekijk hoe deze in de zoekresultaten wordt weergegeven."
+    "desc": "Analyseer uw inhoud op technische SEO-problemen en bekijk hoe deze in de zoekresultaten wordt weergegeven.",
+    "auditTitle": "Huidige pagina-audit",
+    "reanalyze": "Opnieuw analyseren",
+    "notAnalyzed": "Niet geanalyseerd",
+    "clickToAnalyze": "Klik op Opnieuw analyseren om optimalisatiesuggesties te krijgen"
   },
   "ocr": {
     "initialTitle": "Geen afbeelding geselecteerd",

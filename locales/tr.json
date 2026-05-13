@@ -124,7 +124,11 @@
     "schemaTab": "Schema.org",
     "scoreTitle": "SEO Denetim Puanı",
     "previewTitle": "Google Arama Önizlemesi",
-    "desc": "İçeriğinizi teknik SEO sorunları açısından analiz edin ve arama sonuçlarında nasıl göründüğünün önizlemesini yapın."
+    "desc": "İçeriğinizi teknik SEO sorunları açısından analiz edin ve arama sonuçlarında nasıl göründüğünün önizlemesini yapın.",
+    "auditTitle": "Mevcut Sayfa Denetimi",
+    "reanalyze": "Yeniden analiz et",
+    "notAnalyzed": "Analiz Edilmedi",
+    "clickToAnalyze": "Optimizasyon önerileri almak için Yeniden Analiz Et'e tıklayın"
   },
   "ocr": {
     "initialTitle": "Resim Seçilmedi",

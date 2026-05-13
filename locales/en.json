@@ -125,7 +125,11 @@
     "schemaTab": "Schema.org",
     "scoreTitle": "SEO Audit Score",
     "previewTitle": "Google Search Preview",
-    "desc": "Analyze your content for technical SEO issues and preview how it appears in search results."
+    "desc": "Analyze your content for technical SEO issues and preview how it appears in search results.",
+    "auditTitle": "Current Page Audit",
+    "reanalyze": "Reanalyze",
+    "notAnalyzed": "Not Analyzed",
+    "clickToAnalyze": "Click 'Reanalyze' to get optimization suggestions"
   },
   "ocr": {
     "initialTitle": "No Image Selected",
