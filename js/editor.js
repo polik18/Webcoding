@@ -768,18 +768,19 @@ function syncSelectionToVisual() {
     
     const cursor = editor.getCursor();
     const line = editor.getLine(cursor.line);
-    if (!line) return;
+    if (line === undefined || line === null) return;
     
     let snippet = editor.getSelection();
     if (!snippet) {
-        const start = Math.max(0, cursor.ch - 15);
-        const end = Math.min(line.length, cursor.ch + 15);
+        // Try to get a small context around the cursor if nothing is selected
+        const start = Math.max(0, cursor.ch - 8);
+        const end = Math.min(line.length, cursor.ch + 8);
         snippet = line.substring(start, end).trim();
     }
     
     snippet = snippet.replace(/[#*`_>\[\]\(\)]/g, '').trim();
     
-    if (!snippet || snippet.length < 3) return;
+    if (!snippet || snippet.length < 1) return;
     
     isSyncingSelection = true;
     
@@ -792,7 +793,7 @@ function syncSelectionToVisual() {
     
     win.find(snippet, false, false, true, false, false, false);
     
-    setTimeout(() => { isSyncingSelection = false; }, 100);
+    setTimeout(() => { isSyncingSelection = false; }, 300);
 }
 
 function syncSelectionToCode() {
@@ -813,13 +814,24 @@ function syncSelectionToCode() {
         if (node && node.nodeType === 3) {
             const text = node.textContent;
             const offset = sel.anchorOffset;
-            const start = Math.max(0, offset - 15);
-            const end = Math.min(text.length, offset + 15);
+            
+            // Get word around cursor
+            let start = offset;
+            while (start > 0 && /\\S/.test(text[start - 1])) start--;
+            let end = offset;
+            while (end < text.length && /\\S/.test(text[end])) end++;
+            
             snippet = text.substring(start, end).trim();
+            
+            if (!snippet) {
+                start = Math.max(0, offset - 8);
+                end = Math.min(text.length, offset + 8);
+                snippet = text.substring(start, end).trim();
+            }
         }
     }
     
-    if (!snippet || snippet.length < 3) return;
+    if (!snippet || snippet.length < 1) return;
     
     isSyncingSelection = true;
     
@@ -828,7 +840,7 @@ function syncSelectionToCode() {
         editor.setSelection(cursor.from(), cursor.to());
         editor.scrollIntoView(cursor.from(), 100);
     } else {
-        const words = snippet.split(/\\s+/).filter(w => w.length > 3);
+        const words = snippet.split(/\\s+/).filter(w => w.length > 1);
         if (words.length > 0) {
             const subCursor = editor.getSearchCursor(words[0]);
             if (subCursor.findNext()) {
@@ -838,7 +850,7 @@ function syncSelectionToCode() {
         }
     }
     
-    setTimeout(() => { isSyncingSelection = false; }, 100);
+    setTimeout(() => { isSyncingSelection = false; }, 300);
 }
 
 let visualSelectionRange = null;
