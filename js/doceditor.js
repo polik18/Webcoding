@@ -672,6 +672,30 @@ window.exportDocx = async function() {
     }
 };
 
+// Smart export: respects current tab mode (visual = rendered HTML, code = raw text)
+window.exportDocxSmart = async function() {
+    const tab = typeof getActive === 'function' ? getActive() : null;
+    const isVisualMode = tab && (tab.mode === 'visual' || tab.mode === 'split');
+    
+    if (isVisualMode) {
+        // Use existing visual-frame-based export
+        window.exportDocx && await window.exportDocx();
+    } else {
+        // Export raw code/text from editor
+        const content = typeof editor !== 'undefined' ? editor.getValue() : '';
+        const tabName = tab ? tab.name : 'document';
+        const base = tabName.replace(/\.[^.]+$/, '');
+        const plainHtml = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><style>body{font-family:Consolas,monospace;font-size:10pt;line-height:1.5;} pre{white-space:pre-wrap;}</style></head><body><pre>${content.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre></body></html>`;
+        const blob = new Blob([plainHtml], { type: 'application/msword' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = base + '.docx';
+        a.click();
+        URL.revokeObjectURL(a.href);
+        showToast('\u2705 DOCX \u5c0e\u51fa\u5b8c\u6210\uff01', 'success');
+    }
+};
+
 async function _buildMinimalDocx(htmlBody) {
     if (typeof JSZip === 'undefined') {
         // Absolute fallback: Word can open HTML with this MIME type

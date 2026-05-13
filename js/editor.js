@@ -1128,12 +1128,29 @@ window.downloadFileAs = function() {
     const tab = getActive();
     if (!tab) return;
     const content = editor.getValue(tab.eol);
-    const ext = tab.name.includes('.') ? tab.name.split('.').pop().toLowerCase() : 'txt';
+    const isVisualMode = tab.mode === 'visual' || tab.mode === 'split';
     
     showSaveDialog(tab.name, null, (chosen) => {
         const chosenExt = chosen.split('.').pop().toLowerCase();
         if (chosenExt === 'pdf') {
+            // exportCurrentAsPdf already checks tab.mode internally
             window.exportCurrentAsPdf && window.exportCurrentAsPdf();
+        } else if (chosenExt === 'docx') {
+            if (isVisualMode) {
+                // Export the rendered visual preview as DOCX
+                window.exportDocx && window.exportDocx();
+            } else {
+                // Export raw code text as a plain-text Word document
+                const plainHtml = `<html><head><meta charset="utf-8"></head><body><pre style="font-family:monospace;font-size:11pt">${content.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre></body></html>`;
+                const blob = new Blob([plainHtml], { type: 'application/msword' });
+                const base = chosen.replace(/\.[^.]+$/, '');
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = base + '.docx';
+                a.click();
+                URL.revokeObjectURL(a.href);
+                showToast('✅ DOCX 導出完成！', 'success');
+            }
         } else {
             tab.isDefault = false;
             executeDownload(content, chosen);
@@ -1381,29 +1398,44 @@ window.exportCurrentAsPdf = function() {
     }
     const tab = getActive();
     if (!tab) return;
-    const content = editor.getValue();
     const base = (tab.name || 'document').replace(/\.[^.]+$/, '');
-    // Wrap code in a styled HTML document for PDF output
-    const htmlDoc = `<!DOCTYPE html><html><head><meta charset="utf-8">
-<style>body{font-family:monospace;font-size:12px;white-space:pre-wrap;padding:20px;color:#000;background:#fff;}</style>
-</head><body>${content.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</body></html>`;
-    const el = document.createElement('div');
-    el.style.cssText = 'font-family:monospace;font-size:12px;white-space:pre-wrap;padding:20px;color:#000;background:#fff;';
-    el.textContent = content;
-    document.body.appendChild(el);
-    html2pdf().set({
+    const isVisualMode = tab.mode === 'visual' || tab.mode === 'split';
+
+    const opt = {
         margin: 0.5,
         filename: base + '.pdf',
-        image: { type: 'jpeg', quality: 0.95 },
-        html2canvas: { scale: 2 },
+        image: { type: 'jpeg', quality: 0.97 },
+        html2canvas: { scale: 2, useCORS: true },
         jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-    }).from(el).save().then(() => {
-        document.body.removeChild(el);
-        showToast('✅ PDF 導出完成！', 'success');
-    }).catch(err => {
-        document.body.removeChild(el);
-        showToast('PDF 導出失敗: ' + err.message, 'error');
-    });
+    };
+
+    if (isVisualMode) {
+        // Export the rendered visual preview
+        const frame = document.getElementById('visual-frame');
+        const doc = frame && (frame.contentDocument || frame.contentWindow.document);
+        if (!doc || !doc.body) {
+            showToast('預覽畫面尚未載入', 'error'); return;
+        }
+        showToast('正在產生 PDF（預覽模式）...', 'info');
+        html2pdf().set(opt).from(doc.body).save()
+            .then(() => showToast('\u2705 PDF 導出完成！', 'success'))
+            .catch(err => showToast('PDF 導出失敗: ' + err.message, 'error'));
+    } else {
+        // Export raw code/text with monospace styling
+        const content = editor.getValue();
+        const el = document.createElement('div');
+        el.style.cssText = 'font-family:"JetBrains Mono",monospace;font-size:11px;white-space:pre-wrap;padding:20px;color:#000;background:#fff;line-height:1.6;';
+        el.textContent = content;
+        document.body.appendChild(el);
+        showToast('正在產生 PDF（原始碼模式）...', 'info');
+        html2pdf().set(opt).from(el).save().then(() => {
+            document.body.removeChild(el);
+            showToast('\u2705 PDF 導出完成！', 'success');
+        }).catch(err => {
+            document.body.removeChild(el);
+            showToast('PDF 導出失敗: ' + err.message, 'error');
+        });
+    }
 };
 
 function updateUI() {
@@ -1919,27 +1951,7 @@ window.autoScanSitemap = function() {
         }
     };
     
-    if (fs && fs.root) {
-        fs.root.children.forEach(child => scanNode(child, '/'));
-    }
-    
-    if (htmlFiles.length === 0) {
-        showToast('工作區內沒有找到 .html 檔案', 'info');
-        return;
-    }
-    
-    document.getElementById('seo-sitemap-paths').value = htmlFiles.map(f => '/' + f).join('\n');
-    showToast(`成功掃描到 ${htmlFiles.length} 個 HTML 檔案`, 'success');
-};
-
-window.generateSitemap = function() {
-    let baseUrl = document.getElementById('sitemap-base-url').value.trim();
-    if (!baseUrl) baseUrl = 'https://example.com';
-    if (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
-    
-    const freq = document.getElementById('sitemap-changefreq').value;
-    const priority = document.getElementById('sitemap-priority').value;
-    
+window.autoScanSitemap = function() {
     let htmlFiles = [];
     const scanNode = (node, path) => {
         if (node.type === 'file' && node.name.toLowerCase().endsWith('.html')) {
@@ -1954,18 +1966,59 @@ window.generateSitemap = function() {
     }
     
     if (htmlFiles.length === 0) {
-        showToast('工作區內沒有找到任何 .html 檔案', 'error');
+        showToast('工作區內沒有找到 .html 檔案', 'info');
         return;
     }
     
+    const ta = document.getElementById('sitemap-paths');
+    if (ta) ta.value = htmlFiles.map(f => '/' + f).join('\n');
+    showToast(`成功掃描到 ${htmlFiles.length} 個 HTML 檔案`, 'success');
+};
+
+window.generateSitemap = function() {
+    let baseUrl = (document.getElementById('sitemap-base-url').value || '').trim();
+    if (!baseUrl) { showToast('請先輸入網站 Base URL', 'error'); return; }
+    if (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
+    
+    const freq = document.getElementById('sitemap-changefreq').value;
+    const priority = parseFloat(document.getElementById('sitemap-priority').value || '0.8').toFixed(1);
+    
+    // Read paths from textarea (manual input)
+    const ta = document.getElementById('sitemap-paths');
+    const pathsRaw = ta ? ta.value.split('\n') : [];
+    let paths = pathsRaw.map(p => p.trim()).filter(p => p.length > 0);
+    
+    // Fallback: auto-scan local workspace if textarea is empty
+    if (paths.length === 0) {
+        const htmlFiles = [];
+        const scanNode = (node, path) => {
+            if (node.type === 'file' && node.name.toLowerCase().endsWith('.html')) {
+                htmlFiles.push((path + node.name).replace(/^\//, ''));
+            } else if (node.type === 'folder' && node.children) {
+                node.children.forEach(child => scanNode(child, path + node.name + '/'));
+            }
+        };
+        if (typeof fs !== 'undefined' && fs && fs.root) {
+            fs.root.children.forEach(child => scanNode(child, '/'));
+        }
+        paths = htmlFiles.map(f => '/' + f);
+    }
+    
+    if (paths.length === 0) {
+        showToast('請輸入至少一條網頁路徑，或點擊「自動掃描工作區」', 'error');
+        return;
+    }
+    
+    const today = new Date().toISOString().split('T')[0];
     let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
     xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
     
-    htmlFiles.forEach(path => {
+    paths.forEach(path => {
         if (!path.startsWith('/')) path = '/' + path;
         const loc = baseUrl + path;
         xml += `  <url>\n`;
         xml += `    <loc>${loc}</loc>\n`;
+        xml += `    <lastmod>${today}</lastmod>\n`;
         xml += `    <changefreq>${freq}</changefreq>\n`;
         xml += `    <priority>${priority}</priority>\n`;
         xml += `  </url>\n`;
@@ -1976,7 +2029,7 @@ window.generateSitemap = function() {
     if (typeof closeSeoModal === 'function') closeSeoModal();
     if (typeof tabManager !== 'undefined') {
         tabManager.createNewTab('sitemap.xml', xml, false);
-        showToast('sitemap.xml 建立成功，請記得存檔', 'success');
+        showToast(`sitemap.xml 建立完成（${paths.length} 頁），請記得存檔`, 'success');
     }
 };
 
@@ -1984,8 +2037,18 @@ window.generateRobotsTxt = function() {
     const isAllowAll = document.getElementById('robots-allow-all').checked;
     const pathsRaw = document.getElementById('robots-disallow').value.split('\n');
     const paths = pathsRaw.map(p => p.trim()).filter(p => p.length > 0);
+    const sitemapUrl = (document.getElementById('robots-sitemap-url') || {value:''}).value.trim();
+    const blockedBots = Array.from(document.querySelectorAll('.robots-bot-check:checked')).map(cb => cb.value);
     
-    let txt = `User-agent: *\n`;
+    let txt = '';
+    
+    // Block specific bots first (each gets its own User-agent block)
+    blockedBots.forEach(bot => {
+        txt += `User-agent: ${bot}\nDisallow: /\n\n`;
+    });
+    
+    // Global wildcard rule
+    txt += `User-agent: *\n`;
     if (!isAllowAll) {
         txt += `Disallow: /\n`;
     } else {
@@ -1999,9 +2062,15 @@ window.generateRobotsTxt = function() {
         }
     }
     
+    // Sitemap directive
+    if (sitemapUrl) {
+        txt += `\nSitemap: ${sitemapUrl}\n`;
+    }
+    
     if (typeof closeSeoModal === 'function') closeSeoModal();
     if (typeof tabManager !== 'undefined') {
         tabManager.createNewTab('robots.txt', txt, false);
-        showToast('robots.txt 建立成功，請記得存檔', 'success');
+        showToast('robots.txt \u5efa\u7acb\u5b8c\u6210\uff0c\u8acb\u8a18\u5f97\u5b58\u6a94', 'success');
     }
 };
+
