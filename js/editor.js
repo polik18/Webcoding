@@ -256,7 +256,7 @@ window.tabManager = new TabManager();
 const tabManager = window.tabManager;
 
 // Aliases for compatibility
-function getActive() { return tabManager.getActiveTab() || {}; }
+function getActive() { return tabManager.getActiveTab() || null; }
 
 window.onI18nReady = () => {
     if (!window.tabManager || !window.tabManager.tabs) return; // Prevent running before initialization
@@ -413,11 +413,17 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initVisualFrame() {
-    const doc = document.getElementById('visual-frame').contentWindow.document;
-    doc.open(); 
-    doc.write('<html><head></head><body style="padding: 20px; font-family: sans-serif;" contenteditable="true"></body></html>'); 
-    doc.close();
-    doc.body.addEventListener('input', () => { if (getActive().mode === 'visual') syncVisualToCode(); });
+    try {
+        const frame = document.getElementById('visual-frame');
+        if (!frame || !frame.contentWindow) return;
+        const doc = frame.contentWindow.document;
+        doc.open(); 
+        doc.write('<html><head></head><body style="padding: 20px; font-family: sans-serif;" contenteditable="true"></body></html>'); 
+        doc.close();
+        doc.body.addEventListener('input', () => { if (getActive().mode === 'visual') syncVisualToCode(); });
+    } catch (err) {
+        console.warn("Could not initialize visual frame (likely CORS restriction on file://):", err);
+    }
 }
 
 // ─── unified mode-button helper ───────────────────────────────────────────
@@ -1545,9 +1551,9 @@ function updateUI() {
         else modeSwitchContainer.classList.remove('hidden');
     }
 
-    _setActiveBtn('mode-code-btn', tab.mode === 'code');
-    _setActiveBtn('mode-split-btn', tab.mode === 'split');
-    _setActiveBtn('mode-visual-btn', tab.mode === 'visual');
+    if (tab.mode === 'code' || tab.mode === 'spreadsheet' || isPdf) _setActiveBtn('mode-code-btn');
+    else if (tab.mode === 'split') _setActiveBtn('mode-split-btn');
+    else if (tab.mode === 'visual') _setActiveBtn('mode-visual-btn');
 
     if (splitResizer) {
         if (tab.mode === 'split') splitResizer.classList.remove('hidden');

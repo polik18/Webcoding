@@ -715,19 +715,7 @@
                         <input type="file" id="ocr-file-input" class="hidden" accept="image/*" onchange="handleOcrFileUpload(event)">
                     </div>
 
-                    <!-- Google Vision API (collapsible) -->
-                    <div class="border border-dashed border-gray-300 dark:border-gray-600 rounded-xl overflow-hidden">
-                        <button onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')" class="w-full flex items-center justify-between p-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-                            <span>✨ <span data-i18n="ocr.gvisionTitle">Google Vision API</span> <span class="text-green-500" data-i18n="ocr.gvisionHighAcc">High Accuracy</span></span>
-                            <i class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-200"></i>
-                        </button>
-                        <div class="hidden p-3 space-y-2 bg-white dark:bg-gray-800">
-                            <p class="text-[10px] text-gray-500" data-i18n="ocr.gvisionDesc">Enter API Key to use Google Cloud Vision engine. Up to 99% accuracy for Traditional Chinese. Free 1000 requests/month.</p>
-                            <input type="password" id="ocr-gvision-key" placeholder="AIza..." class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs font-mono focus:ring-2 focus:ring-green-500 outline-none" oninput="localStorage.setItem('gvision_key', this.value)">
-                            <div id="ocr-gvision-status" class="text-[10px] text-gray-400"></div>
-                            <a href="https://cloud.google.com/vision/docs/setup" target="_blank" class="text-[10px] text-blue-500 hover:underline block" data-i18n="ocr.gvisionLink">How to get a free API Key</a>
-                        </div>
-                    </div>
+
                 </div>
 
                 <!-- Main Content Area -->

@@ -1470,32 +1470,7 @@ async function enhanceImageForOcr(dataUrl) {
     });
 }
 
-// ─── Google Cloud Vision API Recognition ────────────────────────────
-async function recognizeWithGoogleVision(imageDataUrl, apiKey) {
-    const base64 = imageDataUrl.split(',')[1];
-    const statusEl = document.getElementById('ocr-gvision-status');
-    if (statusEl) statusEl.textContent = '☁️ 正在呼叫 Google Vision API...';
-    
-    const response = await fetch(
-        `https://vision.googleapis.com/v1/images:annotate?key=${apiKey}`,
-        {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                requests: [{
-                    image: { content: base64 },
-                    features: [{ type: 'TEXT_DETECTION', maxResults: 1 }],
-                    imageContext: { languageHints: ['zh-Hant', 'zh-Hans', 'en'] }
-                }]
-            })
-        }
-    );
-    const data = await response.json();
-    if (data.error) throw new Error(data.error.message);
-    if (statusEl) statusEl.textContent = '✅ Google Vision 辨識完成';
-    const annotations = data.responses && data.responses[0] && data.responses[0].textAnnotations;
-    return annotations && annotations.length > 0 ? annotations[0].description : '';
-}
+
 
 async function performOcr(imageDataUrl, autoSave = false) {
     if (typeof Tesseract === 'undefined') {
@@ -1508,33 +1483,26 @@ async function performOcr(imageDataUrl, autoSave = false) {
     
     const lang = document.getElementById('ocr-lang-select').value || 'chi_tra+eng';
     const psm = document.getElementById('ocr-mode-select') ? document.getElementById('ocr-mode-select').value : '6';
-    const gvisionKey = (document.getElementById('ocr-gvision-key') || {}).value || localStorage.getItem('gvision_key') || '';
-    
     try {
         let recognizedText = '';
         
-        if (gvisionKey.trim()) {
-            // ─ Route A: Google Cloud Vision (highest accuracy) ─
-            recognizedText = await recognizeWithGoogleVision(imageDataUrl, gvisionKey.trim());
-        } else {
-            // ─ Route B: Enhanced Tesseract with PSM/OEM and Otsu binarization ─
-            const enhancedDataUrl = await enhanceImageForOcr(imageDataUrl);
-            try {
-                // Try Tesseract v4 createWorker API first
-                const worker = await Tesseract.createWorker(lang, 1);
-                await worker.setParameters({
-                    tessedit_pageseg_mode: psm,
-                    preserve_interword_spaces: '1',
-                });
-                const result = await worker.recognize(enhancedDataUrl);
-                await worker.terminate();
-                recognizedText = result.data.text;
-            } catch (workerErr) {
-                // Fallback: simple recognize() for older Tesseract.js API
-                console.warn('createWorker failed, using simple API:', workerErr);
-                const result = await Tesseract.recognize(enhancedDataUrl, lang);
-                recognizedText = result.data.text;
-            }
+        // Enhanced Tesseract with PSM/OEM and Otsu binarization
+        const enhancedDataUrl = await enhanceImageForOcr(imageDataUrl);
+        try {
+            // Try Tesseract v4 createWorker API first
+            const worker = await Tesseract.createWorker(lang, 1);
+            await worker.setParameters({
+                tessedit_pageseg_mode: psm,
+                preserve_interword_spaces: '1',
+            });
+            const result = await worker.recognize(enhancedDataUrl);
+            await worker.terminate();
+            recognizedText = result.data.text;
+        } catch (workerErr) {
+            // Fallback: simple recognize() for older Tesseract.js API
+            console.warn('createWorker failed, using simple API:', workerErr);
+            const result = await Tesseract.recognize(enhancedDataUrl, lang);
+            recognizedText = result.data.text;
         }
         
         if (loadingEl) { loadingEl.classList.add('hidden'); loadingEl.classList.remove('flex'); }
