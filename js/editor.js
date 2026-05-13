@@ -314,7 +314,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (getActive().mode === 'visual' || getActive().mode === 'split') syncCodeToVisual(); 
     });
     
-    editor.on('cursorActivity', updateStatus);
+    editor.on('cursorActivity', () => {
+        updateStatus();
+        const tab = getActive();
+        if (tab && tab.mode === 'split') {
+            if (typeof syncSelectionToVisual === 'function') syncSelectionToVisual();
+        }
+    });
     
     initVisualFrame();
 
@@ -415,6 +421,17 @@ function _bindVisualFrameInput(doc) {
         if (mode === 'visual' || mode === 'split') syncVisualToCode();
     };
     doc.body.addEventListener('input', doc.__visualInputHandler);
+
+    if (doc.__visualSelectionHandler) {
+        doc.removeEventListener('selectionchange', doc.__visualSelectionHandler);
+    }
+    doc.__visualSelectionHandler = () => {
+        const mode = getActive().mode;
+        if (mode === 'split' && typeof syncSelectionToCode === 'function') {
+            syncSelectionToCode();
+        }
+    };
+    doc.addEventListener('selectionchange', doc.__visualSelectionHandler);
 }
 
 function initVisualFrame() {
@@ -736,6 +753,93 @@ document.getElementById('custom-modal-input').addEventListener('keydown', (e) =>
     if (e.key === 'Enter') { e.preventDefault(); document.getElementById('custom-modal-confirm').click(); }
     if (e.key === 'Escape') { e.preventDefault(); closeCustomModal(); }
 });
+
+let isSyncingSelection = false;
+
+function syncSelectionToVisual() {
+    if (isSyncingSelection || isSyncingVisual) return;
+    const tab = getActive();
+    if (!tab || tab.mode !== 'split') return;
+
+    const frame = document.getElementById('visual-frame');
+    if (!frame) return;
+    const win = frame.contentWindow;
+    const doc = win.document;
+    
+    const cursor = editor.getCursor();
+    const line = editor.getLine(cursor.line);
+    if (!line) return;
+    
+    let snippet = editor.getSelection();
+    if (!snippet) {
+        const start = Math.max(0, cursor.ch - 15);
+        const end = Math.min(line.length, cursor.ch + 15);
+        snippet = line.substring(start, end).trim();
+    }
+    
+    snippet = snippet.replace(/[#*`_>\[\]\(\)]/g, '').trim();
+    
+    if (!snippet || snippet.length < 3) return;
+    
+    isSyncingSelection = true;
+    
+    const sel = win.getSelection();
+    sel.removeAllRanges();
+    const range = doc.createRange();
+    range.selectNodeContents(doc.body);
+    range.collapse(true);
+    sel.addRange(range);
+    
+    win.find(snippet, false, false, true, false, false, false);
+    
+    setTimeout(() => { isSyncingSelection = false; }, 100);
+}
+
+function syncSelectionToCode() {
+    if (isSyncingSelection || isSyncingVisual) return;
+    const tab = getActive();
+    if (!tab || tab.mode !== 'split') return;
+
+    const frame = document.getElementById('visual-frame');
+    if (!frame) return;
+    const win = frame.contentWindow;
+    
+    const sel = win.getSelection();
+    if (!sel || sel.rangeCount === 0) return;
+    
+    let snippet = sel.toString();
+    if (!snippet) {
+        const node = sel.anchorNode;
+        if (node && node.nodeType === 3) {
+            const text = node.textContent;
+            const offset = sel.anchorOffset;
+            const start = Math.max(0, offset - 15);
+            const end = Math.min(text.length, offset + 15);
+            snippet = text.substring(start, end).trim();
+        }
+    }
+    
+    if (!snippet || snippet.length < 3) return;
+    
+    isSyncingSelection = true;
+    
+    const cursor = editor.getSearchCursor(snippet);
+    if (cursor.findNext()) {
+        editor.setSelection(cursor.from(), cursor.to());
+        editor.scrollIntoView(cursor.from(), 100);
+    } else {
+        const words = snippet.split(/\\s+/).filter(w => w.length > 3);
+        if (words.length > 0) {
+            const subCursor = editor.getSearchCursor(words[0]);
+            if (subCursor.findNext()) {
+                editor.setSelection(subCursor.from(), subCursor.to());
+                editor.scrollIntoView(subCursor.from(), 100);
+            }
+        }
+    }
+    
+    setTimeout(() => { isSyncingSelection = false; }, 100);
+}
 
 let visualSelectionRange = null;
 function saveVisualSelection() {
