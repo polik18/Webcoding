@@ -553,8 +553,18 @@ function syncCodeToVisual() {
         li { margin-bottom: 0.5em; }
     `;
 
-    const isMarkdown = tab && (tab.docType === 'md' || tab.docType === 'markdown');
-    let htmlContent = isMarkdown ? (typeof marked !== 'undefined' ? marked.parse(content) : content) : content;
+    const isMarkdown = tab && (tab.name.toLowerCase().endsWith('.md') || tab.name.toLowerCase().endsWith('.markdown') || tab.docType === 'md');
+    const isHtml = tab && (tab.name.toLowerCase().endsWith('.html') || tab.name.toLowerCase().endsWith('.htm') || tab.docType === 'docx' || tab.docType === 'odt' || tab.docType === 'pdf-text');
+    
+    let htmlContent;
+    if (isMarkdown) {
+        htmlContent = typeof marked !== 'undefined' ? marked.parse(content) : content;
+    } else if (isHtml) {
+        htmlContent = content;
+    } else {
+        const escapedContent = content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        htmlContent = `<pre><code style="font-family: 'JetBrains Mono', monospace;">${escapedContent}</code></pre>`;
+    }
     
     const isInitialized = doc.body && doc.head && doc.head.querySelector('style[data-theme="visual"]');
     
@@ -580,10 +590,12 @@ function syncCodeToVisual() {
     }
     
     if (doc.body) {
-        doc.body.contentEditable = !isMarkdown;
-        if (!isMarkdown) {
+        doc.body.contentEditable = isHtml;
+        if (isHtml) {
             doc.body.removeEventListener('input', syncVisualToCode);
             doc.body.addEventListener('input', syncVisualToCode);
+        } else {
+            doc.body.removeEventListener('input', syncVisualToCode);
         }
     }
 }
@@ -616,7 +628,7 @@ function syncVisualToCode() {
         const cursorPos = editor.getCursor();
         isProgrammaticChange = true;
         
-        if (tab.docType === 'md' || tab.docType === 'markdown') {
+        if (tab.name.toLowerCase().endsWith('.md') || tab.name.toLowerCase().endsWith('.markdown') || tab.docType === 'md') {
             if (typeof TurndownService !== 'undefined') {
                 if (!turndownService) {
                     turndownService = new TurndownService({ 
