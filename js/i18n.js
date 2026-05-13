@@ -51,7 +51,12 @@ i18next
         }
     })
     .catch(err => {
-        console.error("i18next failed to load", err);
+        console.warn("⚠️ i18next failed to load translations (likely due to file:// CORS restriction). Falling back to default UI text.", err);
+        // CRITICAL: We MUST call onI18nReady even if translations fail, 
+        // otherwise the entire IDE initialization stops and the UI breaks.
+        if (typeof window.onI18nReady === 'function') {
+            window.onI18nReady();
+        }
     });
 
 function updateLanguageUI() {
