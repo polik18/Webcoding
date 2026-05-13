@@ -141,7 +141,16 @@
     "resultLabel": "Výsledek rozpoznávání (upravitelné)",
     "camera": "Vyfotit",
     "upload": "Nahrát obrázek",
-    "paste": "Vložit obrázek"
+    "paste": "Vložit obrázek",
+    "modeLabel": "Režim rozpoznávání",
+    "modeDoc": "Dokument (skenování/snímek obrazovky)",
+    "modePhoto": "Fotografie (mobilní fotoaparát)",
+    "modeLine": "Jeden řádek (štítek/účtenka)",
+    "modeDesc": "Režim dokumentu funguje nejlépe pro plochý a strukturovaný text.",
+    "gvisionTitle": "Google Vision API",
+    "gvisionHighAcc": "Vysoká přesnost",
+    "gvisionDesc": "Chcete-li používat modul Google Cloud Vision, zadejte klíč API. Až 99% přesnost pro tradiční čínštinu. Zdarma 1000 žádostí/měsíc.",
+    "gvisionLink": "Jak získat bezplatný klíč API"
   },
   "recent": {
     "title": "Nedávný přístup",

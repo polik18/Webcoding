@@ -141,7 +141,16 @@
     "resultLabel": "Tunnistustulos (muokattava)",
     "camera": "Ota valokuva",
     "upload": "Lataa kuva",
-    "paste": "Liitä kuva"
+    "paste": "Liitä kuva",
+    "modeLabel": "Tunnistustila",
+    "modeDoc": "Asiakirja (skannaus/kuvakaappaus)",
+    "modePhoto": "Valokuva (mobiilikamera)",
+    "modeLine": "Yksi rivi (tarra/kuitti)",
+    "modeDesc": "Asiakirjatila toimii parhaiten tasaiselle ja jäsennellylle tekstille.",
+    "gvisionTitle": "Google Vision API",
+    "gvisionHighAcc": "Korkea tarkkuus",
+    "gvisionDesc": "Anna API-avain käyttääksesi Google Cloud Vision -moottoria. Jopa 99 %:n tarkkuus perinteiselle kiinalle. Ilmainen 1000 pyyntöä/kk.",
+    "gvisionLink": "Kuinka saada ilmainen API-avain"
   },
   "recent": {
     "title": "Viimeaikainen käyttö",

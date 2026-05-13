@@ -141,7 +141,16 @@
     "resultLabel": "Genkendelsesresultat (kan redigeres)",
     "camera": "Tag billede",
     "upload": "Upload billede",
-    "paste": "Indsæt billede"
+    "paste": "Indsæt billede",
+    "modeLabel": "Genkendelsestilstand",
+    "modeDoc": "Dokument (Scan/Skærmbillede)",
+    "modePhoto": "Foto (mobilkamera)",
+    "modeLine": "Enkelt linje (etiket/kvittering)",
+    "modeDesc": "Dokumenttilstand fungerer bedst til flad og struktureret tekst.",
+    "gvisionTitle": "Google Vision API",
+    "gvisionHighAcc": "Høj nøjagtighed",
+    "gvisionDesc": "Indtast API-nøgle for at bruge Google Cloud Vision-motoren. Op til 99 % nøjagtighed for traditionel kinesisk. Gratis 1000 forespørgsler/måned.",
+    "gvisionLink": "Sådan får du en gratis API-nøgle"
   },
   "recent": {
     "title": "Seneste adgang",

@@ -141,7 +141,16 @@
     "resultLabel": "Erkennungsergebnis (bearbeitbar)",
     "camera": "Machen Sie ein Foto",
     "upload": "Bild hochladen",
-    "paste": "Bild einfügen"
+    "paste": "Bild einfügen",
+    "modeLabel": "Erkennungsmodus",
+    "modeDoc": "Dokument (Scan/Screenshot)",
+    "modePhoto": "Foto (mobile Kamera)",
+    "modeLine": "Einzeilig (Etikett/Quittung)",
+    "modeDesc": "Der Dokumentmodus eignet sich am besten für flachen und strukturierten Text.",
+    "gvisionTitle": "Google Vision-API",
+    "gvisionHighAcc": "Hohe Genauigkeit",
+    "gvisionDesc": "Geben Sie den API-Schlüssel ein, um die Google Cloud Vision-Engine zu verwenden. Bis zu 99 % Genauigkeit für traditionelles Chinesisch. Kostenlose 1000 Anfragen/Monat.",
+    "gvisionLink": "So erhalten Sie einen kostenlosen API-Schlüssel"
   },
   "recent": {
     "title": "Aktueller Zugriff",

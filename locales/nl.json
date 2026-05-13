@@ -141,7 +141,16 @@
     "resultLabel": "Herkenningsresultaat (bewerkbaar)",
     "camera": "Maak een foto",
     "upload": "Afbeelding uploaden",
-    "paste": "Afbeelding plakken"
+    "paste": "Afbeelding plakken",
+    "modeLabel": "Herkenningsmodus",
+    "modeDoc": "Document (scan/screenshot)",
+    "modePhoto": "Foto (mobiele camera)",
+    "modeLine": "Enkele regel (label/bon)",
+    "modeDesc": "De documentmodus werkt het beste voor platte en gestructureerde tekst.",
+    "gvisionTitle": "Google Vision-API",
+    "gvisionHighAcc": "Hoge nauwkeurigheid",
+    "gvisionDesc": "Voer de API-sleutel in om de Google Cloud Vision-engine te gebruiken. Tot 99% nauwkeurigheid voor traditioneel Chinees. Gratis 1000 aanvragen/maand.",
+    "gvisionLink": "Hoe u een gratis API-sleutel kunt krijgen"
   },
   "recent": {
     "title": "Recente toegang",

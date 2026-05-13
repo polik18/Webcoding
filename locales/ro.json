@@ -141,7 +141,16 @@
     "resultLabel": "Rezultat recunoaștere (editabil)",
     "camera": "Faceți o fotografie",
     "upload": "Încărcați imaginea",
-    "paste": "Lipiți imaginea"
+    "paste": "Lipiți imaginea",
+    "modeLabel": "Modul de recunoaștere",
+    "modeDoc": "Document (Scanare/Captură de ecran)",
+    "modePhoto": "Fotografie (Camera mobilă)",
+    "modeLine": "Linie unică (etichetă/chitanță)",
+    "modeDesc": "Modul document funcționează cel mai bine pentru textul plat și structurat.",
+    "gvisionTitle": "API-ul Google Vision",
+    "gvisionHighAcc": "Precizie ridicată",
+    "gvisionDesc": "Introduceți cheia API pentru a utiliza motorul Google Cloud Vision. Precizie de până la 99% pentru chineza tradițională. Gratuit 1000 de cereri/luna.",
+    "gvisionLink": "Cum să obțineți o cheie API gratuită"
   },
   "recent": {
     "title": "Acces recent",

@@ -141,7 +141,16 @@
     "resultLabel": "Igenkänningsresultat (redigerbart)",
     "camera": "Ta foto",
     "upload": "Ladda upp bild",
-    "paste": "Klistra in bild"
+    "paste": "Klistra in bild",
+    "modeLabel": "Igenkänningsläge",
+    "modeDoc": "Dokument (skanna/skärmdump)",
+    "modePhoto": "Foto (mobilkamera)",
+    "modeLine": "Enkel rad (etikett/kvitto)",
+    "modeDesc": "Dokumentläget fungerar bäst för platt och strukturerad text.",
+    "gvisionTitle": "Google Vision API",
+    "gvisionHighAcc": "Hög noggrannhet",
+    "gvisionDesc": "Ange API-nyckel för att använda Google Cloud Vision-motorn. Upp till 99 % noggrannhet för traditionell kinesiska. Gratis 1000 förfrågningar/månad.",
+    "gvisionLink": "Hur man får en gratis API-nyckel"
   },
   "recent": {
     "title": "Senaste åtkomst",

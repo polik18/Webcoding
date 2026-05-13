@@ -141,7 +141,16 @@
     "resultLabel": "Kết quả nhận dạng (Có thể chỉnh sửa)",
     "camera": "Chụp ảnh",
     "upload": "Tải hình ảnh lên",
-    "paste": "Dán hình ảnh"
+    "paste": "Dán hình ảnh",
+    "modeLabel": "Chế độ nhận dạng",
+    "modeDoc": "Tài liệu (Quét/Ảnh chụp màn hình)",
+    "modePhoto": "Ảnh (Camera di động)",
+    "modeLine": "Dòng đơn (Nhãn/Biên nhận)",
+    "modeDesc": "Chế độ tài liệu hoạt động tốt nhất cho văn bản phẳng và có cấu trúc.",
+    "gvisionTitle": "API tầm nhìn của Google",
+    "gvisionHighAcc": "Độ chính xác cao",
+    "gvisionDesc": "Nhập API Key để sử dụng công cụ Google Cloud Vision. Độ chính xác lên tới 99% đối với tiếng Trung phồn thể. Miễn phí 1000 yêu cầu/tháng.",
+    "gvisionLink": "Cách nhận Khóa API miễn phí"
   },
   "recent": {
     "title": "Truy cập gần đây",

@@ -141,7 +141,16 @@
     "resultLabel": "תוצאת זיהוי (ניתן לעריכה)",
     "camera": "צלם תמונה",
     "upload": "העלה תמונה",
-    "paste": "הדבק תמונה"
+    "paste": "הדבק תמונה",
+    "modeLabel": "מצב זיהוי",
+    "modeDoc": "מסמך (סריקה/צילום מסך)",
+    "modePhoto": "תמונה (מצלמה ניידת)",
+    "modeLine": "שורה בודדת (תווית/קבלה)",
+    "modeDesc": "מצב מסמך עובד בצורה הטובה ביותר עבור טקסט שטוח ומובנה.",
+    "gvisionTitle": "Google Vision API",
+    "gvisionHighAcc": "דיוק גבוה",
+    "gvisionDesc": "הזן מפתח API כדי להשתמש במנוע Google Cloud Vision. עד 99% דיוק עבור סינית מסורתית. 1000 בקשות חינם לחודש.",
+    "gvisionLink": "כיצד להשיג מפתח API בחינם"
   },
   "recent": {
     "title": "גישה אחרונה",

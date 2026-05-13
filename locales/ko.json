@@ -142,7 +142,16 @@
     "resultLabel": "인식 결과(수정 가능)",
     "camera": "사진 찍기",
     "upload": "이미지 업로드",
-    "paste": "이미지 붙여넣기"
+    "paste": "이미지 붙여넣기",
+    "modeLabel": "인식 모드",
+    "modeDoc": "문서(스캔/스크린샷)",
+    "modePhoto": "사진(모바일 카메라)",
+    "modeLine": "단일 라인(라벨/영수증)",
+    "modeDesc": "문서 모드는 단순하고 구조화된 텍스트에 가장 적합합니다.",
+    "gvisionTitle": "구글 비전 API",
+    "gvisionHighAcc": "높은 정확도",
+    "gvisionDesc": "Google Cloud Vision 엔진을 사용하려면 API Key를 입력하세요. 중국어 번체의 경우 최대 99% 정확도. 매월 1000개 요청이 무료입니다.",
+    "gvisionLink": "무료 API 키를 얻는 방법"
   },
   "recent": {
     "title": "최근 접속",

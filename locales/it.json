@@ -141,7 +141,16 @@
     "resultLabel": "Risultato del riconoscimento (modificabile)",
     "camera": "Scatta foto",
     "upload": "Carica immagine",
-    "paste": "Incolla immagine"
+    "paste": "Incolla immagine",
+    "modeLabel": "Modalità di riconoscimento",
+    "modeDoc": "Documento (scansione/screenshot)",
+    "modePhoto": "Foto (fotocamera mobile)",
+    "modeLine": "Riga singola (etichetta/ricevuta)",
+    "modeDesc": "La modalità Documento funziona meglio per testo piatto e strutturato.",
+    "gvisionTitle": "API di Google Vision",
+    "gvisionHighAcc": "Alta precisione",
+    "gvisionDesc": "Inserisci la chiave API per utilizzare il motore Google Cloud Vision. Precisione fino al 99% per il cinese tradizionale. Gratuito 1000 richieste/mese.",
+    "gvisionLink": "Come ottenere una chiave API gratuita"
   },
   "recent": {
     "title": "Accesso recente",

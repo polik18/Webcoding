@@ -142,7 +142,16 @@
     "resultLabel": "識別結果（可編輯）",
     "camera": "拍照",
     "upload": "上傳圖片",
-    "paste": "貼上影像"
+    "paste": "貼上影像",
+    "modeLabel": "識別方式",
+    "modeDoc": "文件（掃描/截圖）",
+    "modePhoto": "照片（手機相機）",
+    "modeLine": "單行（標籤/收據）",
+    "modeDesc": "文件模式最適合平面文字和結構化文字。",
+    "gvisionTitle": "Google視覺API",
+    "gvisionHighAcc": "高精度",
+    "gvisionDesc": "輸入 API 金鑰以使用 Google Cloud Vision 引擎。繁體中文準確率高達 99%。每月免費 1000 個請求。",
+    "gvisionLink": "如何取得免費的 API 金鑰"
   },
   "recent": {
     "title": "最近訪問",

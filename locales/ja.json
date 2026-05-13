@@ -142,7 +142,16 @@
     "resultLabel": "認識結果（編集可能）",
     "camera": "写真を撮る",
     "upload": "画像をアップロードする",
-    "paste": "画像を貼り付け"
+    "paste": "画像を貼り付け",
+    "modeLabel": "認識モード",
+    "modeDoc": "ドキュメント (スキャン/スクリーンショット)",
+    "modePhoto": "写真（携帯カメラ）",
+    "modeLine": "単行（ラベル/レシート）",
+    "modeDesc": "ドキュメント モードは、フラットで構造化されたテキストに最適です。",
+    "gvisionTitle": "Google ビジョン API",
+    "gvisionHighAcc": "高精度",
+    "gvisionDesc": "Google Cloud Vision エンジンを使用するための API キーを入力します。繁体字中国語の精度は最大 99%。毎月 1000 件のリクエストは無料です。",
+    "gvisionLink": "無料のAPIキーを取得する方法"
   },
   "recent": {
     "title": "最近のアクセス",

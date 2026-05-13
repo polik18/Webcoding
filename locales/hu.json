@@ -141,7 +141,16 @@
     "resultLabel": "Felismerés eredménye (szerkeszthető)",
     "camera": "Fotó készítése",
     "upload": "Kép feltöltése",
-    "paste": "Kép beillesztése"
+    "paste": "Kép beillesztése",
+    "modeLabel": "Felismerési mód",
+    "modeDoc": "Dokumentum (szkennelés/képernyőkép)",
+    "modePhoto": "Fotó (mobilkamera)",
+    "modeLine": "Egysoros (címke/nyugta)",
+    "modeDesc": "A dokumentum mód sík és strukturált szöveg esetén működik a legjobban.",
+    "gvisionTitle": "Google Vision API",
+    "gvisionHighAcc": "Nagy pontosságú",
+    "gvisionDesc": "Írja be az API-kulcsot a Google Cloud Vision motor használatához. Akár 99%-os pontosság a hagyományos kínai nyelvhez. Ingyenes 1000 kérés/hó.",
+    "gvisionLink": "Ingyenes API-kulcs beszerzése"
   },
   "recent": {
     "title": "Legutóbbi hozzáférés",

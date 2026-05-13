@@ -141,7 +141,16 @@
     "resultLabel": "识别结果（可编辑）",
     "camera": "拍照",
     "upload": "上传图片",
-    "paste": "粘贴图像"
+    "paste": "粘贴图像",
+    "modeLabel": "识别方式",
+    "modeDoc": "文件（扫描/截图）",
+    "modePhoto": "照片（手机相机）",
+    "modeLine": "单行（标签/收据）",
+    "modeDesc": "文档模式最适合平面文本和结构化文本。",
+    "gvisionTitle": "谷歌视觉API",
+    "gvisionHighAcc": "高精度",
+    "gvisionDesc": "输入 API 密钥以使用 Google Cloud Vision 引擎。繁体中文准确率高达 99%。每月免费 1000 个请求。",
+    "gvisionLink": "如何获取免费的 API 密钥"
   },
   "recent": {
     "title": "最近访问",

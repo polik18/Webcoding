@@ -141,7 +141,16 @@
     "resultLabel": "Wynik rozpoznania (edytowalny)",
     "camera": "Zrób zdjęcie",
     "upload": "Prześlij obraz",
-    "paste": "Wklej obraz"
+    "paste": "Wklej obraz",
+    "modeLabel": "Tryb rozpoznawania",
+    "modeDoc": "Dokument (skan/zrzut ekranu)",
+    "modePhoto": "Zdjęcie (aparat mobilny)",
+    "modeLine": "Pojedyncza linia (etykieta/paragon)",
+    "modeDesc": "Tryb dokumentu najlepiej sprawdza się w przypadku tekstu płaskiego i strukturalnego.",
+    "gvisionTitle": "API Google Vision",
+    "gvisionHighAcc": "Wysoka dokładność",
+    "gvisionDesc": "Wprowadź klucz API, aby korzystać z silnika Google Cloud Vision. Dokładność do 99% w przypadku języka chińskiego tradycyjnego. Bezpłatne 1000 żądań miesięcznie.",
+    "gvisionLink": "Jak zdobyć darmowy klucz API"
   },
   "recent": {
     "title": "Niedawny dostęp",

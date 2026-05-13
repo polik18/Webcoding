@@ -141,7 +141,16 @@
     "resultLabel": "Hasil Pengakuan (Dapat Diedit)",
     "camera": "Ambil Foto",
     "upload": "Unggah Gambar",
-    "paste": "Tempel Gambar"
+    "paste": "Tempel Gambar",
+    "modeLabel": "Modus Pengenalan",
+    "modeDoc": "Dokumen (Pindai/Tangkapan Layar)",
+    "modePhoto": "Foto (Kamera Ponsel)",
+    "modeLine": "Jalur Tunggal (Label/Kwitansi)",
+    "modeDesc": "Mode dokumen berfungsi paling baik untuk teks datar dan terstruktur.",
+    "gvisionTitle": "API Visi Google",
+    "gvisionHighAcc": "Akurasi Tinggi",
+    "gvisionDesc": "Masukkan Kunci API untuk menggunakan mesin Google Cloud Vision. Akurasi hingga 99% untuk bahasa Mandarin Tradisional. Gratis 1000 permintaan/bulan.",
+    "gvisionLink": "Cara mendapatkan Kunci API gratis"
   },
   "recent": {
     "title": "Akses Terbaru",
