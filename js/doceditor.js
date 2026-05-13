@@ -1244,11 +1244,11 @@ window.closeQrModal = function() {
 
 // --- OCR Tool Logic ---
 let _ocrVideoStream = null;
+let _ocrPendingDataUrl = null;
 
 window.openOcrModal = function() {
     document.getElementById('ocr-modal').classList.remove('hidden');
-    document.getElementById('ocr-camera-container').classList.add('hidden');
-    document.getElementById('ocr-loading').classList.add('hidden');
+    resetOcr();
 };
 
 window.closeOcrModal = function() {
@@ -1256,9 +1256,23 @@ window.closeOcrModal = function() {
     document.getElementById('ocr-modal').classList.add('hidden');
 };
 
+window.resetOcr = function() {
+    _ocrPendingDataUrl = null;
+    stopOcrCamera();
+    document.getElementById('ocr-view-initial').classList.remove('hidden');
+    document.getElementById('ocr-view-preview').classList.add('hidden');
+    document.getElementById('ocr-view-result').classList.add('hidden');
+    document.getElementById('ocr-camera-container').classList.add('hidden');
+    document.getElementById('ocr-loading').classList.add('hidden');
+    document.getElementById('ocr-scan-line').classList.add('hidden');
+    document.getElementById('ocr-progress-bar').style.width = '0%';
+};
+
 window.startOcrCamera = async function() {
+    resetOcr();
     const video = document.getElementById('ocr-video');
     const container = document.getElementById('ocr-camera-container');
+    document.getElementById('ocr-view-initial').classList.add('hidden');
     container.classList.remove('hidden');
     container.classList.add('flex');
     
@@ -1269,7 +1283,7 @@ window.startOcrCamera = async function() {
         video.play();
     } catch (err) {
         showToast('無法存取相機: ' + err.message, 'error');
-        stopOcrCamera();
+        resetOcr();
     }
 };
 
@@ -1279,8 +1293,10 @@ window.stopOcrCamera = function() {
         _ocrVideoStream = null;
     }
     const container = document.getElementById('ocr-camera-container');
-    container.classList.add('hidden');
-    container.classList.remove('flex');
+    if (container) {
+        container.classList.add('hidden');
+        container.classList.remove('flex');
+    }
 };
 
 window.takeOcrPhoto = function() {
@@ -1294,7 +1310,7 @@ window.takeOcrPhoto = function() {
     
     stopOcrCamera();
     const dataUrl = canvas.toDataURL('image/png');
-    performOcr(dataUrl);
+    showOcrPreview(dataUrl);
 };
 
 window.triggerOcrFileUpload = function() { document.getElementById('ocr-file-input').click(); };
@@ -1318,7 +1334,7 @@ document.addEventListener('paste', function(e) {
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     if (!document.getElementById('ocr-modal').classList.contains('hidden')) {
-                        performOcr(event.target.result);
+                        showOcrPreview(event.target.result);
                     } else if (!document.getElementById('qr-modal').classList.contains('hidden')) {
                         window.decodeQrFromImage(event.target.result);
                     }

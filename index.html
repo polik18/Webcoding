@@ -352,35 +352,34 @@
 
         <div id="visual-container" class="hidden flex-col bg-white dark:bg-gray-900 transition-all duration-300" style="min-width:200px; overflow:hidden">
             <div class="flex items-center p-1.5 sm:p-2 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm flex-shrink-0 overflow-x-auto whitespace-nowrap hide-scrollbar">
-                <button onclick="execCmd('bold')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Bold" data-i18n-title="visual.bold"><i class="fa-solid fa-bold"></i></button>
-                <button onclick="execCmd('italic')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Italic" data-i18n-title="visual.italic"><i class="fa-solid fa-italic"></i></button>
-                <button onclick="execCmd('underline')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Underline" data-i18n-title="visual.underline"><i class="fa-solid fa-underline"></i></button>
+                <button onclick="execCmd('bold')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 hover:text-violet-600 rounded transition-colors" title="Bold"><i class="fa-solid fa-bold"></i></button>
+                <button onclick="execCmd('italic')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 hover:text-violet-600 rounded transition-colors" title="Italic"><i class="fa-solid fa-italic"></i></button>
+                <button onclick="execCmd('underline')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 hover:text-violet-600 rounded transition-colors" title="Underline"><i class="fa-solid fa-underline"></i></button>
+                <button onclick="execCmd('strikeThrough')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 hover:text-violet-600 rounded transition-colors" title="Strikethrough"><i class="fa-solid fa-strikethrough"></i></button>
                 
                 <div class="w-px h-5 sm:h-6 bg-gray-300 dark:bg-gray-600 mx-1 flex-shrink-0"></div>
                 
-                <button onclick="execCmd('justifyLeft')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Align Left" data-i18n-title="visual.alignLeft"><i class="fa-solid fa-align-left"></i></button>
-                <button onclick="execCmd('justifyCenter')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Align Center" data-i18n-title="visual.alignCenter"><i class="fa-solid fa-align-center"></i></button>
-                <button onclick="execCmd('justifyRight')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Align Right" data-i18n-title="visual.alignRight"><i class="fa-solid fa-align-right"></i></button>
+                <button onclick="execCmd('justifyLeft')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Align Left"><i class="fa-solid fa-align-left"></i></button>
+                <button onclick="execCmd('justifyCenter')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Align Center"><i class="fa-solid fa-align-center"></i></button>
                 
                 <div class="w-px h-5 sm:h-6 bg-gray-300 dark:bg-gray-600 mx-1 flex-shrink-0"></div>
                 
-                <button onclick="execCmd('formatBlock', 'H1')" class="p-1 sm:p-2 flex-shrink-0 font-bold text-sm sm:text-base text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="H1" data-i18n-title="visual.h1">H1</button>
-                <button onclick="execCmd('formatBlock', 'H2')" class="p-1 sm:p-2 flex-shrink-0 font-bold text-sm sm:text-base text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="H2" data-i18n-title="visual.h2">H2</button>
-                <input type="color" onmousedown="saveVisualSelection()" onchange="applyTextColor(this.value)" class="w-6 h-6 sm:w-8 sm:h-8 p-0 border-0 rounded cursor-pointer ms-1 flex-shrink-0" title="Text Color" data-i18n-title="visual.textColor">
+                <button onclick="execCmd('formatBlock', 'H1')" class="p-1 sm:p-2 flex-shrink-0 font-bold text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="H1">H1</button>
+                <button onclick="execCmd('formatBlock', 'H2')" class="p-1 sm:p-2 flex-shrink-0 font-bold text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="H2">H2</button>
+                <button onclick="execCmd('formatBlock', 'BLOCKQUOTE')" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Quote"><i class="fa-solid fa-quote-left"></i></button>
                 
                 <div class="w-px h-5 sm:h-6 bg-gray-300 dark:bg-gray-600 mx-1 flex-shrink-0"></div>
                 
-                <button onclick="insertImagePrompt()" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Insert Image" data-i18n-title="visual.insertImg"><i class="fa-regular fa-image"></i></button>
-                <button onclick="insertLinkPrompt()" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Insert Link" data-i18n-title="visual.insertLink"><i class="fa-solid fa-link"></i></button>
+                <button onclick="insertImagePrompt()" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-600 rounded transition-colors" title="Insert Image"><i class="fa-regular fa-image"></i></button>
+                <button onclick="insertLinkPrompt()" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 rounded transition-colors" title="Insert Link"><i class="fa-solid fa-link"></i></button>
                 
                 <div class="w-px h-5 sm:h-6 bg-gray-300 dark:bg-gray-600 mx-1 flex-shrink-0"></div>
                 
-                <button onclick="insertTablePrompt()" class="py-1 px-2 flex-shrink-0 flex items-center gap-1 sm:gap-2 text-[11px] sm:text-sm font-medium bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-800/50 rounded transition-colors border border-blue-200 dark:border-blue-800" title="Table" data-i18n-title="visual.insertTableTitle"><i class="fa-solid fa-table"></i> <span class="hidden sm:inline" data-i18n="visual.insertTable"></span></button>
-                <div class="flex items-center text-[10px] sm:text-xs font-bold text-gray-600 dark:text-gray-300 gap-0.5 sm:gap-1 ms-1 bg-gray-100 dark:bg-gray-800 p-0.5 sm:p-1 rounded border border-gray-200 dark:border-gray-700 flex-shrink-0">
-                    <button onclick="addTableRow()" class="px-1.5 py-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="+Row" data-i18n-title="visual.rowAddTitle" data-i18n="visual.rowAdd"></button>
-                    <button onclick="addTableColumn()" class="px-1.5 py-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="+Col" data-i18n-title="visual.colAddTitle" data-i18n="visual.colAdd"></button>
-                    <button onclick="removeTableRow()" class="px-1.5 py-1 hover:bg-red-100 text-red-500 rounded transition-colors" title="-Row" data-i18n-title="visual.rowDelTitle" data-i18n="visual.rowDel"></button>
-                    <button onclick="removeTableColumn()" class="px-1.5 py-1 hover:bg-red-100 text-red-500 rounded transition-colors" title="-Col" data-i18n-title="visual.colDelTitle" data-i18n="visual.colDel"></button>
+                <button onclick="insertTablePrompt()" class="py-1 px-2 flex-shrink-0 flex items-center gap-1 text-[11px] font-medium bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors shadow-sm" title="Table"><i class="fa-solid fa-table"></i> <span class="hidden sm:inline">Table</span></button>
+                <div class="flex items-center text-[10px] sm:text-xs font-bold text-gray-600 dark:text-gray-300 gap-0.5 ms-1 bg-gray-100 dark:bg-gray-800 p-0.5 rounded border border-gray-200 dark:border-gray-700 flex-shrink-0">
+                    <button onclick="addTableRow()" class="px-1.5 py-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded" title="+Row">+R</button>
+                    <button onclick="addTableColumn()" class="px-1.5 py-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded" title="+Col">+C</button>
+                    <button onclick="removeTableRow()" class="px-1.5 py-1 hover:bg-red-100 text-red-500 rounded" title="-Row">-R</button>
                 </div>
             </div>
             <iframe id="visual-frame" class="w-full flex-grow bg-white border-none"></iframe>
@@ -653,66 +652,127 @@
         </div>
     </div>
 
-    <!-- OCR Tool Modal -->
+    <!-- OCR Tool Modal (Redesigned) -->
     <div id="ocr-modal" class="hidden fixed inset-0 z-[300] flex items-center justify-center bg-black/60 backdrop-blur-sm">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col max-h-[90vh]">
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-language text-violet-500 text-xl"></i>
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-white" data-i18n="nav.ocrTitle">圖片文字辨識 (OCR)</h3>
+        <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col max-h-[90vh]">
+            <!-- Header -->
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between bg-violet-500 text-white">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-language text-xl text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold">智能 OCR 文字辨識</h3>
+                        <p class="text-[10px] text-violet-100 opacity-80 uppercase tracking-widest">AI Vision Studio</p>
+                    </div>
                 </div>
-                <button onclick="closeOcrModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition">
-                    <i class="fa-solid fa-xmark text-xl"></i>
+                <button onclick="closeOcrModal()" class="w-8 h-8 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full transition">
+                    <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
             
-            <div class="p-6 overflow-y-auto space-y-6">
-                <!-- Language Selection -->
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">辨識語言</label>
-                    <select id="ocr-lang-select" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-violet-500 outline-none transition">
-                        <option value="chi_tra+eng">繁體中文 + English</option>
-                        <option value="chi_sim+eng">简体中文 + English</option>
-                        <option value="eng">English Only</option>
-                        <option value="jpn">日本語</option>
-                    </select>
-                </div>
+            <div class="flex-1 overflow-y-auto p-0 flex flex-col md:flex-row">
+                <!-- Sidebar / Settings -->
+                <div class="w-full md:w-64 bg-gray-50 dark:bg-gray-900/50 p-6 border-r border-gray-200 dark:border-gray-700 space-y-6">
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">辨識語言設定</label>
+                        <select id="ocr-lang-select" class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-violet-500 outline-none transition">
+                            <option value="chi_tra+eng">繁體中文 + English</option>
+                            <option value="chi_sim+eng">简体中文 + English</option>
+                            <option value="eng">English Only</option>
+                            <option value="jpn+eng">日本語 + English</option>
+                            <option value="kor+eng">한국어 + English</option>
+                        </select>
+                    </div>
 
-                <div class="grid grid-cols-3 gap-3">
-                    <button onclick="startOcrCamera()" class="flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-violet-500 dark:hover:border-violet-500 hover:bg-violet-50 dark:hover:bg-violet-900/10 transition-all group">
-                        <i class="fa-solid fa-camera text-2xl text-gray-400 group-hover:text-violet-500"></i>
-                        <span class="text-xs font-medium text-gray-600 dark:text-gray-400 group-hover:text-violet-600 text-center">相機拍照</span>
-                    </button>
-                    <button onclick="triggerOcrFileUpload()" class="flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-emerald-500 dark:hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/10 transition-all group">
-                        <i class="fa-solid fa-file-image text-2xl text-gray-400 group-hover:text-emerald-500"></i>
-                        <span class="text-xs font-medium text-gray-600 dark:text-gray-400 group-hover:text-emerald-600 text-center">上傳圖片</span>
+                    <div class="space-y-3">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">輸入來源</label>
+                        <button onclick="startOcrCamera()" class="w-full flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-violet-500 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition group">
+                            <i class="fa-solid fa-camera text-gray-400 group-hover:text-violet-500"></i>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">相機拍照</span>
+                        </button>
+                        <button onclick="triggerOcrFileUpload()" class="w-full flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition group">
+                            <i class="fa-solid fa-file-image text-gray-400 group-hover:text-emerald-500"></i>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">上傳檔案</span>
+                        </button>
+                        <button onclick="triggerOcrPaste()" class="w-full flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition group">
+                            <i class="fa-solid fa-clipboard text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">貼上圖片</span>
+                        </button>
                         <input type="file" id="ocr-file-input" class="hidden" accept="image/*" onchange="handleOcrFileUpload(event)">
-                    </button>
-                    <button onclick="triggerOcrPaste()" class="flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all group">
-                        <i class="fa-solid fa-clipboard text-2xl text-gray-400 group-hover:text-blue-500"></i>
-                        <span class="text-xs font-medium text-gray-600 dark:text-gray-400 group-hover:text-blue-600 text-center">貼上圖片</span>
-                    </button>
-                </div>
-
-                <div id="ocr-camera-container" class="hidden flex-col items-center gap-3">
-                    <div class="relative w-full max-w-[400px] aspect-video rounded-xl overflow-hidden bg-black shadow-inner border border-gray-200 dark:border-gray-700">
-                        <video id="ocr-video" class="w-full h-full object-cover" playsinline></video>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="takeOcrPhoto()" class="px-6 py-2 text-sm bg-violet-600 text-white hover:bg-violet-700 rounded-lg font-bold shadow-lg shadow-violet-600/30 transition">拍照辨識</button>
-                        <button onclick="stopOcrCamera()" class="px-4 py-2 text-sm bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg font-bold transition">取消</button>
                     </div>
                 </div>
 
-                <div id="ocr-loading" class="hidden flex-col items-center justify-center p-6 bg-violet-50 dark:bg-violet-900/20 rounded-xl border border-violet-100 dark:border-violet-800">
-                    <i class="fa-solid fa-circle-notch fa-spin text-4xl text-violet-500 mb-4"></i>
-                    <p class="text-sm font-bold text-violet-700 dark:text-violet-300" id="ocr-loading-text">正在分析圖片文字，這可能需要幾秒鐘...</p>
-                    <p class="text-xs text-violet-500/70 dark:text-violet-400/70 mt-2 text-center">初次使用特定語言可能需下載語言模型包</p>
+                <!-- Main Content Area -->
+                <div class="flex-1 p-6 flex flex-col min-h-[300px]">
+                    <!-- Step 1: Drop/Preview Area -->
+                    <div id="ocr-view-initial" class="flex-1 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl flex flex-col items-center justify-center p-8 text-center bg-gray-50/50 dark:bg-gray-800/30">
+                        <i class="fa-solid fa-cloud-arrow-up text-5xl text-gray-200 dark:text-gray-700 mb-4"></i>
+                        <h4 class="text-sm font-bold text-gray-600 dark:text-gray-400">尚未選取圖片</h4>
+                        <p class="text-xs text-gray-400 mt-2">請從左側選擇來源，或直接拖曳圖片到此處</p>
+                    </div>
+
+                    <!-- Step 2: Image Preview -->
+                    <div id="ocr-view-preview" class="hidden flex-1 flex flex-col gap-4">
+                        <div class="relative flex-1 bg-black rounded-xl overflow-hidden shadow-inner border border-gray-200 dark:border-gray-700">
+                            <img id="ocr-preview-img" class="w-full h-full object-contain">
+                            <div id="ocr-scan-line" class="hidden absolute top-0 left-0 w-full h-0.5 bg-violet-400 shadow-[0_0_15px_rgba(167,139,250,0.8)] z-10 animate-scan"></div>
+                        </div>
+                        <button id="ocr-start-btn" onclick="startPerformingOcr()" class="w-full py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-bold shadow-lg shadow-violet-600/30 transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-magnifying-glass"></i> 開始辨識文字
+                        </button>
+                    </div>
+
+                    <!-- Step 3: Result View -->
+                    <div id="ocr-view-result" class="hidden flex-1 flex flex-col gap-4">
+                        <div class="flex-1 grid grid-cols-1 gap-4 overflow-hidden">
+                            <div class="h-1/3 bg-gray-100 dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+                                <img id="ocr-result-img" class="w-full h-full object-contain">
+                            </div>
+                            <div class="h-2/3 flex flex-col">
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">辨識結果 (可直接編輯修正)</label>
+                                <textarea id="ocr-result-text" class="flex-1 w-full p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-mono focus:ring-2 focus:ring-violet-500 outline-none resize-none"></textarea>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="resetOcr()" class="flex-1 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold transition">重新開始</button>
+                            <button onclick="saveOcrResult()" class="flex-[2] py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-lg shadow-emerald-600/30 transition">儲存為新檔案</button>
+                        </div>
+                    </div>
+
+                    <!-- Camera View -->
+                    <div id="ocr-camera-container" class="hidden flex-1 flex flex-col gap-4">
+                        <div class="relative flex-1 bg-black rounded-xl overflow-hidden shadow-inner border border-gray-200 dark:border-gray-700">
+                            <video id="ocr-video" class="w-full h-full object-cover" playsinline></video>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="stopOcrCamera()" class="flex-1 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold transition">取消</button>
+                            <button onclick="takeOcrPhoto()" class="flex-[2] py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-bold shadow-lg shadow-violet-600/30 transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-camera"></i> 拍照
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Loading State Overlay -->
+                    <div id="ocr-loading" class="hidden absolute inset-0 z-20 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm flex-col items-center justify-center p-6 text-center">
+                        <div class="relative w-20 h-20 mb-4">
+                            <i class="fa-solid fa-circle-notch fa-spin text-5xl text-violet-500"></i>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <i class="fa-solid fa-brain text-xl text-violet-400"></i>
+                            </div>
+                        </div>
+                        <p class="text-sm font-black text-gray-900 dark:text-white" id="ocr-loading-text">正在分析圖片文字...</p>
+                        <div class="w-48 h-1 bg-gray-200 dark:bg-gray-700 rounded-full mt-4 overflow-hidden">
+                            <div id="ocr-progress-bar" class="w-0 h-full bg-violet-500 transition-all"></div>
+                        </div>
+                        <p class="text-[10px] text-gray-400 mt-2 uppercase tracking-tighter">AI 語言模型處理中，請稍候</p>
+                    </div>
                 </div>
             </div>
             
-            <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 text-center">
-                <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Powered by Tesseract.js</p>
+            <div class="px-6 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                <p class="text-[9px] text-gray-400 font-bold">OCR Powered by Tesseract.js</p>
+                <p class="text-[9px] text-gray-400 font-bold">WebPad++ Visual Intelligence v2.0</p>
             </div>
         </div>
     </div>
@@ -753,7 +813,7 @@
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <i class="fa-solid fa-globe text-blue-500 text-xl"></i>
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">網站 SEO 工具</h3>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">網站 SEO 專家工具</h3>
                 </div>
                 <button onclick="closeSeoModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition">
                     <i class="fa-solid fa-xmark text-xl"></i>
@@ -761,83 +821,116 @@
             </div>
             
             <div class="flex border-b border-gray-200 dark:border-gray-700">
-                <button id="seo-tab-sitemap" onclick="switchSeoTab('sitemap')" class="flex-1 py-3 text-sm font-bold border-b-2 border-blue-500 text-blue-600 transition-colors">Sitemap 產生器</button>
-                <button id="seo-tab-robots" onclick="switchSeoTab('robots')" class="flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">Robots.txt 產生器</button>
+                <button onclick="switchSeoTab('sitemap')" id="seo-tab-sitemap" class="flex-1 py-3 text-sm font-bold border-b-2 border-blue-500 text-blue-600 transition-colors">Sitemap</button>
+                <button onclick="switchSeoTab('robots')" id="seo-tab-robots" class="flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">Robots.txt</button>
+                <button onclick="switchSeoTab('audit')" id="seo-tab-audit" class="flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+                    <i class="fa-solid fa-magnifying-glass-chart mr-1"></i> 診斷與預覽
+                </button>
             </div>
-
-            <div class="flex-1 overflow-y-auto">
-                <!-- Sitemap Panel -->
-                <div id="seo-panel-sitemap" class="p-6 space-y-6">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">網站根網址 (Base URL)</label>
-                        <input type="url" id="seo-sitemap-baseurl" placeholder="https://www.yourdomain.com" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition" value="https://example.com">
+            
+            <div class="p-6 overflow-y-auto bg-gray-50 dark:bg-gray-900/50 flex-1">
+                <!-- Sitemap Tab -->
+                <div id="seo-content-sitemap" class="space-y-4">
+                    <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800 flex items-start gap-3">
+                        <i class="fa-solid fa-circle-info text-blue-500 mt-1"></i>
+                        <p class="text-xs text-blue-700 dark:text-blue-300">
+                            Sitemap 會自動掃描您的工作區，將所有 HTML 檔案列入索引，幫助搜尋引擎更快發現您的網頁。
+                        </p>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">網站基本路徑 (Base URL)</label>
+                        <input type="text" id="sitemap-base-url" placeholder="https://example.com/" class="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
                     
                     <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">更新頻率 (Changefreq)</label>
-                            <select id="seo-sitemap-freq" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none">
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">更新頻率</label>
+                            <select id="sitemap-changefreq" class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                                 <option value="always">Always</option>
                                 <option value="hourly">Hourly</option>
                                 <option value="daily" selected>Daily</option>
                                 <option value="weekly">Weekly</option>
                                 <option value="monthly">Monthly</option>
-                                <option value="yearly">Yearly</option>
-                                <option value="never">Never</option>
                             </select>
                         </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">優先權 (Priority)</label>
-                            <select id="seo-sitemap-priority" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none">
-                                <option value="1.0">1.0 (Highest)</option>
-                                <option value="0.8" selected>0.8 (High)</option>
-                                <option value="0.5">0.5 (Normal)</option>
-                                <option value="0.3">0.3 (Low)</option>
-                            </select>
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">優先權 (Priority)</label>
+                            <input type="number" id="sitemap-priority" value="0.8" step="0.1" min="0" max="1.0" class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                         </div>
                     </div>
                     
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">網頁路徑清單</label>
-                        <textarea id="seo-sitemap-paths" rows="4" placeholder="/index.html&#10;/about.html&#10;/contact/" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition font-mono text-sm"></textarea>
-                        <div class="mt-2 text-right">
-                            <button onclick="autoScanSitemap()" class="px-4 py-1.5 text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg font-bold transition">
-                                <i class="fa-solid fa-magnifying-glass mr-1"></i> 自動掃描工作區檔案
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <button onclick="generateSitemap()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-600/20 transition-all active:scale-95">產生並儲存 sitemap.xml</button>
+                    <button onclick="generateSitemap()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> 產生 sitemap.xml
+                    </button>
                 </div>
 
-                <!-- Robots.txt Panel -->
-                <div id="seo-panel-robots" class="hidden p-6 space-y-6">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">全域訪問權限 (User-agent: *)</label>
-                        <div class="flex gap-4">
-                            <label class="flex items-center gap-2 cursor-pointer group">
-                                <input type="radio" name="seo-robots-global" value="allow_all" checked class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600">
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-200 group-hover:text-blue-600">全部開放 (預設)</span>
-                            </label>
-                            <label class="flex items-center gap-2 cursor-pointer group">
-                                <input type="radio" name="seo-robots-global" value="disallow_all" class="w-4 h-4 text-red-600 border-gray-300 focus:ring-red-500 dark:bg-gray-700 dark:border-gray-600">
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-200 group-hover:text-red-600">完全阻擋</span>
-                            </label>
+                <!-- Robots.txt Tab -->
+                <div id="seo-content-robots" class="hidden space-y-4">
+                    <div class="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <div>
+                            <div class="font-bold text-gray-900 dark:text-white">全面開放 (Allow All)</div>
+                            <div class="text-xs text-gray-500">允許所有搜尋引擎爬蟲存取您的網站</div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="robots-allow-all" checked class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        </label>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">禁止爬取的路徑 (Disallow Paths)</label>
+                        <textarea id="robots-disallow" placeholder="/admin/\n/private/" class="w-full h-24 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+                    </div>
+
+                    <button onclick="generateRobotsTxt()" class="w-full py-3 bg-gray-900 dark:bg-blue-600 hover:bg-black dark:hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-robot"></i> 產生 robots.txt
+                    </button>
+                </div>
+
+                <!-- SEO Audit Tab -->
+                <div id="seo-content-audit" class="hidden space-y-6">
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm font-bold text-gray-700 dark:text-gray-300">頁面診斷報告 (Current Page Audit)</div>
+                        <button onclick="runSeoAudit()" class="px-3 py-1 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-lg transition shadow-sm flex items-center gap-1">
+                            <i class="fa-solid fa-rotate"></i> 重新分析
+                        </button>
+                    </div>
+
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 flex items-center gap-6 shadow-sm">
+                        <div class="relative w-24 h-24 flex-shrink-0">
+                            <svg class="w-full h-full" viewBox="0 0 36 36">
+                                <path class="text-gray-100 dark:text-gray-700 stroke-current" stroke-width="3" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path id="seo-score-circle" class="text-emerald-500 stroke-current transition-all duration-1000" stroke-dasharray="0, 100" stroke-width="3" stroke-linecap="round" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span id="seo-score-text" class="text-2xl font-black text-gray-900 dark:text-white">--</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div id="seo-score-label" class="text-lg font-bold text-gray-900 dark:text-white">尚未分析</div>
+                            <div class="text-xs text-gray-500">點擊「重新分析」來獲取優化建議</div>
                         </div>
                     </div>
-                    
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">阻擋特定爬蟲 (Disallow Bots)</label>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="bot-gpt" class="seo-bot-checkbox rounded text-blue-600" value="GPTBot"><span class="text-sm text-gray-700 dark:text-gray-300">GPTBot (OpenAI)</span></label>
-                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="bot-cc" class="seo-bot-checkbox rounded text-blue-600" value="CCBot"><span class="text-sm text-gray-700 dark:text-gray-300">CCBot (CommonCrawl)</span></label>
-                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="bot-baidu" class="seo-bot-checkbox rounded text-blue-600" value="Baiduspider"><span class="text-sm text-gray-700 dark:text-gray-300">Baiduspider</span></label>
-                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="bot-yandex" class="seo-bot-checkbox rounded text-blue-600" value="Yandex"><span class="text-sm text-gray-700 dark:text-gray-300">Yandex</span></label>
+
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">搜尋結果預覽 (Google SERP Preview)</label>
+                        <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                            <div id="preview-google-url" class="text-[14px] text-gray-600 dark:text-gray-400 mb-1 truncate flex items-center gap-1">
+                                <i class="fa-solid fa-globe text-[12px]"></i> example.com › page
+                            </div>
+                            <div id="preview-google-title" class="text-[20px] text-blue-700 dark:text-blue-400 font-medium mb-1 hover:underline cursor-pointer">Page Title will appear here</div>
+                            <div id="preview-google-desc" class="text-[14px] text-gray-700 dark:text-gray-300 leading-normal line-clamp-2">
+                                這裡會顯示網頁的描述文字（Meta Description）。良好的描述可以大幅提升使用者的點擊率。
+                            </div>
                         </div>
                     </div>
-                    
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">阻擋特定目錄 (Disallow Paths)</label>
+
+                    <div class="space-y-3" id="seo-audit-results"></div>
+                </div>
+            </div>
+        </div>
+    </div>                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">阻擋特定目錄 (Disallow Paths)</label>
                         <textarea id="seo-robots-paths" rows="3" placeholder="/admin/&#10;/private/&#10;/api/" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition font-mono text-sm"></textarea>
                         <p class="text-[10px] text-gray-400 mt-1">一行一個目錄，例如 /admin/ 或是 /login.html</p>
                     </div>
@@ -854,6 +947,7 @@
     </div>
 
     <!-- Core Scripts -->
+    <script src="js/seo.js"></script>
     <script src="js/recent.js"></script>
     <script src="js/i18n.js"></script>
     <script src="js/filesystem.js"></script>

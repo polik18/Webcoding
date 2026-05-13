@@ -487,20 +487,95 @@ function switchToSpreadsheet() {
 function syncCodeToVisual() {
     const frame = document.getElementById('visual-frame');
     const doc = frame.contentDocument || frame.contentWindow.document;
+    const isDark = document.documentElement.classList.contains('dark');
     
     let content = editor.getValue();
     const tab = getActive();
     
-    // Check if it's a markdown file
-    if (tab && (tab.docType === 'md' || tab.docType === 'markdown')) {
-        if (typeof marked !== 'undefined') {
-            // Apply markdown to HTML conversion with a basic wrapper for styling
-            content = '<!DOCTYPE html>\n<html>\n<head>\n<style>\nbody { font-family: sans-serif; line-height: 1.6; padding: 20px; }\nblockquote { border-left: 4px solid #ccc; margin: 0; padding-left: 16px; color: #666; }\ncode { background: #f4f4f4; padding: 2px 4px; border-radius: 4px; font-family: monospace; }\npre { background: #f4f4f4; padding: 10px; overflow-x: auto; }\n</style>\n</head>\n<body>\n' + marked.parse(content) + '\n</body>\n</html>';
+    // Professional Visual Theme CSS
+    const themeCss = `
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+        :root {
+            --bg: ${isDark ? '#0f172a' : '#ffffff'};
+            --text: ${isDark ? '#e2e8f0' : '#1e293b'};
+            --link: ${isDark ? '#60a5fa' : '#2563eb'};
+            --code-bg: ${isDark ? '#1e293b' : '#f1f5f9'};
+            --border: ${isDark ? '#334155' : '#e2e8f0'};
+            --h-color: ${isDark ? '#f8fafc' : '#0f172a'};
+            --blockquote: ${isDark ? '#475569' : '#94a3b8'};
         }
-    }
+        body { 
+            font-family: 'Inter', -apple-system, sans-serif; 
+            line-height: 1.7; 
+            color: var(--text); 
+            background: var(--bg); 
+            padding: 40px; 
+            max-width: 900px; 
+            margin: 0 auto; 
+            transition: background 0.3s, color 0.3s;
+        }
+        h1, h2, h3, h4 { color: var(--h-color); font-weight: 700; margin-top: 2em; margin-bottom: 1em; line-height: 1.3; }
+        h1 { font-size: 2.25rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
+        h2 { font-size: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
+        p { margin-bottom: 1.25em; }
+        a { color: var(--link); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        code { 
+            font-family: 'JetBrains Mono', monospace; 
+            background: var(--code-bg); 
+            padding: 0.2em 0.4em; 
+            border-radius: 6px; 
+            font-size: 0.9em; 
+        }
+        pre { 
+            background: var(--code-bg); 
+            padding: 1.5rem; 
+            border-radius: 12px; 
+            overflow-x: auto; 
+            border: 1px solid var(--border);
+            margin: 1.5em 0;
+        }
+        pre code { background: transparent; padding: 0; }
+        blockquote { 
+            border-left: 4px solid var(--border); 
+            margin: 1.5em 0; 
+            padding: 0.5em 1.5rem; 
+            color: var(--blockquote); 
+            background: ${isDark ? 'rgba(51,65,85,0.2)' : 'rgba(241,245,249,0.5)'};
+            border-radius: 0 8px 8px 0;
+        }
+        table { width: 100%; border-collapse: collapse; margin: 1.5em 0; border: 1px solid var(--border); }
+        th, td { border: 1px solid var(--border); padding: 12px 15px; text-align: left; }
+        th { background: var(--code-bg); font-weight: 600; }
+        img { max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        hr { border: 0; border-top: 2px solid var(--border); margin: 2em 0; }
+        ul, ol { padding-left: 1.5em; margin-bottom: 1.25em; }
+        li { margin-bottom: 0.5em; }
+    `;
+
+    const isMarkdown = tab && (tab.docType === 'md' || tab.docType === 'markdown');
+    let htmlContent = isMarkdown ? (typeof marked !== 'undefined' ? marked.parse(content) : content) : content;
     
-    doc.open(); doc.write(content); doc.close();
-    if (doc.body) doc.body.contentEditable = true;
+    const fullHtml = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>${themeCss}</style>
+</head>
+<body spellcheck="false">
+    ${htmlContent}
+</body>
+</html>`;
+
+    doc.open();
+    doc.write(fullHtml);
+    doc.close();
+    
+    if (doc.body) {
+        doc.body.contentEditable = true;
+        // Listen for changes to sync back
+        doc.body.addEventListener('input', syncVisualToCode);
+    }
 }
 
 function formatHTML(html) {
@@ -523,30 +598,43 @@ let turndownService = null;
 function syncVisualToCode() {
     clearTimeout(syncTimeout);
     syncTimeout = setTimeout(() => {
-        const doc = document.getElementById('visual-frame').contentWindow.document;
+        const frame = document.getElementById('visual-frame');
+        const doc = frame.contentDocument || frame.contentWindow.document;
         const tab = getActive();
+        if (!tab) return;
+
         const cursorPos = editor.getCursor();
         isProgrammaticChange = true;
         
-        if (tab && (tab.docType === 'md' || tab.docType === 'markdown')) {
+        if (tab.docType === 'md' || tab.docType === 'markdown') {
             if (typeof TurndownService !== 'undefined') {
                 if (!turndownService) {
-                    turndownService = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' });
+                    turndownService = new TurndownService({ 
+                        headingStyle: 'atx', 
+                        codeBlockStyle: 'fenced',
+                        hr: '---',
+                        bulletListMarker: '-'
+                    });
                 }
+                // Only convert the BODY content to avoid Turndown processing the <style> tags
                 const markdownContent = turndownService.turndown(doc.body.innerHTML);
                 editor.setValue(markdownContent);
             }
         } else {
-            const htmlContent = doc.documentElement.innerHTML;
-            let cleanHTML = '<!DOCTYPE html>\n<html>\n' + htmlContent.replace(/ contenteditable="true"/g, '') + '\n</html>';
-            cleanHTML = formatHTML(cleanHTML);
-            editor.setValue(cleanHTML);
+            // For HTML files, clean up and format
+            const bodyHtml = doc.body.innerHTML;
+            let cleanHTML = bodyHtml.replace(/ contenteditable="true"/g, '');
+            // Wrap back in a basic HTML5 structure if it's a full page
+            if (editor.getValue().toLowerCase().includes('<html')) {
+                cleanHTML = `<!DOCTYPE html>\n<html>\n<head>\n    <meta charset="utf-8">\n    <title>${tab.name}</title>\n</head>\n<body>\n${cleanHTML}\n</body>\n</html>`;
+            }
+            editor.setValue(formatHTML(cleanHTML));
         }
         
         editor.setCursor(cursorPos);
         isProgrammaticChange = false;
         tabManager.markUnsaved();
-    }, 300);
+    }, 500);
 }
 
 let modalCallback = null;
