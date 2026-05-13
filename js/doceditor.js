@@ -1420,27 +1420,81 @@ async function enhanceImageForOcr(dataUrl) {
         img.onload = () => {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            const scale = 2; // Upscale 2x
+            // Upscale 2.5x for better Tesseract DPI
+            const scale = 2.5;
             canvas.width = img.width * scale;
             canvas.height = img.height * scale;
-            ctx.imageSmoothingEnabled = false;
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const data = imageData.data;
+            const gray = new Uint8Array(data.length / 4);
+            
+            // Step 1: Convert to grayscale using luminance weights
             for (let i = 0; i < data.length; i += 4) {
-                const r = data[i]; const g = data[i+1]; const b = data[i+2];
-                const gray = 0.299 * r + 0.587 * g + 0.114 * b;
-                let c = (gray - 128) * 1.3 + 128; // Boost contrast
-                c = Math.max(0, Math.min(255, c));
-                data[i] = data[i+1] = data[i+2] = c;
+                gray[i >> 2] = Math.round(0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2]);
+            }
+            
+            // Step 2: Otsu's automatic threshold binarization
+            const hist = new Array(256).fill(0);
+            for (let v of gray) hist[v]++;
+            const total = gray.length;
+            let sum = 0;
+            for (let t = 0; t < 256; t++) sum += t * hist[t];
+            let sumB = 0, wB = 0, wF = 0, maxVar = 0, threshold = 128;
+            for (let t = 0; t < 256; t++) {
+                wB += hist[t];
+                if (!wB) continue;
+                wF = total - wB;
+                if (!wF) break;
+                sumB += t * hist[t];
+                const mB = sumB / wB;
+                const mF = (sum - sumB) / wF;
+                const varBetween = wB * wF * (mB - mF) ** 2;
+                if (varBetween > maxVar) { maxVar = varBetween; threshold = t; }
+            }
+            
+            // Step 3: Apply threshold — pure black text on white background
+            for (let i = 0; i < data.length; i += 4) {
+                const v = gray[i >> 2] < threshold ? 0 : 255;
+                data[i] = data[i+1] = data[i+2] = v;
+                data[i+3] = 255;
             }
             ctx.putImageData(imageData, 0, 0);
-            resolve(canvas.toDataURL('image/jpeg', 0.95));
+            resolve(canvas.toDataURL('image/png')); // PNG is lossless = better for OCR
         };
         img.onerror = () => resolve(dataUrl);
         img.src = dataUrl;
     });
+}
+
+// ─── Google Cloud Vision API Recognition ────────────────────────────
+async function recognizeWithGoogleVision(imageDataUrl, apiKey) {
+    const base64 = imageDataUrl.split(',')[1];
+    const statusEl = document.getElementById('ocr-gvision-status');
+    if (statusEl) statusEl.textContent = '☁️ 正在呼叫 Google Vision API...';
+    
+    const response = await fetch(
+        `https://vision.googleapis.com/v1/images:annotate?key=${apiKey}`,
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                requests: [{
+                    image: { content: base64 },
+                    features: [{ type: 'TEXT_DETECTION', maxResults: 1 }],
+                    imageContext: { languageHints: ['zh-Hant', 'zh-Hans', 'en'] }
+                }]
+            })
+        }
+    );
+    const data = await response.json();
+    if (data.error) throw new Error(data.error.message);
+    if (statusEl) statusEl.textContent = '✅ Google Vision 辨識完成';
+    const annotations = data.responses && data.responses[0] && data.responses[0].textAnnotations;
+    return annotations && annotations.length > 0 ? annotations[0].description : '';
 }
 
 async function performOcr(imageDataUrl, autoSave = false) {
@@ -1450,20 +1504,43 @@ async function performOcr(imageDataUrl, autoSave = false) {
     }
     
     const loadingEl = document.getElementById('ocr-loading');
-    loadingEl.classList.remove('hidden');
-    loadingEl.classList.add('flex');
+    if (loadingEl) { loadingEl.classList.remove('hidden'); loadingEl.classList.add('flex'); }
     
     const lang = document.getElementById('ocr-lang-select').value || 'chi_tra+eng';
+    const psm = document.getElementById('ocr-mode-select') ? document.getElementById('ocr-mode-select').value : '6';
+    const gvisionKey = (document.getElementById('ocr-gvision-key') || {}).value || localStorage.getItem('gvision_key') || '';
     
     try {
-        const enhancedDataUrl = await enhanceImageForOcr(imageDataUrl);
-        const result = await Tesseract.recognize(enhancedDataUrl, lang);
+        let recognizedText = '';
         
-        loadingEl.classList.add('hidden');
-        loadingEl.classList.remove('flex');
+        if (gvisionKey.trim()) {
+            // ─ Route A: Google Cloud Vision (highest accuracy) ─
+            recognizedText = await recognizeWithGoogleVision(imageDataUrl, gvisionKey.trim());
+        } else {
+            // ─ Route B: Enhanced Tesseract with PSM/OEM and Otsu binarization ─
+            const enhancedDataUrl = await enhanceImageForOcr(imageDataUrl);
+            try {
+                // Try Tesseract v4 createWorker API first
+                const worker = await Tesseract.createWorker(lang, 1);
+                await worker.setParameters({
+                    tessedit_pageseg_mode: psm,
+                    preserve_interword_spaces: '1',
+                });
+                const result = await worker.recognize(enhancedDataUrl);
+                await worker.terminate();
+                recognizedText = result.data.text;
+            } catch (workerErr) {
+                // Fallback: simple recognize() for older Tesseract.js API
+                console.warn('createWorker failed, using simple API:', workerErr);
+                const result = await Tesseract.recognize(enhancedDataUrl, lang);
+                recognizedText = result.data.text;
+            }
+        }
         
-        if (!result.data.text.trim()) {
-            showToast('找不到任何文字', 'info');
+        if (loadingEl) { loadingEl.classList.add('hidden'); loadingEl.classList.remove('flex'); }
+        
+        if (!recognizedText.trim()) {
+            showToast('找不到任何文字，請嘗試切換「照片模式」或改善圖片品質', 'info');
             return;
         }
         
@@ -1472,21 +1549,21 @@ async function performOcr(imageDataUrl, autoSave = false) {
             const filename = `OCR_Result_${dateStr}.txt`;
             closeOcrModal();
             if (typeof tabManager !== 'undefined') {
-                tabManager.createNewTab(filename, result.data.text, false);
+                tabManager.createNewTab(filename, recognizedText, false);
                 showToast('OCR 辨識並匯出完成', 'success');
             }
         } else {
             // Show result view for manual editing
             document.getElementById('ocr-result-img').src = imageDataUrl;
-            document.getElementById('ocr-result-text').value = result.data.text;
+            document.getElementById('ocr-result-text').value = recognizedText;
             switchOcrView('result');
             showToast('辨識完成', 'success');
         }
         
     } catch (e) {
-        loadingEl.classList.add('hidden');
-        loadingEl.classList.remove('flex');
+        if (loadingEl) { loadingEl.classList.add('hidden'); loadingEl.classList.remove('flex'); }
         showToast('OCR 辨識失敗: ' + e.message, 'error');
+        console.error('OCR error:', e);
     }
 }
 

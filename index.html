@@ -676,7 +676,7 @@
             
             <div class="flex-1 overflow-y-auto p-0 flex flex-col md:flex-row">
                 <!-- Sidebar / Settings -->
-                <div class="w-full md:w-64 bg-gray-50 dark:bg-gray-900/50 p-6 border-r border-gray-200 dark:border-gray-700 space-y-6">
+                <div class="w-full md:w-64 bg-gray-50 dark:bg-gray-900/50 p-6 border-r border-gray-200 dark:border-gray-700 space-y-6 overflow-y-auto">
                     <div class="space-y-2">
                         <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">辨識語言設定</label>
                         <select id="ocr-lang-select" class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-violet-500 outline-none transition">
@@ -686,6 +686,16 @@
                             <option value="jpn+eng">日本語 + English</option>
                             <option value="kor+eng">한국어 + English</option>
                         </select>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">辨識模式</label>
+                        <select id="ocr-mode-select" class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-violet-500 outline-none transition">
+                            <option value="6">📄 文件模式（掃描 / 截圖）</option>
+                            <option value="3">📷 照片模式（手機拍照）</option>
+                            <option value="7">📝 單行模式（標籤 / 收据）</option>
+                        </select>
+                        <p class="text-[10px] text-gray-400">文件模式對平整文字效果最佳</p>
                     </div>
 
                     <div class="space-y-3">
@@ -703,6 +713,20 @@
                             <span class="text-sm font-medium text-gray-700 dark:text-gray-300">貼上圖片</span>
                         </button>
                         <input type="file" id="ocr-file-input" class="hidden" accept="image/*" onchange="handleOcrFileUpload(event)">
+                    </div>
+
+                    <!-- Google Vision API (collapsible) -->
+                    <div class="border border-dashed border-gray-300 dark:border-gray-600 rounded-xl overflow-hidden">
+                        <button onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')" class="w-full flex items-center justify-between p-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                            <span>✨ Google Vision API <span class="text-green-500">高精準</span></span>
+                            <i class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-200"></i>
+                        </button>
+                        <div class="hidden p-3 space-y-2 bg-white dark:bg-gray-800">
+                            <p class="text-[10px] text-gray-500">填入 API Key 後，將改用 Google Cloud Vision 引擎，繁體中文準確率接近 99%。免費 1000 次/月。</p>
+                            <input type="password" id="ocr-gvision-key" placeholder="AIza..." class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs font-mono focus:ring-2 focus:ring-green-500 outline-none" oninput="localStorage.setItem('gvision_key', this.value)">
+                            <div id="ocr-gvision-status" class="text-[10px] text-gray-400"></div>
+                            <a href="https://cloud.google.com/vision/docs/setup" target="_blank" class="text-[10px] text-blue-500 hover:underline block">→ 如何申請免費 API Key</a>
+                        </div>
                     </div>
                 </div>
 

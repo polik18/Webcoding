@@ -1951,7 +1951,6 @@ window.autoScanSitemap = function() {
         }
     };
     
-window.autoScanSitemap = function() {
     let htmlFiles = [];
     const scanNode = (node, path) => {
         if (node.type === 'file' && node.name.toLowerCase().endsWith('.html')) {
