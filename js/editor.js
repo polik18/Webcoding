@@ -404,12 +404,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+function _bindVisualFrameInput(doc) {
+    // Remove any existing listener to avoid duplicates, then re-bind.
+    // We store a named function reference on the doc object so we can remove it.
+    if (doc.__visualInputHandler) {
+        doc.body.removeEventListener('input', doc.__visualInputHandler);
+    }
+    doc.__visualInputHandler = () => {
+        const mode = getActive().mode;
+        if (mode === 'visual' || mode === 'split') syncVisualToCode();
+    };
+    doc.body.addEventListener('input', doc.__visualInputHandler);
+}
+
 function initVisualFrame() {
     const doc = document.getElementById('visual-frame').contentWindow.document;
     doc.open(); 
     doc.write('<html><head></head><body style="padding: 20px; font-family: sans-serif;" contenteditable="true"></body></html>'); 
     doc.close();
-    doc.body.addEventListener('input', () => { if (getActive().mode === 'visual') syncVisualToCode(); });
+    _bindVisualFrameInput(doc);
 }
 
 // ─── unified mode-button helper ───────────────────────────────────────────
@@ -488,7 +501,11 @@ function switchToSpreadsheet() {
     if (sc) { sc.style.flexGrow = '1'; sc.classList.remove('hidden'); sc.classList.add('flex'); }
 }
 
+// Prevent re-entrant loops: visual input → syncVisualToCode → editor.setValue → editor.on('change') → syncCodeToVisual
+let isSyncingVisual = false;
+
 function syncCodeToVisual() {
+    if (isSyncingVisual) return;
     const frame = document.getElementById('visual-frame');
     const doc = frame.contentDocument || frame.contentWindow.document;
     const isDark = document.documentElement.classList.contains('dark');
@@ -594,13 +611,11 @@ function syncCodeToVisual() {
     }
     
     if (doc.body) {
-        doc.body.contentEditable = isHtml || isMarkdown;
-        if (isHtml || isMarkdown) {
-            doc.body.removeEventListener('input', syncVisualToCode);
-            doc.body.addEventListener('input', syncVisualToCode);
-        } else {
-            doc.body.removeEventListener('input', syncVisualToCode);
-        }
+        // Always enable contentEditable in visual/split mode so the user can edit the preview
+        const activeMode = tab ? tab.mode : 'code';
+        doc.body.contentEditable = (activeMode === 'visual' || activeMode === 'split') ? 'true' : 'false';
+        // Re-bind the input→sync handler because doc.write() destroys previous listeners
+        _bindVisualFrameInput(doc);
     }
 }
 
@@ -628,7 +643,10 @@ function syncVisualToCode() {
         const doc = frame.contentDocument || frame.contentWindow.document;
         const tab = getActive();
         if (!tab) return;
+        // Only sync back when in visual or split mode
+        if (tab.mode !== 'visual' && tab.mode !== 'split') return;
 
+        isSyncingVisual = true;
         const cursorPos = editor.getCursor();
         isProgrammaticChange = true;
         
@@ -649,7 +667,9 @@ function syncVisualToCode() {
         } else {
             // For HTML files, clean up and format
             const bodyHtml = doc.body.innerHTML;
-            let cleanHTML = bodyHtml.replace(/ contenteditable="true"/g, '');
+            let cleanHTML = bodyHtml
+                .replace(/ contenteditable="(true|false)"/gi, '')
+                .replace(/ contenteditable/gi, '');
             // Wrap back in a basic HTML5 structure if it's a full page
             if (editor.getValue().toLowerCase().includes('<html')) {
                 cleanHTML = `<!DOCTYPE html>\n<html>\n<head>\n    <meta charset="utf-8">\n    <title>${tab.name}</title>\n</head>\n<body>\n${cleanHTML}\n</body>\n</html>`;
@@ -659,6 +679,7 @@ function syncVisualToCode() {
         
         editor.setCursor(cursorPos);
         isProgrammaticChange = false;
+        isSyncingVisual = false;
         tabManager.markUnsaved();
     }, 500);
 }

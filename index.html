@@ -817,24 +817,195 @@
 
     <!-- SEO Tools Modal -->
     <div id="seo-modal" class="hidden fixed inset-0 z-[300] flex items-center justify-center bg-black/60 backdrop-blur-sm">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col max-h-[90vh]">
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-globe text-blue-500 text-xl"></i>
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">網站 SEO 專家工具</h3>
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-3xl mx-4 overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col max-h-[90vh]">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex-shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center"><i class="fa-solid fa-globe text-lg"></i></div>
+                    <div><div class="font-bold text-base">網站 SEO 專家工具</div><div class="text-[10px] opacity-70 uppercase tracking-widest">WebPad++ SEO Expert v2.0</div></div>
                 </div>
-                <button onclick="closeSeoModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
+                <button onclick="closeSeoModal()" class="w-8 h-8 flex items-center justify-center bg-white/10 hover:bg-white/25 rounded-full transition"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            
-            <div class="flex border-b border-gray-200 dark:border-gray-700">
-                <button onclick="switchSeoTab('sitemap')" id="seo-tab-sitemap" class="flex-1 py-3 text-sm font-bold border-b-2 border-blue-500 text-blue-600 transition-colors" data-i18n="seo.sitemapTab">Sitemap</button>
-                <button onclick="switchSeoTab('robots')" id="seo-tab-robots" class="flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors" data-i18n="seo.robotsTab">Robots.txt</button>
-                <button onclick="switchSeoTab('audit')" id="seo-tab-audit" class="flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
-                    <i class="fa-solid fa-magnifying-glass-chart mr-1"></i> <span data-i18n="seo.auditTab">診斷與預覽</span>
-                </button>
+
+            <div class="flex border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+                <button onclick="switchSeoTab('sitemap')" id="seo-tab-sitemap" class="flex-1 py-3 text-sm font-bold border-b-2 border-blue-500 text-blue-600 transition-colors"><i class="fa-solid fa-map mr-1"></i>Sitemap</button>
+                <button onclick="switchSeoTab('robots')"  id="seo-tab-robots"  class="flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"><i class="fa-solid fa-robot mr-1"></i>Robots.txt</button>
+                <button onclick="switchSeoTab('audit')"   id="seo-tab-audit"   class="flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"><i class="fa-solid fa-magnifying-glass-chart mr-1"></i>診斷</button>
             </div>
+
+            <div class="p-5 overflow-y-auto flex-1 space-y-4 bg-gray-50 dark:bg-gray-900/40">
+
+                <!-- ═══ SITEMAP TAB ═══ -->
+                <div id="seo-content-sitemap" class="space-y-4">
+                    <!-- Mode Switch -->
+                    <div class="flex rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 text-sm font-bold">
+                        <button id="sitemap-mode-local"    onclick="switchSitemapMode('local')"    class="flex-1 py-2.5 flex items-center justify-center gap-2 bg-blue-600 text-white shadow transition">
+                            <i class="fa-solid fa-folder-open"></i> 本機工作區
+                        </button>
+                        <button id="sitemap-mode-external" onclick="switchSitemapMode('external')" class="flex-1 py-2.5 flex items-center justify-center gap-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                            <i class="fa-solid fa-globe"></i> 外部網站
+                        </button>
+                    </div>
+
+                    <!-- Base URL (shared) -->
+                    <div class="space-y-1">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">網站基本路徑 (Base URL)</label>
+                        <input type="text" id="sitemap-base-url" placeholder="https://example.com" class="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+
+                    <!-- LOCAL panel -->
+                    <div id="sitemap-local-panel" class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">工作區 HTML 檔案</span>
+                            <div class="flex items-center gap-2">
+                                <span id="sitemap-local-count" class="text-xs text-gray-400"></span>
+                                <button onclick="scanLocalWorkspace()" class="px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition shadow-sm flex items-center gap-1">
+                                    <i class="fa-solid fa-radar"></i> 掃描工作區
+                                </button>
+                            </div>
+                        </div>
+                        <div id="sitemap-local-files" class="min-h-[60px] max-h-[130px] overflow-y-auto p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 text-xs text-gray-400 italic">
+                            點擊「掃描工作區」以列出 HTML 檔案
+                        </div>
+                    </div>
+
+                    <!-- EXTERNAL panel -->
+                    <div id="sitemap-external-panel" class="hidden space-y-3">
+                        <div class="space-y-1">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">目標網站 URL</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="sitemap-external-url" placeholder="https://example.com" class="flex-1 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                <button id="btn-fetch-external" onclick="fetchExternalSitemap()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition shadow-sm whitespace-nowrap flex items-center gap-1">
+                                    <i class="fa-solid fa-rotate"></i> 嘗試自動讀取
+                                </button>
+                            </div>
+                            <p id="external-fetch-status" class="text-xs text-gray-400 mt-1"></p>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">URL 列表（每行一個，可手動貼入）</label>
+                            <textarea id="sitemap-external-urls" rows="5" placeholder="https://example.com/&#10;https://example.com/about/&#10;https://example.com/contact/" class="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none resize-y"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Freq + Priority -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">更新頻率</label>
+                            <select id="sitemap-changefreq" class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                <option value="always">Always</option>
+                                <option value="hourly">Hourly</option>
+                                <option value="daily">Daily</option>
+                                <option value="weekly" selected>Weekly</option>
+                                <option value="monthly">Monthly</option>
+                                <option value="yearly">Yearly</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">優先權 (Priority)</label>
+                            <input type="number" id="sitemap-priority" value="0.8" step="0.1" min="0" max="1.0" class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                    </div>
+
+                    <button onclick="generateSitemap()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> 產生 sitemap.xml
+                    </button>
+                </div>
+
+                <!-- ═══ ROBOTS TAB ═══ -->
+                <div id="seo-content-robots" class="hidden space-y-4">
+                    <div class="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <div>
+                            <div class="font-bold text-gray-900 dark:text-white text-sm">全面開放 (Allow All)</div>
+                            <div class="text-xs text-gray-500">允許所有搜尋引擎爬蟲存取您的網站</div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="robots-allow-all" checked class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        </label>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">禁止爬取的路徑 (每行一個)</label>
+                        <textarea id="robots-disallow" rows="3" placeholder="/admin/&#10;/private/&#10;/tmp/" class="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none resize-y"></textarea>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Sitemap URL（選填，自動填入）</label>
+                        <input type="text" id="robots-sitemap-url" placeholder="https://example.com/sitemap.xml" class="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">額外規則（進階，選填）</label>
+                        <textarea id="robots-extra" rows="2" placeholder="User-agent: Googlebot&#10;Allow: /" class="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none resize-y"></textarea>
+                    </div>
+                    <button onclick="generateRobotsTxt()" class="w-full py-3 bg-gray-900 dark:bg-indigo-600 hover:bg-black dark:hover:bg-indigo-700 text-white rounded-xl font-bold shadow-lg transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-robot"></i> 產生 robots.txt
+                    </button>
+                </div>
+
+                <!-- ═══ AUDIT TAB ═══ -->
+                <div id="seo-content-audit" class="hidden space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm font-bold text-gray-700 dark:text-gray-300">頁面診斷報告 (Current Page Audit)</div>
+                        <div class="flex gap-2">
+                            <button onclick="exportSeoReport()" class="px-3 py-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-xs font-bold rounded-lg transition flex items-center gap-1">
+                                <i class="fa-solid fa-download"></i> 匯出報告
+                            </button>
+                            <button onclick="runSeoAudit()" class="px-3 py-1 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-lg transition shadow-sm flex items-center gap-1">
+                                <i class="fa-solid fa-rotate"></i> 重新分析
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 flex items-center gap-5 shadow-sm">
+                        <div class="relative w-20 h-20 flex-shrink-0">
+                            <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                                <path class="text-gray-100 dark:text-gray-700 stroke-current" stroke-width="3" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                <path id="seo-score-circle" class="text-emerald-500 stroke-current transition-all duration-1000" stroke-dasharray="0, 100" stroke-width="3" stroke-linecap="round" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center"><span id="seo-score-text" class="text-2xl font-black text-gray-900 dark:text-white">--</span></div>
+                        </div>
+                        <div>
+                            <div id="seo-score-label" class="text-base font-bold text-gray-900 dark:text-white">尚未分析</div>
+                            <div class="text-xs text-gray-500 mt-1">點擊「重新分析」獲取優化建議</div>
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">搜尋結果預覽 (Google SERP)</label>
+                        <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                            <div id="preview-google-url" class="text-[13px] text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-1"><i class="fa-solid fa-globe text-[11px]"></i> example.com › page</div>
+                            <div id="preview-google-title" class="text-[18px] text-blue-700 dark:text-blue-400 font-medium mb-1 hover:underline cursor-pointer leading-snug">Page Title will appear here</div>
+                            <div id="preview-google-desc" class="text-[13px] text-gray-600 dark:text-gray-300 leading-normal line-clamp-2">這裡會顯示 Meta Description 的內容。良好的描述可大幅提升點擊率。</div>
+                        </div>
+                    </div>
+                    <div class="space-y-2" id="seo-audit-results"></div>
+                </div>
+
+                <!-- ═══ SHARED OUTPUT PREVIEW ═══ -->
+                <div id="seo-output-preview" class="hidden space-y-3 border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-file-code text-blue-500"></i>
+                            <span id="seo-output-filename" class="text-sm font-bold text-gray-800 dark:text-white"></span>
+                            <span class="text-xs text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full font-bold">產生成功</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="openSeoOutputAsTab()" class="px-3 py-1.5 text-xs bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-bold transition flex items-center gap-1">
+                                <i class="fa-solid fa-file-pen"></i> 在編輯器開啟
+                            </button>
+                            <button onclick="downloadSeoOutput()" class="px-3 py-1.5 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition shadow-sm flex items-center gap-1">
+                                <i class="fa-solid fa-download"></i> 下載檔案
+                            </button>
+                        </div>
+                    </div>
+                    <pre id="seo-output-code" class="w-full max-h-48 overflow-auto p-4 bg-gray-900 text-green-300 rounded-xl text-xs font-mono leading-relaxed whitespace-pre-wrap border border-gray-700"></pre>
+                </div>
+
+            </div>
+
+            <div class="px-5 py-3 bg-gray-50 dark:bg-gray-800/80 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center flex-shrink-0">
+                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">WebPad++ SEO Expert v2.0</span>
+                <div class="flex items-center gap-2"><span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span><span class="text-[10px] text-emerald-600 font-bold">Active</span></div>
+            </div>
+        </div>
+    </div>
+
+
             
             <div class="p-6 overflow-y-auto bg-gray-50 dark:bg-gray-900/50 flex-1">
                 <!-- Sitemap Tab -->
