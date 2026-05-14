@@ -1400,78 +1400,160 @@ document.addEventListener('paste', function(e) {
     }
 });
 
-async function enhanceImageForOcr(dataUrl) {
-    return new Promise((resolve) => {
+// ── PaddleOCR (PP-OCRv5) Engine ─────────────────────────────────────────────
+const PADDLE_CDN_BASE = 'https://cdn.jsdelivr.net/gh/X3ZvaWQ/paddleocr.js@main/assets/';
+let _paddleOcrService = null;
+let _paddleOcrLoading = false;
+
+async function _loadPaddleOcrService() {
+    if (_paddleOcrService) return _paddleOcrService;
+    if (_paddleOcrLoading) {
+        // Wait for the ongoing load to finish
+        while (_paddleOcrLoading) await new Promise(r => setTimeout(r, 200));
+        return _paddleOcrService;
+    }
+    _paddleOcrLoading = true;
+    try {
+        showToast('首次使用 PaddleOCR，正在下載辨識模型 (~20MB)...', 'info');
+
+        // Dynamically import PaddleOCR as an ES module
+        const { PaddleOcrService } = await import('https://cdn.jsdelivr.net/npm/paddleocr@1.1.1/+esm');
+        const ort = window.ort; // loaded via <script src="onnxruntime-web">
+
+        if (!ort) throw new Error('onnxruntime-web 未載入');
+
+        const [detectBuf, recBuf, dictText] = await Promise.all([
+            fetch(PADDLE_CDN_BASE + 'PP-OCRv5_mobile_det_infer.onnx').then(r => { if (!r.ok) throw new Error('det model fetch failed'); return r.arrayBuffer(); }),
+            fetch(PADDLE_CDN_BASE + 'PP-OCRv5_mobile_rec_infer.onnx').then(r => { if (!r.ok) throw new Error('rec model fetch failed'); return r.arrayBuffer(); }),
+            fetch(PADDLE_CDN_BASE + 'ppocrv5_dict.txt').then(r => { if (!r.ok) throw new Error('dict fetch failed'); return r.text(); }),
+        ]);
+
+        const dict = dictText.split('\n').map(s => s.trim()).filter(Boolean);
+
+        _paddleOcrService = await PaddleOcrService.createInstance({
+            ort,
+            detection: {
+                modelBuffer: detectBuf,
+                minimumAreaThreshold: 10,
+                textPixelThreshold: 0.3,
+                paddingBoxVertical: 0.3,
+                paddingBoxHorizontal: 0.5,
+            },
+            recognition: {
+                modelBuffer: recBuf,
+                charactersDictionary: dict,
+                imageHeight: 48,
+            },
+        });
+
+        showToast('PaddleOCR 模型載入完成！', 'success');
+        return _paddleOcrService;
+    } catch (e) {
+        _paddleOcrService = null;
+        throw e;
+    } finally {
+        _paddleOcrLoading = false;
+    }
+}
+
+function _dataUrlToImageData(dataUrl) {
+    return new Promise((resolve, reject) => {
         const img = new Image();
         img.onload = () => {
             const canvas = document.createElement('canvas');
+            // Scale up to at least 1000px wide for better recognition
+            const scale = Math.max(1, Math.min(3, 1500 / img.width));
+            canvas.width = Math.round(img.width * scale);
+            canvas.height = Math.round(img.height * scale);
             const ctx = canvas.getContext('2d');
-            const scale = 2; // Upscale 2x
-            canvas.width = img.width * scale;
-            canvas.height = img.height * scale;
-            ctx.imageSmoothingEnabled = false;
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const data = imageData.data;
-            for (let i = 0; i < data.length; i += 4) {
-                const r = data[i]; const g = data[i+1]; const b = data[i+2];
-                const gray = 0.299 * r + 0.587 * g + 0.114 * b;
-                // Boost contrast significantly to make it more binary, improving OCR
-                let c = (gray - 128) * 2.5 + 128; 
-                c = Math.max(0, Math.min(255, c));
-                data[i] = data[i+1] = data[i+2] = c;
-            }
-            ctx.putImageData(imageData, 0, 0);
-            resolve(canvas.toDataURL('image/jpeg', 0.95));
+            resolve({ data: imageData.data, width: canvas.width, height: canvas.height });
         };
-        img.onerror = () => resolve(dataUrl);
+        img.onerror = reject;
         img.src = dataUrl;
     });
 }
 
-async function performOcr(imageDataUrl, autoSave = false) {
-    if (typeof Tesseract === 'undefined') {
-        showToast('Tesseract.js OCR 引擎尚未載入', 'error');
-        return;
-    }
-    
+async function enhanceImageForOcr(dataUrl) {
+    // Simple pass-through; PaddleOCR handles preprocessing internally
+    return dataUrl;
+}
+
+function _finishOcr(text) {
     const loadingEl = document.getElementById('ocr-loading');
-    loadingEl.classList.remove('hidden');
-    loadingEl.classList.add('flex');
-    
-    const lang = document.getElementById('ocr-lang-select').value || 'chi_tra+eng';
-    
+    if (loadingEl) { loadingEl.classList.add('hidden'); loadingEl.classList.remove('flex'); }
+
+    const cleanedText = window.cleanOcrText(text);
+    if (!cleanedText.trim()) { showToast('找不到任何文字', 'info'); return; }
+
+    const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '').split('.')[0];
+    const filename = `OCR_Result_${dateStr}.txt`;
+    const qrModal = document.getElementById('qr-modal');
+    if (qrModal) qrModal.classList.add('hidden');
+    if (typeof stopOcrCamera === 'function') stopOcrCamera();
+    if (typeof tabManager !== 'undefined') {
+        tabManager.createNewTab(filename, cleanedText, false);
+        showToast('✅ OCR 辨識並匯出完成', 'success');
+    }
+}
+
+async function performOcr(imageDataUrl, autoSave = false) {
+    const loadingEl = document.getElementById('ocr-loading');
+    if (loadingEl) { loadingEl.classList.remove('hidden'); loadingEl.classList.add('flex'); }
+
+    const progressBar = document.getElementById('ocr-progress-bar');
+    if (progressBar) progressBar.style.width = '10%';
+
     try {
-        const enhancedDataUrl = await enhanceImageForOcr(imageDataUrl);
-        const result = await Tesseract.recognize(enhancedDataUrl, lang);
-        
-        loadingEl.classList.add('hidden');
-        loadingEl.classList.remove('flex');
-        
-        const cleanedText = window.cleanOcrText(result.data.text);
-        
-        if (!cleanedText.trim()) {
-            showToast('找不到任何文字', 'info');
+        // ── Try PaddleOCR first ───────────────────────────────────────────────
+        const service = await _loadPaddleOcrService();
+
+        if (progressBar) progressBar.style.width = '40%';
+        const imageInput = await _dataUrlToImageData(imageDataUrl);
+        if (progressBar) progressBar.style.width = '60%';
+
+        const result = await service.recognize(imageInput, {
+            ordering: { sortByReadingOrder: true, sameLineThresholdRatio: 0.5 },
+            onProgress(evt) {
+                if (evt.type === 'rec' && evt.stage === 'item' && progressBar) {
+                    const pct = 60 + Math.round((evt.progress || 0) * 35);
+                    progressBar.style.width = pct + '%';
+                }
+            }
+        });
+
+        if (progressBar) progressBar.style.width = '100%';
+
+        // Collect text: join lines with newline
+        const processed = service.processRecognition(result, { lineMergeThresholdRatio: 0.8 });
+        const text = processed.lines
+            ? processed.lines.map(l => l.map(w => w.text).join('')).join('\n')
+            : processed.text || '';
+
+        _finishOcr(text);
+
+    } catch (paddleErr) {
+        console.warn('PaddleOCR failed, falling back to Tesseract.js:', paddleErr);
+        showToast('PaddleOCR 載入失敗，改用 Tesseract 辨識...', 'info');
+
+        // ── Tesseract fallback ────────────────────────────────────────────────
+        if (typeof Tesseract === 'undefined') {
+            if (loadingEl) { loadingEl.classList.add('hidden'); loadingEl.classList.remove('flex'); }
+            showToast('OCR 引擎無法載入: ' + paddleErr.message, 'error');
             return;
         }
-        
-        // Auto-save to new tab and close modal
-        const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '').split('.')[0];
-        const filename = `OCR_Result_${dateStr}.txt`;
-        // Close QR modal
-        const qrModal = document.getElementById('qr-modal');
-        if (qrModal) qrModal.classList.add('hidden');
-        if (typeof stopOcrCamera === 'function') stopOcrCamera();
-        if (typeof tabManager !== 'undefined') {
-            tabManager.createNewTab(filename, cleanedText, false);
-            showToast('OCR 辨識並匯出完成', 'success');
+        try {
+            const lang = (document.getElementById('ocr-lang-select') || {}).value || 'chi_tra+eng';
+            const tessResult = await Tesseract.recognize(imageDataUrl, lang);
+            if (progressBar) progressBar.style.width = '100%';
+            _finishOcr(tessResult.data.text || '');
+        } catch (tessErr) {
+            if (loadingEl) { loadingEl.classList.add('hidden'); loadingEl.classList.remove('flex'); }
+            showToast('OCR 辨識失敗: ' + tessErr.message, 'error');
         }
-        
-    } catch (e) {
-        loadingEl.classList.add('hidden');
-        loadingEl.classList.remove('flex');
-        showToast('OCR 辨識失敗: ' + e.message, 'error');
     }
 }
 
