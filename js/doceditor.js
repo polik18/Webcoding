@@ -1408,24 +1408,28 @@ let _paddleOcrLoading = false;
 async function _loadPaddleOcrService() {
     if (_paddleOcrService) return _paddleOcrService;
     if (_paddleOcrLoading) {
-        // Wait for the ongoing load to finish
         while (_paddleOcrLoading) await new Promise(r => setTimeout(r, 200));
+        if (!_paddleOcrService) throw new Error('PaddleOCR 初始化失敗');
         return _paddleOcrService;
     }
     _paddleOcrLoading = true;
     try {
         showToast('首次使用 PaddleOCR，正在下載辨識模型 (~20MB)...', 'info');
 
-        // Dynamically import PaddleOCR as an ES module
-        const { PaddleOcrService } = await import('https://cdn.jsdelivr.net/npm/paddleocr@1.1.1/+esm');
-        const ort = window.ort; // loaded via <script src="onnxruntime-web">
+        // Wait for the module bootstrap (set by <script type="module"> in HTML)
+        if (window._paddleOcrReady) await window._paddleOcrReady;
 
+        const PaddleOcrService = window._PaddleOcrService;
+        if (!PaddleOcrService) throw new Error('PaddleOCR ESM 模組無法載入');
+
+        const ort = window.ort;
         if (!ort) throw new Error('onnxruntime-web 未載入');
 
+        const base = window._PADDLE_CDN_BASE || PADDLE_CDN_BASE;
         const [detectBuf, recBuf, dictText] = await Promise.all([
-            fetch(PADDLE_CDN_BASE + 'PP-OCRv5_mobile_det_infer.onnx').then(r => { if (!r.ok) throw new Error('det model fetch failed'); return r.arrayBuffer(); }),
-            fetch(PADDLE_CDN_BASE + 'PP-OCRv5_mobile_rec_infer.onnx').then(r => { if (!r.ok) throw new Error('rec model fetch failed'); return r.arrayBuffer(); }),
-            fetch(PADDLE_CDN_BASE + 'ppocrv5_dict.txt').then(r => { if (!r.ok) throw new Error('dict fetch failed'); return r.text(); }),
+            fetch(base + 'PP-OCRv5_mobile_det_infer.onnx').then(r => { if (!r.ok) throw new Error('det model 404'); return r.arrayBuffer(); }),
+            fetch(base + 'PP-OCRv5_mobile_rec_infer.onnx').then(r => { if (!r.ok) throw new Error('rec model 404'); return r.arrayBuffer(); }),
+            fetch(base + 'ppocrv5_dict.txt').then(r => { if (!r.ok) throw new Error('dict 404'); return r.text(); }),
         ]);
 
         const dict = dictText.split('\n').map(s => s.trim()).filter(Boolean);
@@ -1446,7 +1450,7 @@ async function _loadPaddleOcrService() {
             },
         });
 
-        showToast('PaddleOCR 模型載入完成！', 'success');
+        showToast('✅ PaddleOCR 模型就緒！', 'success');
         return _paddleOcrService;
     } catch (e) {
         _paddleOcrService = null;

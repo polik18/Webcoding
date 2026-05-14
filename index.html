@@ -1044,6 +1044,29 @@
     <script src="js/filesystem.js"></script>
     <script src="js/editor.js"></script>
     <script src="js/doceditor.js"></script>
+
+    <!-- PaddleOCR bootstrap: must be type=module to use ESM import -->
+    <script type="module">
+        const PADDLE_CDN_BASE = 'https://cdn.jsdelivr.net/gh/X3ZvaWQ/paddleocr.js@main/assets/';
+
+        // Expose a promise on window so doceditor.js can await it
+        window._paddleOcrReady = (async () => {
+            try {
+                const { PaddleOcrService } = await import('https://cdn.jsdelivr.net/npm/paddleocr@1.1.1/+esm');
+                const ort = window.ort;
+                if (!ort) throw new Error('onnxruntime-web not loaded');
+
+                window._PaddleOcrService = PaddleOcrService;
+                window._PADDLE_CDN_BASE = PADDLE_CDN_BASE;
+                console.log('[PaddleOCR] ESM module loaded successfully');
+                return true;
+            } catch (e) {
+                console.warn('[PaddleOCR] Failed to load ESM module:', e);
+                window._PaddleOcrService = null;
+                return false;
+            }
+        })();
+    </script>
 </body>
 
 </html>
