@@ -2073,26 +2073,36 @@ window.closeQrModal = function() {
 };
 
 window.switchQrTab = function(tab) {
-    const genTab = document.getElementById('qr-tab-generate');
-    const scanTab = document.getElementById('qr-tab-scan');
-    const genPanel = document.getElementById('qr-panel-generate');
-    const scanPanel = document.getElementById('qr-panel-scan');
+    const tabs = ['generate', 'scan', 'ocr'];
+    const colors = { generate: ['border-emerald-500', 'text-emerald-600'], scan: ['border-emerald-500', 'text-emerald-600'], ocr: ['border-violet-500', 'text-violet-600'] };
+    tabs.forEach(t => {
+        const tabEl = document.getElementById(`qr-tab-${t}`);
+        const panelEl = document.getElementById(`qr-panel-${t}`);
+        if (!tabEl || !panelEl) return;
+        if (t === tab) {
+            tabEl.classList.add(...colors[t]);
+            tabEl.classList.remove('border-transparent', 'text-gray-500');
+            panelEl.classList.remove('hidden');
+        } else {
+            tabEl.classList.remove(...colors[t]);
+            tabEl.classList.add('border-transparent', 'text-gray-500');
+            panelEl.classList.add('hidden');
+        }
+    });
+    // Reset OCR camera when switching away
+    if (tab !== 'ocr' && typeof stopOcrCamera === 'function') stopOcrCamera();
+};
 
-    if (tab === 'generate') {
-        genTab.classList.add('border-emerald-500', 'text-emerald-600');
-        genTab.classList.remove('border-transparent', 'text-gray-500');
-        scanTab.classList.remove('border-emerald-500', 'text-emerald-600');
-        scanTab.classList.add('border-transparent', 'text-gray-500');
-        genPanel.classList.remove('hidden');
-        scanPanel.classList.add('hidden');
-    } else {
-        scanTab.classList.add('border-emerald-500', 'text-emerald-600');
-        scanTab.classList.remove('border-transparent', 'text-gray-500');
-        genTab.classList.remove('border-emerald-500', 'text-emerald-600');
-        genTab.classList.add('border-transparent', 'text-gray-500');
-        scanPanel.classList.remove('hidden');
-        genPanel.classList.add('hidden');
-    }
+// Allow OCR to be opened directly on the OCR tab
+window.openOcrModal = function() {
+    openQrModal();
+    switchQrTab('ocr');
+};
+window.closeOcrModal = function() {
+    if (typeof stopOcrCamera === 'function') stopOcrCamera();
+    const loadingEl = document.getElementById('ocr-loading');
+    if (loadingEl) { loadingEl.classList.add('hidden'); loadingEl.classList.remove('flex'); }
+    // Don't close the whole modal, just reset OCR state
 };
 
 window.qrImportContent = function(type) {

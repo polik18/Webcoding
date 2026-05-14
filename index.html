@@ -198,11 +198,8 @@
                     <button id="btn-seo" onclick="openSeoModal()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded transition" title="SEO 工具 (Sitemap & Robots.txt)">
                         <i class="fa-solid fa-globe text-blue-500"></i> <span class="hidden sm:inline">SEO</span>
                     </button>
-                    <button id="btn-ocr" onclick="window.openCameraToText()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded transition" title="拍照轉文字 (Camera to Text)" data-i18n-title="nav.cameraTitle">
-                        <i class="fa-solid fa-camera text-violet-500"></i> <span class="hidden sm:inline" data-i18n="nav.cameraBtn">拍照取字</span>
-                    </button>
-                    <button id="btn-qr" onclick="openQrModal()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded transition" title="QR Code 工具" data-i18n-title="nav.qrTitle">
-                        <i class="fa-solid fa-camera text-emerald-500"></i> <span class="hidden sm:inline" data-i18n="nav.qrBtn">QR Code</span>
+                    <button id="btn-qr" onclick="openQrModal()" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded transition" title="QR Code / OCR 工具">
+                        <i class="fa-solid fa-qrcode text-emerald-500"></i> <span class="hidden sm:inline">QR / OCR</span>
                     </button>
                     <button onclick="exportDocx && exportDocx()" id="btn-export-docx" class="hidden px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded transition shadow-sm" title="Export DOCX" data-i18n-title="nav.exportDocxTitle">
                         <i class="fa-solid fa-file-word"></i> <span class="hidden sm:inline">Export DOCX</span>
@@ -581,6 +578,7 @@
             <div class="flex border-b border-gray-200 dark:border-gray-700">
                 <button onclick="switchQrTab('generate')" id="qr-tab-generate" class="flex-1 py-3 text-sm font-bold border-b-2 border-emerald-500 text-emerald-600 transition-colors">產生器</button>
                 <button onclick="switchQrTab('scan')" id="qr-tab-scan" class="flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">解碼器 / 掃描</button>
+                <button onclick="switchQrTab('ocr')" id="qr-tab-ocr" class="flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-violet-600 dark:text-gray-400 dark:hover:text-violet-400 transition-colors"><i class="fa-solid fa-language mr-1"></i>OCR 辨識</button>
             </div>
 
             <div id="qr-panel-generate" class="p-6 overflow-y-auto">
@@ -648,7 +646,55 @@
                     </div>
                 </div>
             </div>
-            
+
+            <!-- OCR Panel -->
+            <div id="qr-panel-ocr" class="hidden p-6 overflow-y-auto space-y-4">
+                <div class="flex items-center gap-2">
+                    <label class="text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">辨識語言：</label>
+                    <select id="ocr-lang-select" class="flex-1 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-violet-500 outline-none">
+                        <option value="chi_tra+eng">繁體中文 + English</option>
+                        <option value="chi_sim+eng">简体中文 + English</option>
+                        <option value="eng">English Only</option>
+                        <option value="jpn+eng">日本語 + English</option>
+                        <option value="kor+eng">한국어 + English</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <button onclick="startOcrCamera()" class="flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-violet-500 hover:bg-violet-50 dark:hover:bg-violet-900/10 transition-all group">
+                        <i class="fa-solid fa-camera text-2xl text-gray-400 group-hover:text-violet-500"></i>
+                        <span class="text-xs font-medium text-gray-600 dark:text-gray-400 group-hover:text-violet-600 text-center">相機拍照</span>
+                    </button>
+                    <button onclick="triggerOcrFileUpload()" class="flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/10 transition-all group">
+                        <i class="fa-solid fa-file-image text-2xl text-gray-400 group-hover:text-emerald-500"></i>
+                        <span class="text-xs font-medium text-gray-600 dark:text-gray-400 group-hover:text-emerald-600 text-center">上傳圖片</span>
+                        <input type="file" id="ocr-file-input" class="hidden" accept="image/*" onchange="handleOcrFileUpload(event)">
+                    </button>
+                    <button onclick="triggerOcrPaste()" class="flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all group">
+                        <i class="fa-solid fa-clipboard text-2xl text-gray-400 group-hover:text-blue-500"></i>
+                        <span class="text-xs font-medium text-gray-600 dark:text-gray-400 group-hover:text-blue-600 text-center">貼上圖片</span>
+                    </button>
+                </div>
+                <!-- OCR Camera -->
+                <div id="ocr-camera-container" class="hidden flex-col items-center gap-3">
+                    <div class="relative w-full max-w-[300px] aspect-square rounded-xl overflow-hidden bg-black shadow-inner border border-gray-200 dark:border-gray-700 mx-auto">
+                        <video id="ocr-video" class="w-full h-full object-cover" playsinline></video>
+                    </div>
+                    <div class="flex gap-2 w-full">
+                        <button onclick="stopOcrCamera()" class="flex-1 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-bold text-sm transition">取消</button>
+                        <button onclick="takeOcrPhoto()" class="flex-[2] py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-bold text-sm transition"><i class="fa-solid fa-camera mr-1"></i>拍照辨識</button>
+                    </div>
+                </div>
+                <!-- OCR Loading -->
+                <div id="ocr-loading" class="hidden flex-col items-center justify-center p-6 text-center">
+                    <i class="fa-solid fa-circle-notch fa-spin text-4xl text-violet-500 mb-3"></i>
+                    <p class="text-sm font-bold text-gray-700 dark:text-gray-300">正在辨識文字，請稍候...</p>
+                    <div class="w-40 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mt-3 overflow-hidden">
+                        <div id="ocr-progress-bar" class="w-0 h-full bg-violet-500 transition-all"></div>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-400 text-center">辨識完成後將自動開啟為新檔案</p>
+            </div>
+
             <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 text-center">
                 <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Powered by qrcode.js & jsQR</p>
             </div>

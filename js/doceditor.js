@@ -1363,6 +1363,7 @@ window.triggerOcrFileUpload = function() { document.getElementById('ocr-file-inp
 window.handleOcrFileUpload = function(e) {
     const file = e.target.files[0];
     if (!file) return;
+    e.target.value = ''; // reset so same file can be re-selected
     const reader = new FileReader();
     reader.onload = ev => performOcr(ev.target.result);
     reader.readAsDataURL(file);
@@ -1459,10 +1460,13 @@ async function performOcr(imageDataUrl, autoSave = false) {
             return;
         }
         
-        // Force autoSave logic (ignore autoSave flag)
+        // Auto-save to new tab and close modal
         const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '').split('.')[0];
         const filename = `OCR_Result_${dateStr}.txt`;
-        closeOcrModal();
+        // Close QR modal
+        const qrModal = document.getElementById('qr-modal');
+        if (qrModal) qrModal.classList.add('hidden');
+        if (typeof stopOcrCamera === 'function') stopOcrCamera();
         if (typeof tabManager !== 'undefined') {
             tabManager.createNewTab(filename, cleanedText, false);
             showToast('OCR 辨識並匯出完成', 'success');
