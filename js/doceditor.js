@@ -1341,9 +1341,9 @@ window.startPerformingOcr = function() {
     }
 };
 
-window.takeOcrPhoto = function(autoSave = false) {
+window.takeOcrPhoto = function(autoSave = true) {
     const video = document.getElementById('ocr-video');
-    if (!video || !video.videoWidth) return;
+    if (!video || !video.videoWidth) { showToast('無法取得相機畫面', 'error'); return; }
     
     const canvas = document.createElement('canvas');
     canvas.width = video.videoWidth;
@@ -1352,11 +1352,7 @@ window.takeOcrPhoto = function(autoSave = false) {
     
     stopOcrCamera();
     const dataUrl = canvas.toDataURL('image/png');
-    if (autoSave) {
-        performOcr(dataUrl, true);
-    } else {
-        showOcrPreview(dataUrl);
-    }
+    performOcr(dataUrl);
 };
 
 window.triggerOcrFileUpload = function() { document.getElementById('ocr-file-input').click(); };
