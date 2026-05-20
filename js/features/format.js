@@ -77,7 +77,11 @@ window.openQrModal = async function() {
     document.getElementById('qr-modal').classList.remove('hidden');
     switchQrTab('generate');
     if (typeof window.ensureQrLibraries === 'function') {
-        await window.ensureQrLibraries({ generator: true, scanner: true });
+        // Start QR libraries early while the user is still deciding between generate / scan.
+        window.ensureQrLibraries({ generator: true, scanner: true });
+    }
+    if (typeof window.scheduleOcrPreload === 'function') {
+        window.scheduleOcrPreload({ lang: 'chi_tra+eng', profile: 'balanced', reason: 'open-vision-tools', includeLanguageData: true });
     }
 };
 window.closeQrModal = function() { document.getElementById('qr-modal').classList.add('hidden'); };
@@ -91,6 +95,9 @@ window.switchQrTab = function(tab) {
         if (t === tab) { tabEl.classList.add(...colors[t]); tabEl.classList.remove('border-transparent','text-gray-500'); panelEl.classList.remove('hidden'); }
         else { tabEl.classList.remove(...colors[t]); tabEl.classList.add('border-transparent','text-gray-500'); panelEl.classList.add('hidden'); }
     });
+    if (tab === 'ocr' && typeof window.scheduleOcrPreload === 'function') {
+        window.scheduleOcrPreload({ lang: 'chi_tra+eng', profile: 'balanced', reason: 'ocr-tab', includeLanguageData: true });
+    }
     if (tab !== 'ocr' && typeof stopOcrCamera === 'function') stopOcrCamera();
 };
 

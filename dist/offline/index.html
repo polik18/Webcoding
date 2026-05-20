@@ -40,7 +40,7 @@
     ║     • Offline release uses css/offline-fallback.css instead       ║
     ║                                                                      ║
     ║  6. OCR is browser-only and lazy-loaded                            ║
-    ║     • js/tools/ocr-engine.js loads Tesseract.js only when OCR starts  ║
+    ║     • js/tools/ocr-engine.js can preload Tesseract.js before OCR starts  ║
     ║     • OCR quality depends heavily on source image clarity/lighting     ║
     ║     • Keep OCR UI IDs unique; duplicate IDs break camera/progress      ║
     ║                                                                      ║
@@ -233,8 +233,8 @@
                     <button id="btn-seo" data-action="call" data-call="tools.seo.openModal" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded transition" title="SEO 工具 (Sitemap & Robots.txt)">
                         <i class="fa-solid fa-globe text-blue-500"></i> <span class="hidden sm:inline">SEO</span>
                     </button>
-                    <button id="btn-qr" data-action="call" data-call="features.format.openQrModal" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded transition" title="QR Code / OCR 工具">
-                        <i class="fa-solid fa-qrcode text-emerald-500"></i> <span class="hidden sm:inline">QR / OCR</span>
+                    <button id="btn-qr" data-action="call" data-call="features.format.openQrModal" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded transition" title="辨識工具：QR Code 與 OCR 文字辨識">
+                        <i class="fa-solid fa-wand-magic-sparkles text-violet-500"></i> <span class="hidden sm:inline">辨識工具</span>
                     </button>
                     <button data-action="call" data-call="tools.docx.exportDocx" data-optional="true" id="btn-export-docx" class="hidden px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded transition shadow-sm" title="Export DOCX" data-i18n-title="nav.exportDocxTitle">
                         <i class="fa-solid fa-file-word"></i> <span class="hidden sm:inline">Export DOCX</span>
@@ -596,11 +596,14 @@
 
     <!-- QR / OCR tools -->
     <div id="qr-modal" class="hidden fixed inset-0 z-[300] flex items-center justify-center bg-black/60 backdrop-blur-sm">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col max-h-[90vh]">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col max-h-[90vh]">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-qrcode text-emerald-500 text-xl"></i>
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">QR Code 工具</h3>
+                    <i class="fa-solid fa-wand-magic-sparkles text-violet-500 text-xl"></i>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">辨識工具</h3>
+                        <p class="text-[10px] text-gray-400">QR Code 產生、QR 掃描、OCR 文字辨識</p>
+                    </div>
                 </div>
                 <button data-action="call" data-call="tools.qr.closeModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition">
                     <i class="fa-solid fa-xmark text-xl"></i>
@@ -608,9 +611,9 @@
             </div>
             
             <div class="flex border-b border-gray-200 dark:border-gray-700">
-                <button data-action="call" data-call="features.format.switchQrTab" data-args='["generate"]' id="qr-tab-generate" class="flex-1 py-3 text-sm font-bold border-b-2 border-emerald-500 text-emerald-600 transition-colors">產生器</button>
-                <button data-action="call" data-call="features.format.switchQrTab" data-args='["scan"]' id="qr-tab-scan" class="flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">解碼器 / 掃描</button>
-                <button data-action="call" data-call="features.format.switchQrTab" data-args='["ocr"]' id="qr-tab-ocr" class="flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-violet-600 dark:text-gray-400 dark:hover:text-violet-400 transition-colors"><i class="fa-solid fa-language mr-1"></i>OCR 辨識</button>
+                <button data-action="call" data-call="features.format.switchQrTab" data-args='["generate"]' id="qr-tab-generate" class="flex-1 py-3 text-sm font-bold border-b-2 border-emerald-500 text-emerald-600 transition-colors">QR 產生</button>
+                <button data-action="call" data-call="features.format.switchQrTab" data-args='["scan"]' id="qr-tab-scan" class="flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">QR 掃描 / 解碼</button>
+                <button data-action="call" data-call="features.format.switchQrTab" data-args='["ocr"]' id="qr-tab-ocr" class="flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-violet-600 dark:text-gray-400 dark:hover:text-violet-400 transition-colors"><i class="fa-solid fa-language mr-1"></i>文字 OCR</button>
             </div>
 
             <div id="qr-panel-generate" class="p-6 overflow-y-auto">
@@ -702,14 +705,14 @@
             </div>
 
             <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 text-center">
-                <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Powered by qrcode.js & jsQR</p>
+                <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">辨識工具：qrcode.js、jsQR、Tesseract.js</p>
             </div>
         </div>
     </div>
 
     <!-- OCR Tool Modal (Redesigned) -->
     <div id="ocr-modal" class="hidden fixed inset-0 z-[300] flex items-center justify-center bg-black/60 backdrop-blur-sm">
-        <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col max-h-[90vh]">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-6xl mx-2 sm:mx-4 overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col max-h-[94vh]">
             <!-- Header -->
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between bg-violet-500 text-white">
                 <div class="flex items-center gap-3">
@@ -717,8 +720,8 @@
                         <i class="fa-solid fa-language text-xl text-white"></i>
                     </div>
                     <div>
-                        <h3 class="text-lg font-bold">智能 OCR 文字辨識</h3>
-                        <p class="text-[10px] text-violet-100 opacity-80 uppercase tracking-widest">AI Vision Studio</p>
+                        <h3 class="text-lg font-bold">OCR 文字辨識</h3>
+                        <p class="text-[10px] text-violet-100 opacity-90">相機拍照、上傳、貼上圖片皆可辨識</p>
                     </div>
                 </div>
                 <button data-action="call" data-call="tools.ocr.closeModal" class="w-8 h-8 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full transition">
@@ -726,9 +729,9 @@
                 </button>
             </div>
             
-            <div class="flex-1 overflow-y-auto p-0 flex flex-col md:flex-row">
+            <div class="flex-1 overflow-y-auto p-0 flex flex-col lg:flex-row">
                 <!-- Sidebar / Settings -->
-                <div class="w-full md:w-64 bg-gray-50 dark:bg-gray-900/50 p-6 border-r border-gray-200 dark:border-gray-700 space-y-6">
+                <div class="w-full lg:w-72 bg-gray-50 dark:bg-gray-900/50 p-5 lg:p-6 border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-700 space-y-5">
                     <div class="space-y-2">
                         <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">辨識語言設定</label>
                         <select id="ocr-lang-select" class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-violet-500 outline-none transition">
@@ -762,6 +765,7 @@
                             <option value="vertical">直排中文 / 日文</option>
                         </select>
                         <p class="text-[10px] leading-relaxed text-gray-400">繁中預設會使用免費高準確語言包；圖片模糊、反光、小字或截圖文字分散時，建議改用「高準確」。</p>
+                        <p id="ocr-preload-status" class="text-[10px] leading-relaxed text-violet-500 dark:text-violet-300">OCR 引擎會在背景預載，避免按下辨識後才等待大檔案下載。</p>
                     </div>
 
                     <div class="space-y-3">
@@ -783,7 +787,7 @@
                 </div>
 
                 <!-- Main Content Area -->
-                <div class="flex-1 p-6 flex flex-col min-h-[300px] relative">
+                <div class="flex-1 p-4 sm:p-6 flex flex-col min-h-[560px] relative">
                     <!-- Step 1: Drop/Preview Area -->
                     <div id="ocr-view-initial" class="flex-1 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl flex flex-col items-center justify-center p-8 text-center bg-gray-50/50 dark:bg-gray-800/30 transition duration-200" data-drop-zone="ocr">
                         <i class="fa-solid fa-cloud-arrow-up text-5xl text-gray-200 dark:text-gray-700 mb-4"></i>
@@ -803,39 +807,55 @@
                     </div>
 
                     <!-- Step 3: Result View -->
-                    <div id="ocr-view-result" class="hidden flex-1 flex flex-col gap-4">
-                        <div class="flex-1 grid grid-cols-1 gap-4 overflow-hidden">
-                            <div class="h-1/3 bg-gray-100 dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
-                                <img id="ocr-result-img" class="w-full h-full object-contain">
+                    <div id="ocr-view-result" class="hidden flex-1 flex flex-col gap-4 min-h-[520px]">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <h4 class="text-base font-black text-gray-900 dark:text-white">辨識結果</h4>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">左側保留處理後圖片，右側是可編輯文字區，方便直接檢查修正。</p>
                             </div>
-                            <div class="h-2/3 flex flex-col">
-                                <div class="flex items-center justify-between mb-1">
-                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">辨識結果 (可直接編輯修正)</label>
-                                    <span id="ocr-result-meta" class="text-[10px] text-gray-400"></span>
+                            <span id="ocr-result-meta" class="text-[10px] text-gray-400 leading-relaxed text-right max-w-[45%]"></span>
+                        </div>
+                        <div class="flex-1 grid grid-cols-1 lg:grid-cols-[minmax(260px,42%)_minmax(360px,58%)] gap-4 overflow-hidden">
+                            <div class="min-h-[240px] lg:min-h-0 bg-gray-100 dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col">
+                                <div class="px-3 py-2 text-[10px] font-bold text-gray-400 border-b border-gray-200 dark:border-gray-700">處理後圖片預覽</div>
+                                <div class="flex-1 min-h-0 flex items-center justify-center bg-black/90">
+                                    <img id="ocr-result-img" class="w-full h-full object-contain">
                                 </div>
-                                <textarea id="ocr-result-text" class="flex-1 w-full p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-mono focus:ring-2 focus:ring-violet-500 outline-none resize-none"></textarea>
+                            </div>
+                            <div class="min-h-[360px] flex flex-col">
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">辨識結果，可直接編輯修正</label>
+                                <textarea id="ocr-result-text" class="flex-1 min-h-[340px] w-full p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 text-sm leading-relaxed font-mono focus:ring-2 focus:ring-violet-500 outline-none resize-none"></textarea>
                             </div>
                         </div>
-                        <div class="flex gap-2">
-                            <button data-action="call" data-call="tools.ocr.reset" class="flex-1 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold transition">重新開始</button>
-                            <button data-action="call" data-call="tools.ocr.copyResult" class="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition">複製</button>
-                            <button data-action="call" data-call="tools.ocr.saveResult" class="flex-[2] py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-lg shadow-emerald-600/30 transition">儲存為新檔案</button>
+                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
+                            <button data-action="call" data-call="tools.ocr.reset" class="py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold transition">重新開始</button>
+                            <button data-action="call" data-call="tools.ocr.copyResult" class="py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition">複製</button>
+                            <button data-action="call" data-call="tools.ocr.saveResult" class="sm:col-span-2 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-lg shadow-emerald-600/30 transition">儲存為新檔案</button>
                         </div>
                     </div>
 
                     <!-- Camera View -->
-                    <div id="ocr-camera-container" class="hidden flex-1 flex flex-col gap-4">
-                        <div class="relative flex-1 bg-black rounded-xl overflow-hidden shadow-inner border border-gray-200 dark:border-gray-700">
-                            <video id="ocr-video" class="w-full h-full object-cover" playsinline></video>
-                        </div>
-                        <div class="flex flex-col gap-2">
-                            <div class="flex gap-2">
-                                <button data-action="call" data-call="tools.ocr.stopCamera" class="flex-1 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold transition">取消</button>
-                                <button data-action="call" data-call="tools.ocr.takePhoto" class="flex-[2] py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-bold shadow-lg shadow-violet-600/30 transition flex items-center justify-center gap-2">
-                                    <i class="fa-solid fa-camera"></i> 拍照預覽
-                                </button>
+                    <div id="ocr-camera-container" class="hidden flex-1 flex flex-col gap-4 min-h-[520px]">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <h4 class="text-base font-black text-gray-900 dark:text-white">相機拍照辨識</h4>
+                                <p id="ocr-camera-status" class="text-xs leading-relaxed text-gray-500 dark:text-gray-400">正在準備相機...</p>
                             </div>
-                            <button data-action="call" data-call="tools.ocr.takePhoto" data-args='[true]' class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-lg shadow-emerald-600/30 transition flex items-center justify-center gap-2">
+                            <button id="ocr-torch-btn" data-action="call" data-call="tools.ocr.toggleTorch" class="hidden px-3 py-2 text-xs bg-amber-100 text-amber-700 rounded-lg font-bold transition">
+                                <i class="fa-solid fa-bolt"></i> 補光
+                            </button>
+                        </div>
+                        <div class="relative flex-1 min-h-[360px] bg-black rounded-xl overflow-hidden shadow-inner border border-gray-200 dark:border-gray-700">
+                            <video id="ocr-video" class="w-full h-full object-contain bg-black" playsinline></video>
+                            <div class="pointer-events-none absolute inset-4 border border-white/30 rounded-xl"></div>
+                            <div class="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[82%] h-[72%] border-2 border-violet-400/80 rounded-xl shadow-[0_0_0_1000px_rgba(0,0,0,0.18)]"></div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
+                            <button data-action="call" data-call="tools.ocr.stopCamera" class="py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold transition">取消</button>
+                            <button data-action="call" data-call="tools.ocr.takePhoto" class="sm:col-span-1 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-bold shadow-lg shadow-violet-600/30 transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-camera"></i> 拍照預覽
+                            </button>
+                            <button data-action="call" data-call="tools.ocr.takePhoto" data-args='[true]' class="sm:col-span-2 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-lg shadow-emerald-600/30 transition flex items-center justify-center gap-2">
                                 <i class="fa-solid fa-file-export"></i> 拍照並立即辨識
                             </button>
                         </div>

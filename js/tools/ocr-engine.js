@@ -373,6 +373,86 @@
         return variants.map((v, index) => ({ ...v, psm: index === 0 ? 'auto' : 'block' }));
     }
 
+
+
+    const _preloadState = {
+        enginePromise: null,
+        languageLinks: new Set(),
+        scheduled: false
+    };
+
+    function _connectionAllowsPreload() {
+        const connection = navigator.connection || navigator.webkitConnection || navigator.mozConnection;
+        if (!connection) return true;
+        if (connection.saveData) return false;
+        return !/2g/i.test(connection.effectiveType || '');
+    }
+
+    function _langParts(lang) {
+        return String(lang || 'chi_tra+eng')
+            .split('+')
+            .map(part => part.trim())
+            .filter(Boolean);
+    }
+
+    function _tessdataUrl(langCode, dataProfile) {
+        const base = (dataProfile && dataProfile.langPath) || TESSDATA_PATHS.best;
+        return `${String(base).replace(/\/$/, '')}/${langCode}.traineddata.gz`;
+    }
+
+    function _prefetchUrl(url, asType = 'fetch') {
+        if (!url || _preloadState.languageLinks.has(url)) return;
+        _preloadState.languageLinks.add(url);
+        try {
+            const link = document.createElement('link');
+            link.rel = 'prefetch';
+            link.href = url;
+            link.as = asType;
+            link.crossOrigin = 'anonymous';
+            document.head.appendChild(link);
+        } catch (err) {
+            console.warn('[OCR] prefetch link failed:', url, err);
+        }
+    }
+
+    function _prefetchLanguageData(lang, profile) {
+        if (!_connectionAllowsPreload()) return [];
+        const dataProfile = _selectTessdata(profile || 'balanced', lang || 'chi_tra+eng');
+        const urls = _langParts(lang).map(part => _tessdataUrl(part, dataProfile));
+        urls.forEach(url => _prefetchUrl(url, 'fetch'));
+        return urls;
+    }
+
+    window.preloadOcrAssets = function(options = {}) {
+        const lang = options.lang || 'chi_tra+eng';
+        const profile = options.profile || 'balanced';
+        const includeLanguageData = options.includeLanguageData !== false;
+
+        if (includeLanguageData) _prefetchLanguageData(lang, profile);
+
+        if (!_preloadState.enginePromise) {
+            _preloadState.enginePromise = _loadTesseract().catch(err => {
+                _preloadState.enginePromise = null;
+                console.warn('[OCR] background preload failed:', err);
+                return null;
+            });
+        }
+        return _preloadState.enginePromise;
+    };
+
+    window.scheduleOcrPreload = function(options = {}) {
+        if (!_connectionAllowsPreload() && options.reason === 'idle') return Promise.resolve(null);
+        if (_preloadState.scheduled && options.reason === 'idle') return _preloadState.enginePromise || Promise.resolve(null);
+        if (options.reason === 'idle') _preloadState.scheduled = true;
+
+        const run = () => window.preloadOcrAssets(options);
+        if (options.reason === 'idle' && 'requestIdleCallback' in window) {
+            return new Promise(resolve => requestIdleCallback(() => resolve(run()), { timeout: 2500 }));
+        }
+        const delay = options.reason === 'idle' ? 1200 : 0;
+        return new Promise(resolve => setTimeout(() => resolve(run()), delay));
+    };
+
     window.cleanOcrText = function(text, options = {}) {
         if (!text) return '';
         const mergeCjkLines = options.mergeCjkLines === true;

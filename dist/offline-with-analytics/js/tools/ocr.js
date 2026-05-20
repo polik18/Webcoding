@@ -6,6 +6,19 @@ let _ocrVideoStream = null;
 let _ocrPendingDataUrl = null;
 let _ocrLastResult = null;
 let _ocrBusy = false;
+let _ocrTorchOn = false;
+let _ocrCameraStatusTimer = null;
+let _ocrPreloadUiBound = false;
+
+const OCR_CAMERA_CONSTRAINTS = {
+    video: {
+        facingMode: { ideal: 'environment' },
+        width: { ideal: 1920, min: 1280 },
+        height: { ideal: 1080, min: 720 },
+        frameRate: { ideal: 30, max: 30 }
+    },
+    audio: false
+};
 
 function _ocrEl(id) { return document.getElementById(id); }
 
@@ -14,6 +27,16 @@ function _setOcrProgress(percent, message, detail) {
     const progressLabel = _ocrEl('ocr-progress-label');
     if (progressBar) progressBar.style.width = `${Math.max(0, Math.min(100, Math.round(percent || 0)))}%`;
     if (progressLabel) progressLabel.textContent = detail ? `${message}（${detail}）` : (message || '正在處理...');
+}
+
+function _setOcrPreloadStatus(message) {
+    const status = _ocrEl('ocr-preload-status');
+    if (status && message) status.textContent = message;
+}
+
+function _setOcrCameraStatus(message) {
+    const status = _ocrEl('ocr-camera-status');
+    if (status && message) status.textContent = message;
 }
 
 function _getOcrSettings() {
@@ -46,16 +69,136 @@ function _showOcrLoading(show) {
     if (scanLine) scanLine.classList.toggle('hidden', !show);
 }
 
+function _scheduleOcrAssetWarmup(reason = 'ui') {
+    if (typeof window.scheduleOcrPreload === 'function') {
+        window.scheduleOcrPreload({
+            ..._getOcrSettings(),
+            reason,
+            includeLanguageData: true
+        });
+        _setOcrPreloadStatus('OCR 引擎與語言資料正在背景預載，稍後辨識會更快。');
+    }
+}
+
+function _bindOcrPreloadTriggers() {
+    if (_ocrPreloadUiBound) return;
+    _ocrPreloadUiBound = true;
+
+    const bind = el => {
+        if (!el || el.dataset.ocrPreloadBound === 'true') return;
+        el.dataset.ocrPreloadBound = 'true';
+        ['pointerenter', 'focus', 'touchstart'].forEach(type => {
+            el.addEventListener(type, () => _scheduleOcrAssetWarmup(type), { passive: true, once: type !== 'focus' });
+        });
+    };
+
+    ['btn-qr', 'qr-tab-ocr', 'image-action-ocr'].forEach(id => bind(_ocrEl(id)));
+    document.querySelectorAll('[data-call^="tools.ocr"], [data-call="features.format.openQrModal"]').forEach(bind);
+
+    ['ocr-lang-select', 'ocr-quality-select'].forEach(id => {
+        const el = _ocrEl(id);
+        if (el && el.dataset.ocrChangePreloadBound !== 'true') {
+            el.dataset.ocrChangePreloadBound = 'true';
+            el.addEventListener('change', () => _scheduleOcrAssetWarmup('settings-change'));
+        }
+    });
+}
+
+function _runWhenIdle(fn, timeout = 1800) {
+    if ('requestIdleCallback' in window) {
+        requestIdleCallback(fn, { timeout });
+    } else {
+        setTimeout(fn, Math.min(timeout, 1200));
+    }
+}
+
+function _safeCapabilities(track) {
+    try { return track && typeof track.getCapabilities === 'function' ? track.getCapabilities() : {}; }
+    catch (e) { return {}; }
+}
+
+function _chooseContinuousMode(values) {
+    if (!Array.isArray(values)) return null;
+    return values.includes('continuous') ? 'continuous' : (values.includes('single-shot') ? 'single-shot' : null);
+}
+
+async function _applyOcrCameraOptimizations(stream) {
+    const track = stream && stream.getVideoTracks && stream.getVideoTracks()[0];
+    if (!track || typeof track.applyConstraints !== 'function') {
+        _setOcrCameraStatus('已開啟相機。請讓文字填滿畫面，等畫面清楚後再拍照。');
+        return;
+    }
+
+    const caps = _safeCapabilities(track);
+    const advanced = [];
+    const notes = [];
+
+    const focusMode = _chooseContinuousMode(caps.focusMode);
+    if (focusMode) {
+        advanced.push({ focusMode });
+        notes.push(focusMode === 'continuous' ? '連續對焦' : '單次對焦');
+    }
+
+    const exposureMode = _chooseContinuousMode(caps.exposureMode);
+    if (exposureMode) advanced.push({ exposureMode });
+
+    const whiteBalanceMode = _chooseContinuousMode(caps.whiteBalanceMode);
+    if (whiteBalanceMode) advanced.push({ whiteBalanceMode });
+
+    if (caps.zoom && Number.isFinite(caps.zoom.min) && Number.isFinite(caps.zoom.max)) {
+        const zoom = Math.min(caps.zoom.max, Math.max(caps.zoom.min, 1.25));
+        if (zoom > caps.zoom.min) {
+            advanced.push({ zoom });
+            notes.push(`畫面放大 ${zoom.toFixed(1)}x`);
+        }
+    }
+
+    if (advanced.length) {
+        try {
+            await track.applyConstraints({ advanced });
+        } catch (err) {
+            console.warn('[OCR] camera optimization skipped:', err);
+        }
+    }
+
+    const torchBtn = _ocrEl('ocr-torch-btn');
+    const torchSupported = !!caps.torch;
+    if (torchBtn) torchBtn.classList.toggle('hidden', !torchSupported);
+
+    _setOcrCameraStatus(notes.length
+        ? `相機已最佳化：${notes.join('、')}。請把文字放在畫面中央，等待清晰後拍照。`
+        : '已開啟相機。這台裝置沒有提供可調整的對焦參數，請前後微調距離，等畫面清楚後再拍照。');
+}
+
+function _startOcrCameraStatusNudge() {
+    clearInterval(_ocrCameraStatusTimer);
+    _ocrCameraStatusTimer = setInterval(() => {
+        if (!_ocrVideoStream) {
+            clearInterval(_ocrCameraStatusTimer);
+            _ocrCameraStatusTimer = null;
+            return;
+        }
+        _setOcrCameraStatus('小提醒：webcam 對焦慢時，請先停住 1～2 秒；文字清楚後再按「拍照預覽」或「拍照並立即辨識」。');
+    }, 9000);
+}
+
+function _stopOcrCameraStatusNudge() {
+    clearInterval(_ocrCameraStatusTimer);
+    _ocrCameraStatusTimer = null;
+}
+
 window.openOcrModal = function() {
     const qrModal = _ocrEl('qr-modal');
     if (qrModal) qrModal.classList.add('hidden');
     const modal = _ocrEl('ocr-modal');
     if (modal) modal.classList.remove('hidden');
+    _bindOcrPreloadTriggers();
+    _scheduleOcrAssetWarmup('open-modal');
     window.resetOcr();
 };
 
 window.closeOcrModal = function() {
-    window.stopOcrCamera();
+    window.stopOcrCamera({ keepView: true });
     _showOcrLoading(false);
     const modal = _ocrEl('ocr-modal');
     if (modal) modal.classList.add('hidden');
@@ -65,7 +208,7 @@ window.resetOcr = function() {
     if (_ocrBusy) return;
     _ocrPendingDataUrl = null;
     _ocrLastResult = null;
-    window.stopOcrCamera();
+    window.stopOcrCamera({ keepView: true });
     _setOcrProgress(0, '準備辨識');
     _showOcrLoading(false);
     const resultText = _ocrEl('ocr-result-text');
@@ -92,41 +235,68 @@ window.showOcrPreview = function(dataUrl) {
 window.startOcrCamera = async function() {
     if (_ocrBusy) return;
     window.resetOcr();
+    _scheduleOcrAssetWarmup('start-camera');
     const video = _ocrEl('ocr-video');
-    const container = _ocrEl('ocr-camera-container');
     _switchOcrView('camera');
+    _setOcrCameraStatus('正在開啟相機與套用對焦設定...');
     try {
-        _ocrVideoStream = await navigator.mediaDevices.getUserMedia({
-            video: {
-                facingMode: { ideal: 'environment' },
-                width: { ideal: 1920 },
-                height: { ideal: 1080 },
-                advanced: [{ focusMode: 'continuous' }]
-            },
-            audio: false
-        });
+        _ocrVideoStream = await navigator.mediaDevices.getUserMedia(OCR_CAMERA_CONSTRAINTS);
+        await _applyOcrCameraOptimizations(_ocrVideoStream);
         if (video) {
             video.srcObject = _ocrVideoStream;
+            video.muted = true;
             video.setAttribute('playsinline', true);
             await video.play();
+            if (video.videoWidth && video.videoHeight) {
+                _setOcrCameraStatus(`相機畫面 ${video.videoWidth}×${video.videoHeight}。請等文字清楚後再拍照。`);
+            }
         }
+        _startOcrCameraStatusNudge();
     } catch (err) {
         showToast('無法存取相機: ' + err.message, 'error');
         window.resetOcr();
     }
 };
 
-window.stopOcrCamera = function() {
+window.stopOcrCamera = function(options = {}) {
+    _stopOcrCameraStatusNudge();
+    _ocrTorchOn = false;
     if (_ocrVideoStream) {
         _ocrVideoStream.getTracks().forEach(track => track.stop());
         _ocrVideoStream = null;
     }
     const video = _ocrEl('ocr-video');
     if (video) video.srcObject = null;
+    const torchBtn = _ocrEl('ocr-torch-btn');
+    if (torchBtn) {
+        torchBtn.classList.add('hidden');
+        torchBtn.classList.remove('bg-amber-500', 'text-white');
+    }
     const container = _ocrEl('ocr-camera-container');
     if (container) {
         container.classList.add('hidden');
         container.classList.remove('flex');
+    }
+    if (!options.keepView && !_ocrPendingDataUrl) _switchOcrView('initial');
+};
+
+window.toggleOcrTorch = async function() {
+    const track = _ocrVideoStream && _ocrVideoStream.getVideoTracks && _ocrVideoStream.getVideoTracks()[0];
+    if (!track || typeof track.applyConstraints !== 'function') return;
+    const caps = _safeCapabilities(track);
+    if (!caps.torch) return;
+    _ocrTorchOn = !_ocrTorchOn;
+    try {
+        await track.applyConstraints({ advanced: [{ torch: _ocrTorchOn }] });
+        const torchBtn = _ocrEl('ocr-torch-btn');
+        if (torchBtn) {
+            torchBtn.classList.toggle('bg-amber-500', _ocrTorchOn);
+            torchBtn.classList.toggle('text-white', _ocrTorchOn);
+        }
+        _setOcrCameraStatus(_ocrTorchOn ? '已開啟補光。請避免紙張反光，文字清楚後再拍照。' : '已關閉補光。請保持環境光線充足。');
+    } catch (err) {
+        _ocrTorchOn = !_ocrTorchOn;
+        showToast('這台相機無法切換補光', 'info');
     }
 };
 
@@ -139,15 +309,16 @@ window.takeOcrPhoto = function(autoStart = false) {
     const canvas = document.createElement('canvas');
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    window.stopOcrCamera();
+    window.stopOcrCamera({ keepView: true });
     const dataUrl = canvas.toDataURL('image/png');
     window.showOcrPreview(dataUrl);
     if (autoStart) window.startPerformingOcr();
 };
 
 window.triggerOcrFileUpload = function() {
+    _scheduleOcrAssetWarmup('upload');
     const input = _ocrEl('ocr-file-input');
     if (input) input.click();
 };
@@ -167,6 +338,7 @@ window.handleOcrFileUpload = function(e) {
 
 window.handleOcrDrop = function(e) {
     e.preventDefault();
+    _scheduleOcrAssetWarmup('drop');
     const file = e.dataTransfer.files && e.dataTransfer.files[0];
     if (!file || !file.type.startsWith('image/')) {
         showToast('請拖曳圖片檔案', 'error');
@@ -178,6 +350,7 @@ window.handleOcrDrop = function(e) {
 };
 
 window.triggerOcrPaste = function() {
+    _scheduleOcrAssetWarmup('paste');
     showToast('請直接按 Ctrl+V（或 Cmd+V）貼上圖片', 'info');
 };
 
@@ -230,7 +403,7 @@ window.startPerformingOcr = async function() {
         const resultImg = _ocrEl('ocr-result-img');
         const meta = _ocrEl('ocr-result-meta');
         if (resultText) resultText.value = cleanedText;
-        if (resultImg) resultImg.src = _ocrPendingDataUrl;
+        if (resultImg) resultImg.src = result.processedImageDataUrl || _ocrPendingDataUrl;
         if (meta) {
             const confidence = Number.isFinite(result.confidence) ? Math.round(result.confidence) : 0;
             const dataLabel = result.dataLabel || (result.dataMode === 'best' ? '高準確語言包' : '標準語言包');
@@ -286,3 +459,20 @@ window.saveOcrResult = function() {
         showToast('已儲存為新檔案', 'success');
     }
 };
+
+// Start warming the OCR engine after the editor is usable, and preload more
+// aggressively when users hover/focus OCR-related controls.
+function _initOcrPreloadHooks() {
+    _bindOcrPreloadTriggers();
+    _runWhenIdle(() => {
+        if (typeof window.scheduleOcrPreload === 'function') {
+            window.scheduleOcrPreload({ lang: 'chi_tra+eng', profile: 'balanced', reason: 'idle', includeLanguageData: true });
+        }
+    }, 2400);
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _initOcrPreloadHooks, { once: true });
+} else {
+    _initOcrPreloadHooks();
+}
