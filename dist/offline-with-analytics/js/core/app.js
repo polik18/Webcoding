@@ -251,6 +251,7 @@
         ['openQrResultAsTab', 'tools.qr.openResultAsTab'],
         ['startQrCamera', 'tools.qr.startCamera'],
         ['stopQrCamera', 'tools.qr.stopCamera'],
+        ['captureQrFrame', 'tools.qr.captureFrame'],
 
         // OCR
         ['cleanOcrText', 'tools.ocrEngine.cleanText'],

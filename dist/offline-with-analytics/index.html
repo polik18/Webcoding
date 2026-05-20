@@ -667,7 +667,13 @@
                             <div class="absolute inset-0 border-4 border-white/30"></div>
                             <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[70%] border-2 border-emerald-400 rounded-lg shadow-[0_0_0_1000px_rgba(0,0,0,0.5)]"></div>
                         </div>
-                        <button data-action="call" data-call="tools.qr.stopCamera" class="px-4 py-2 text-sm bg-red-100 text-red-600 hover:bg-red-200 rounded-lg font-bold transition">關閉相機</button>
+                        <p id="qr-camera-status" class="max-w-[300px] text-xs leading-relaxed text-gray-500 dark:text-gray-400 text-center">
+                            請把 QR Code 放在框線內，距離鏡頭約 15～25 公分。
+                        </p>
+                        <div class="flex flex-wrap justify-center gap-2">
+                            <button data-action="call" data-call="tools.qr.captureFrame" class="px-4 py-2 text-sm bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-lg font-bold transition">手動辨識</button>
+                            <button data-action="call" data-call="tools.qr.stopCamera" class="px-4 py-2 text-sm bg-red-100 text-red-600 hover:bg-red-200 rounded-lg font-bold transition">關閉相機</button>
+                        </div>
                     </div>
                     
                     
