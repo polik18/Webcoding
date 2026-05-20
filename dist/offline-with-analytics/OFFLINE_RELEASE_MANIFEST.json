@@ -1,0 +1,202 @@
+{
+  "name": "Webcoding local-first release with Google Analytics",
+  "generatedAt": "2026-05-19T23:20:48.752Z",
+  "outputFolder": "dist/offline-with-analytics",
+  "analytics": {
+    "googleAnalytics": "preserved",
+    "strictOffline": false,
+    "note": "This build intentionally keeps Google Analytics and will contact Google when loaded online."
+  },
+  "offlineFlags": {
+    "WEBCODING_OFFLINE": true,
+    "WEBCODING_DISABLE_ANALYTICS": false,
+    "WEBCODING_DISABLE_REMOTE_FALLBACKS": true
+  },
+  "localVendorAssets": {
+    "present": 1,
+    "missing": 29,
+    "total": 30,
+    "missingAssets": [
+      {
+        "name": "qrcodejs",
+        "category": "qr",
+        "local": "libs/vendor/qrcode.min.js",
+        "present": false
+      },
+      {
+        "name": "jsQR",
+        "category": "qr",
+        "local": "libs/vendor/jsQR.min.js",
+        "present": false
+      },
+      {
+        "name": "Tesseract.js",
+        "category": "ocr",
+        "local": "libs/vendor/tesseract.min.js",
+        "present": false
+      },
+      {
+        "name": "html2pdf",
+        "category": "pdf-export",
+        "local": "libs/vendor/html2pdf.bundle.min.js",
+        "present": false
+      },
+      {
+        "name": "mammoth",
+        "category": "docx",
+        "local": "libs/vendor/mammoth.browser.min.js",
+        "present": false
+      },
+      {
+        "name": "PDF.js",
+        "category": "pdf",
+        "local": "libs/vendor/pdf.min.js",
+        "present": false
+      },
+      {
+        "name": "PDF.js worker",
+        "category": "pdf",
+        "local": "libs/vendor/pdf.worker.min.js",
+        "present": false
+      },
+      {
+        "name": "SheetJS XLSX",
+        "category": "spreadsheet",
+        "local": "libs/vendor/xlsx.full.min.js",
+        "present": false
+      },
+      {
+        "name": "jsPDF",
+        "category": "pdf-export",
+        "local": "libs/vendor/jspdf.umd.min.js",
+        "present": false
+      },
+      {
+        "name": "jsPDF AutoTable",
+        "category": "pdf-export",
+        "local": "libs/vendor/jspdf.plugin.autotable.min.js",
+        "present": false
+      },
+      {
+        "name": "js-beautify JS",
+        "category": "format",
+        "local": "libs/vendor/beautify.min.js",
+        "present": false
+      },
+      {
+        "name": "js-beautify CSS",
+        "category": "format",
+        "local": "libs/vendor/beautify-css.min.js",
+        "present": false
+      },
+      {
+        "name": "js-beautify HTML",
+        "category": "format",
+        "local": "libs/vendor/beautify-html.min.js",
+        "present": false
+      },
+      {
+        "name": "diff-match-patch",
+        "category": "compare",
+        "local": "libs/vendor/diff_match_patch.js",
+        "present": false
+      },
+      {
+        "name": "CodeMirror merge CSS",
+        "category": "compare",
+        "local": "libs/addon/merge/merge.min.css",
+        "present": false
+      },
+      {
+        "name": "CodeMirror merge",
+        "category": "compare",
+        "local": "libs/addon/merge/merge.min.js",
+        "present": false
+      },
+      {
+        "name": "Pyodide bootstrap",
+        "category": "python",
+        "local": "libs/vendor/pyodide/pyodide.js",
+        "present": false
+      },
+      {
+        "name": "CodeMirror PHP mode",
+        "category": "editor",
+        "local": "libs/mode/php.min.js",
+        "present": false
+      },
+      {
+        "name": "CodeMirror SQL mode",
+        "category": "editor",
+        "local": "libs/mode/sql.min.js",
+        "present": false
+      },
+      {
+        "name": "CodeMirror Rust mode",
+        "category": "editor",
+        "local": "libs/mode/rust.min.js",
+        "present": false
+      },
+      {
+        "name": "CodeMirror Go mode",
+        "category": "editor",
+        "local": "libs/mode/go.min.js",
+        "present": false
+      },
+      {
+        "name": "CodeMirror SQL hint",
+        "category": "editor",
+        "local": "libs/addon/hint/sql-hint.min.js",
+        "present": false
+      },
+      {
+        "name": "CodeMirror search",
+        "category": "editor",
+        "local": "libs/addon/search/search.min.js",
+        "present": false
+      },
+      {
+        "name": "CodeMirror jump-to-line",
+        "category": "editor",
+        "local": "libs/addon/search/jump-to-line.min.js",
+        "present": false
+      },
+      {
+        "name": "JSHint",
+        "category": "lint",
+        "local": "libs/vendor/jshint.min.js",
+        "present": false
+      },
+      {
+        "name": "CSSLint",
+        "category": "lint",
+        "local": "libs/vendor/csslint.min.js",
+        "present": false
+      },
+      {
+        "name": "HTMLHint",
+        "category": "lint",
+        "local": "libs/vendor/htmlhint.js",
+        "present": false
+      },
+      {
+        "name": "i18next HTTP backend",
+        "category": "i18n",
+        "local": "libs/vendor/i18nextHttpBackend.min.js",
+        "present": false
+      },
+      {
+        "name": "Turndown",
+        "category": "markdown",
+        "local": "libs/vendor/turndown.js",
+        "present": false
+      }
+    ]
+  },
+  "notes": [
+    "This release keeps Google Analytics by request. It is local-first, not strictly offline/private.",
+    "js/core/loader.js still contains CDN URLs for the normal web build, but offline mode disables remote fallback at runtime.",
+    "Run npm run vendor:fetch in a network-enabled environment before building a full local-first package.",
+    "Run npm run offline:audit:strict after building when you need every optional vendor asset bundled."
+  ]
+}

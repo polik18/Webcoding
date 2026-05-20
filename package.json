@@ -1,0 +1,22 @@
+{
+  "name": "webcoding-main",
+  "version": "0.7.0-step7",
+  "private": true,
+  "description": "Browser-based local web coding and document toolbox.",
+  "scripts": {
+    "test": "node tests/smoke/run-smoke-tests.js",
+    "test:smoke": "node tests/smoke/run-smoke-tests.js",
+    "test:syntax": "node scripts/check-js-syntax.js",
+    "vendor:fetch": "node scripts/fetch-vendor-dependencies.js",
+    "vendor:audit": "node scripts/audit-local-dependencies.js",
+    "vendor:audit:strict": "node scripts/audit-local-dependencies.js --strict",
+    "docs:audit": "node scripts/audit-doc-claims.js",
+    "build:offline": "node scripts/build-offline-release.js",
+    "offline:audit": "node scripts/audit-offline-release.js",
+    "offline:audit:strict": "node scripts/audit-offline-release.js --strict",
+    "build:offline:analytics": "node scripts/build-offline-release.js --with-analytics",
+    "offline:audit:analytics": "node scripts/audit-offline-release.js --allow-analytics",
+    "offline:audit:analytics:strict": "node scripts/audit-offline-release.js --allow-analytics --strict"
+  },
+  "devDependencies": {}
+}

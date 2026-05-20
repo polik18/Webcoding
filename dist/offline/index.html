@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Analytics removed for strict offline release. -->
+<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebPad++</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <!--
+    ╔══════════════════════════════════════════════════════════════════════╗
+    ║          ⚠️  DEVELOPER / AI EDITOR WARNING — READ BEFORE EDITING ⚠️  ║
+    ╠══════════════════════════════════════════════════════════════════════╣
+    ║                                                                      ║
+    ║  KNOWN PITFALLS THAT WILL BREAK THE EDITOR (discovered 2025-05):    ║
+    ║                                                                      ║
+    ║  1. MAX_FILE_SIZE — SINGLE DECLARATION ONLY                         ║
+    ║     • Declared with `const` in js/core/fileio/constants.js           ║
+    ║     • DO NOT re-declare it in js/editor.js or anywhere else          ║
+    ║     • Duplicate `const` causes: SyntaxError → editor.js won't run   ║
+    ║       → window.editor = undefined → entire app crashes silently      ║
+    ║                                                                      ║
+    ║  2. CodeMirror simple-mode addon MUST load before rust.min.js       ║
+    ║     • rust mode requires CodeMirror.defineSimpleMode()               ║
+    ║     • libs/addon/mode/simple.min.js must appear BEFORE rust.min.js  ║
+    ║     • Missing it causes: TypeError: e.defineSimpleMode is not a fn  ║
+    ║                                                                      ║
+    ║  3. Font Awesome — DO NOT add local CSS without webfont files         ║
+    ║     • Font Awesome local CSS requires matching woff2/ttf webfonts.   ║
+    ║     • Keep Font Awesome on CDN unless the webfont files are also     ║
+    ║       downloaded and paths are verified.                             ║
+    ║                                                                      ║
+    ║  4. Local-first library loading (libs/ directory)                    ║
+    ║     • Core libraries are stored in libs/ for file:// offline support ║
+    ║     • Scripts use pattern: src="libs/X.js" onerror="...CDN..."      ║
+    ║     • If you add new CDN scripts, add them to libs/ too and use      ║
+    ║       the same local-first pattern to maintain offline compatibility  ║
+    ║                                                                      ║
+    ║  5. Styling strategy                                             ║
+    ║     • Web build may use the Tailwind runtime for rapid UI styling ║
+    ║     • Offline release uses css/offline-fallback.css instead       ║
+    ║                                                                      ║
+    ║  6. OCR is browser-only and lazy-loaded                            ║
+    ║     • js/tools/ocr-engine.js loads Tesseract.js only when OCR starts  ║
+    ║     • OCR quality depends heavily on source image clarity/lighting     ║
+    ║     • Keep OCR UI IDs unique; duplicate IDs break camera/progress      ║
+    ║                                                                      ║
+    ╚══════════════════════════════════════════════════════════════════════╝
+    -->
+    <!-- Offline/local-first runtime flags. Keep before js/core/loader.js. -->
+    <script>
+        window.WEBCODING_OFFLINE = true;
+        window.WEBCODING_DISABLE_ANALYTICS = true;
+        window.WEBCODING_DISABLE_REMOTE_FALLBACKS = true;
+        window.WEBCODING_TESSDATA_PATHS = {
+            standard: 'libs/tessdata/standard',
+            best: 'libs/tessdata/best',
+            fast: 'libs/tessdata/fast'
+        };
+    </script>
+    <link rel="stylesheet" href="css/offline-fallback.css">
+    <!-- Font Awesome CDN removed for offline release; css/offline-fallback.css keeps icon spacing stable. -->
+<!-- CodeMirror Core: local first -->
+    <link rel="stylesheet" href="libs/codemirror.min.css">
+    <link rel="stylesheet" href="libs/theme/dracula.min.css">
+    <script src="libs/codemirror.min.js"></script>
+
+    <!-- CodeMirror Modes: local first -->
+    <script src="libs/mode/xml.min.js"></script>
+    <script src="libs/mode/javascript.min.js"></script>
+    <script src="libs/mode/css.min.js"></script>
+    <script src="libs/mode/htmlmixed.min.js"></script>
+    <script src="libs/mode/python.min.js"></script>
+    <script src="libs/mode/clike.min.js"></script>
+    <script src="libs/mode/markdown.min.js"></script>
+    <!-- Remaining modes: local first, CDN fallback -->
+    <script src="libs/mode/php.min.js"></script>
+    <script src="libs/mode/sql.min.js"></script>
+    <!-- simple-mode addon required by rust & other simple-mode-based languages -->
+    <script src="libs/addon/mode/simple.min.js"></script>
+    <script src="libs/mode/rust.min.js"></script>
+    <script src="libs/mode/go.min.js"></script>
+
+    <!-- IntelliSense & Auto-Complete: local first -->
+    <link rel="stylesheet" href="libs/addon/hint/show-hint.min.css">
+    <script src="libs/addon/hint/show-hint.min.js"></script>
+    <script src="libs/addon/hint/anyword-hint.min.js"></script>
+    <script src="libs/addon/hint/javascript-hint.min.js"></script>
+    <script src="libs/addon/hint/css-hint.min.js"></script>
+    <script src="libs/addon/hint/html-hint.min.js"></script>
+    <script src="libs/addon/hint/sql-hint.min.js"></script>
+
+    <!-- Editing Helpers: local first -->
+    <script src="libs/addon/edit/matchbrackets.min.js"></script>
+    <script src="libs/addon/edit/closebrackets.min.js"></script>
+    <script src="libs/addon/edit/closetag.min.js"></script>
+    <link rel="stylesheet" href="libs/addon/lint/lint.min.css">
+    <script src="libs/addon/lint/lint.min.js"></script>
+
+    <script src="libs/vendor/jshint.min.js"></script>
+    <script src="libs/addon/lint/javascript-lint.min.js"></script>
+    <script src="libs/vendor/csslint.min.js"></script>
+    <script src="libs/addon/lint/css-lint.min.js"></script>
+    <script src="libs/vendor/htmlhint.js"></script>
+    <script src="libs/addon/lint/html-lint.min.js"></script>
+
+    <!-- CodeMirror Search & Sublime Keymap: local first -->
+    <link rel="stylesheet" href="libs/addon/dialog/dialog.min.css">
+    <script src="libs/addon/search/searchcursor.min.js"></script>
+    <script src="libs/addon/search/search.min.js"></script>
+    <script src="libs/addon/dialog/dialog.min.js"></script>
+    <script src="libs/addon/search/jump-to-line.min.js"></script>
+    <script src="libs/keymap/sublime.min.js"></script>
+
+    <!-- localForage: local first (CRITICAL for tab/file persistence) -->
+    <script src="libs/localforage.min.js"></script>
+
+    <!-- JSZip for ZIP export: local first, CDN fallback -->
+    <script src="libs/vendor/jszip.min.js"></script>
+
+    <!-- i18next: local first -->
+    <script src="libs/i18next.min.js"></script>
+    <script src="libs/vendor/i18nextHttpBackend.min.js"></script>
+
+    <!-- Markdown: local first -->
+    <script src="libs/marked.min.js"></script>
+    <script src="libs/vendor/turndown.js"></script>
+
+    <!--
+      The following heavy libraries are now LAZY-LOADED on demand:
+      - js-beautify (~150KB)    → loaded in format.js when formatCode() is first called
+      - diff_match_patch+merge (~150KB) → loaded in compare.js when Compare is opened
+      - xlsx.full.min (~900KB)  → loaded in spreadsheet.js when a spreadsheet is opened
+      - mammoth.js (~500KB)     → loaded in docx.js when a DOCX is opened
+      - pdf.js (~700KB)         → loaded in pdf.js when a PDF is opened
+      - html2pdf (~400KB)       → loaded in fileio/templates.js when PDF export is triggered
+      - jspdf + autotable (~700KB) → loaded in pdf.js for spreadsheet PDF export
+      - tesseract.js + language data → loaded in js/tools/ocr-engine.js when OCR starts
+      - jsQR + qrcodejs (~150KB)→ loaded by loader.js when QR modal is opened
+    -->
+
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 h-screen flex flex-col overflow-hidden transition-colors duration-200">
+    
+    <nav class="relative flex flex-wrap items-center justify-between px-2 sm:px-4 py-2 sm:py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm z-[100] flex-shrink-0 gap-2">
+        <div class="flex items-center gap-2 sm:gap-4">
+            <h1 class="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent flex items-center gap-1 sm:gap-2">
+                <i class="fa-solid fa-code"></i> <span class="hidden sm:inline">WebPad++</span>
+            </h1>
+            
+            <div class="flex items-center gap-1 sm:gap-2">
+                <button data-action="call" data-call="features.sidebar.toggle" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition" title="Toggle Explorer" data-i18n-title="nav.toggleExplorer">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+
+                <!-- Group 1: File Operations -->
+                <div class="flex items-center gap-1 bg-gray-50 dark:bg-gray-900/50 p-1 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <!-- 開新檔案：原 fa-file 圖示，按下會跳出檔案類型選單 -->
+                    <div class="relative" id="new-file-menu-wrapper">
+                        <button data-action="call" data-call="core.fileio.toggleNewFileMenu" data-pass-event="true" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition" title="開新檔案" data-i18n-title="nav.newFileTitle">
+                            <i class="fa-regular fa-file"></i>
+                        </button>
+                        <div id="new-file-menu" class="hidden new-file-dropdown">
+                            <div class="py-1 text-xs font-semibold text-gray-400 px-3 pt-2" data-i18n="nav.newFileChooseType">請選擇要開新的檔案類型</div>
+                            <div class="py-1 text-xs font-semibold text-gray-400 px-3 pt-1">Code</div>
+                            <button data-action="call" data-call="core.fileio.newFileFromTemplate" data-args='["html"]' class="new-file-item"><i class="fa-brands fa-html5 text-orange-500"></i> HTML</button>
+                            <button data-action="call" data-call="core.fileio.newFileFromTemplate" data-args='["css"]'  class="new-file-item"><i class="fa-brands fa-css3-alt text-blue-500"></i> CSS</button>
+                            <button data-action="call" data-call="core.fileio.newFileFromTemplate" data-args='["js"]'   class="new-file-item"><i class="fa-brands fa-js text-yellow-500"></i> JavaScript</button>
+                            <button data-action="call" data-call="core.fileio.newFileFromTemplate" data-args='["ts"]'   class="new-file-item"><i class="fa-solid fa-code text-blue-400"></i> TypeScript</button>
+                            <button data-action="call" data-call="core.fileio.newFileFromTemplate" data-args='["py"]'   class="new-file-item"><i class="fa-brands fa-python text-indigo-500"></i> Python</button>
+                            <button data-action="call" data-call="core.fileio.newFileFromTemplate" data-args='["sql"]'  class="new-file-item"><i class="fa-solid fa-database text-purple-500"></i> SQL</button>
+                            <div class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
+                            <div class="py-1 text-xs font-semibold text-gray-400 px-3">Document</div>
+                            <button data-action="call" data-call="core.fileio.newFileFromTemplate" data-args='["md"]'   class="new-file-item"><i class="fa-brands fa-markdown text-gray-600"></i> Markdown</button>
+                            <button data-action="call" data-call="core.fileio.newFileFromTemplate" data-args='["json"]' class="new-file-item"><i class="fa-solid fa-brackets-curly text-green-600"></i> JSON</button>
+                            <button data-action="call" data-call="core.fileio.newFileFromTemplate" data-args='["txt"]'  class="new-file-item"><i class="fa-regular fa-file-lines text-gray-500"></i> Text</button>
+                            <div class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
+                            <button data-action="call" data-call="core.fileio.newFileFromTemplate" data-args='["xlsx"]' class="new-file-item"><i class="fa-solid fa-table text-emerald-600"></i> Spreadsheet</button>
+                            <div class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
+                            <div class="py-1 text-xs font-semibold text-gray-400 px-3">Tools</div>
+                            <button data-action="call" data-call="core.fileio.openCameraToText" class="new-file-item"><i class="fa-solid fa-camera text-violet-500"></i> Camera to Text</button>
+                        </div>
+                    </div>
+                    <!-- 開啟檔案或資料夾：原 fa-folder-open 圖示，按下會詢問要開檔案還是資料夾 -->
+                    <button data-action="call" data-call="core.fileio.openFileOrFolder" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition" title="開啟檔案或資料夾" data-i18n-title="nav.openTitle">
+                        <i class="fa-regular fa-folder-open"></i>
+                    </button>
+                    <button data-action="call" data-call="recent.openModal" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition" title="最近存取">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </button>
+                    <!-- Save Dropdown -->
+                    <div class="relative" id="save-menu-wrapper">
+                        <div class="flex items-stretch">
+                            <button data-action="call" data-call="core.save.saveFile" class="ps-2 sm:ps-3 pe-1 sm:pe-2 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-s transition relative border-r border-gray-200 dark:border-gray-700" title="Quick Save" data-i18n-title="nav.saveTitle">
+                                <i class="fa-regular fa-floppy-disk"></i> <span class="hidden sm:inline" data-i18n="nav.saveBtn"></span>
+                                <span id="unsaved-indicator" class="hidden absolute -top-1 -end-1 w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse border-2 border-white dark:border-gray-800"></span>
+                            </button>
+                            <button data-action="call" data-call="core.save.toggleSaveMenu" data-pass-event="true" class="px-1.5 sm:px-2 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-e transition" title="Save Options">
+                                <i class="fa-solid fa-chevron-down text-[9px]"></i>
+                            </button>
+                        </div>
+                        <div id="save-menu" class="hidden absolute left-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-[200] py-1">
+                            <button data-action="save-menu-call" data-call="core.save.saveFile" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                                <i class="fa-solid fa-cloud-arrow-up text-blue-500 w-4"></i> <span data-i18n="nav.saveBtn"></span>
+                            </button>
+                            <button data-action="save-menu-call" data-call="core.save.downloadFileAs" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                                <i class="fa-solid fa-file-export text-emerald-500 w-4"></i> <span data-i18n="nav.saveAs">另存新檔...</span>
+                            </button>
+                            <button data-action="save-menu-call" data-call="core.fileio.exportCurrentAsPdf" data-optional="true" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                                <i class="fa-solid fa-file-pdf text-red-500 w-4"></i> <span data-i18n="nav.saveAsPdf">匯出為 PDF</span>
+                            </button>
+                            <button data-action="save-menu-call" data-call="tools.docx.exportDocx" data-optional="true" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                                <i class="fa-solid fa-file-word text-blue-600 w-4"></i> <span data-i18n="nav.saveAsDocx">匯出為 DOCX</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Group 2: Edit Tools -->
+                <div class="flex items-center gap-1 bg-gray-50 dark:bg-gray-900/50 p-1 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <button data-action="call" data-call="features.format.formatCode" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition" title="Format" data-i18n-title="nav.formatTitle">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> <span class="hidden sm:inline" data-i18n="nav.formatBtn"></span>
+                    </button>
+                    <button data-action="call" data-call="features.panel.runCode" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-blue-600 hover:bg-blue-700 text-white rounded transition shadow-sm" title="Run" data-i18n-title="nav.runTitle">
+                        <i class="fa-solid fa-play"></i> <span class="hidden sm:inline" data-i18n="nav.runBtn"></span>
+                    </button>
+                </div>
+
+                <!-- Group 3: Contextual Tools (Hidden by default) -->
+                <div id="contextual-tools" class="flex items-center gap-1">
+                    <button id="btn-seo" data-action="call" data-call="tools.seo.openModal" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded transition" title="SEO 工具 (Sitemap & Robots.txt)">
+                        <i class="fa-solid fa-globe text-blue-500"></i> <span class="hidden sm:inline">SEO</span>
+                    </button>
+                    <button id="btn-qr" data-action="call" data-call="features.format.openQrModal" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded transition" title="QR Code / OCR 工具">
+                        <i class="fa-solid fa-qrcode text-emerald-500"></i> <span class="hidden sm:inline">QR / OCR</span>
+                    </button>
+                    <button data-action="call" data-call="tools.docx.exportDocx" data-optional="true" id="btn-export-docx" class="hidden px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded transition shadow-sm" title="Export DOCX" data-i18n-title="nav.exportDocxTitle">
+                        <i class="fa-solid fa-file-word"></i> <span class="hidden sm:inline">Export DOCX</span>
+                    </button>
+                    <button data-action="call" data-call="tools.docx.exportToPdf" data-optional="true" id="btn-export-pdf-doc" class="hidden px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-red-600 hover:bg-red-700 text-white rounded transition shadow-sm" title="Export PDF" data-i18n-title="nav.exportPdfTitle">
+                        <i class="fa-solid fa-file-pdf"></i> <span class="hidden sm:inline">Export PDF</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2 sm:gap-3">
+
+            <div data-action="call" data-call="features.format.renameFile" class="group flex items-center gap-1 sm:gap-2 px-1 sm:px-2 py-1 rounded cursor-pointer border border-transparent hover:border-blue-300 hover:bg-blue-50 dark:hover:border-blue-700 dark:hover:bg-blue-900/30 transition-all" title="Rename" data-i18n-title="nav.renameTitle">
+                <span id="file-name" data-is-default="true" class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 max-w-[100px] sm:max-w-[150px] truncate group-hover:text-blue-600 dark:group-hover:text-blue-400"></span>
+                <i class="fa-solid fa-pen text-[10px] sm:text-xs text-gray-400 group-hover:text-blue-500"></i>
+            </div>
+            
+            <select id="lang-select" data-change-call="core.i18n.changeLanguage" class="custom-select text-xs font-bold h-7 sm:h-8 ps-2 pe-6 py-0 rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-sm border border-gray-300 dark:border-gray-600 appearance-none bg-no-repeat cursor-pointer outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="en">English</option>
+                <option value="zh-TW">繁體中文</option>
+                <option value="zh-CN">简体中文</option>
+                <option value="ja">日本語</option>
+                <option value="ko">한국어</option>
+                <option value="es">Español</option>
+                <option value="fr">Français</option>
+                <option value="de">Deutsch</option>
+                <option value="it">Italiano</option>
+                <option value="pt">Português</option>
+                <option value="ru">Русский</option>
+                <option value="ar">العربية</option>
+                <option value="hi">हिन्दी</option>
+                <option value="bn">বাংলা</option>
+                <option value="id">Bahasa Indonesia</option>
+                <option value="tr">Türkçe</option>
+                <option value="vi">Tiếng Việt</option>
+                <option value="th">ไทย</option>
+                <option value="pl">Polski</option>
+                <option value="nl">Nederlands</option>
+                <option value="sv">Svenska</option>
+                <option value="da">Dansk</option>
+                <option value="fi">Suomi</option>
+                <option value="no">Norsk</option>
+                <option value="cs">Čeština</option>
+                <option value="el">Ελληνικά</option>
+                <option value="he">עברית</option>
+                <option value="ro">Română</option>
+                <option value="hu">Magyar</option>
+                <option value="uk">Українська</option>
+            </select>
+
+            <button data-action="call" data-call="core.ui.toggleTheme" class="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition flex-shrink-0">
+                <i id="theme-icon" class="fa-solid fa-moon"></i>
+            </button>
+            <button data-action="call" data-call="core.ui.resetAll" class="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-full text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 transition flex-shrink-0" title="Reset All" data-i18n-title="nav.resetAllTitle">
+                <i class="fa-solid fa-rotate-left"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Tab Bar -->
+    <div id="tab-bar" class="flex items-center overflow-x-auto bg-gray-200 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700 hide-scrollbar flex-shrink-0 min-h-[36px] px-1">
+        <div id="tabs-container" class="flex items-center h-full">
+            <!-- Tabs will be injected here -->
+        </div>
+        <button data-action="call" data-call="core.tabManager.createNewTab" class="px-3 py-1.5 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition" title="New Tab" data-i18n-title="nav.newTabTitle">
+            <i class="fa-solid fa-plus"></i>
+        </button>
+        <div class="flex-grow"></div>
+        
+        <!-- Mode Switch Buttons (Moved here for better UX) -->
+        <div id="mode-switch-container" class="flex items-center bg-gray-300 dark:bg-gray-900/50 p-0.5 rounded-md mx-2 scale-90 sm:scale-100">
+            <button id="mode-code-btn" data-action="call" data-call="features.visual.switchToCode" class="px-3 py-1 text-xs font-medium rounded bg-blue-600 text-white shadow-sm transition-all duration-200">
+                <i class="fa-solid fa-code"></i> <span class="hidden md:inline ms-1" data-i18n="nav.modeCode">Code</span>
+            </button>
+            <button id="mode-split-btn" data-action="call" data-call="features.visual.switchToSplit" class="px-3 py-1 text-xs font-medium rounded text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
+                <i class="fa-solid fa-table-columns"></i> <span class="hidden md:inline ms-1" data-i18n="nav.modeSplit">Split</span>
+            </button>
+            <button id="mode-visual-btn" data-action="call" data-call="features.visual.switchToVisual" class="px-3 py-1 text-xs font-medium rounded text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
+                <i class="fa-solid fa-pen-nib"></i> <span class="hidden md:inline ms-1" data-i18n="nav.modeVisual">Visual</span>
+            </button>
+        </div>
+
+        <button data-action="call" data-call="features.compare.openModal" class="px-3 py-1 text-xs text-gray-600 hover:text-blue-600 border-l border-gray-300 dark:border-gray-600 dark:text-gray-400 transition whitespace-nowrap" title="Compare" data-i18n-title="nav.compareTitle">
+            <i class="fa-solid fa-code-compare"></i> <span class="hidden sm:inline ms-1" data-i18n="nav.compareBtn">Compare</span>
+        </button>
+    </div>
+
+    <main class="flex-grow flex relative overflow-hidden">
+        <!-- Mobile sidebar overlay -->
+        <div id="sidebar-overlay" data-action="call" data-call="features.sidebar.toggle"></div>
+        
+        <!-- Sidebar Explorer -->
+        <div id="sidebar" class="w-64 bg-gray-100 dark:bg-gray-800 border-e border-gray-300 dark:border-gray-700 flex flex-col flex-shrink-0">
+            <div class="px-3 py-2 flex items-center justify-between text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 border-b border-gray-300 dark:border-gray-700 uppercase tracking-wider">
+                <span data-i18n="nav.explorer">EXPLORER</span>
+                <div class="flex gap-2">
+                    <button data-action="call" data-call="core.fileSystem.createNodePrompt" data-args='["file"]' class="text-gray-500 hover:text-blue-500 transition-colors" title="New File" data-i18n-title="nav.newFile"><i class="fa-solid fa-file-circle-plus"></i></button>
+                    <button data-action="call" data-call="core.fileSystem.createNodePrompt" data-args='["folder"]' class="text-gray-500 hover:text-blue-500 transition-colors" title="New Folder" data-i18n-title="nav.newFolder"><i class="fa-solid fa-folder-plus"></i></button>
+                    <button data-action="call" data-call="core.fileSystem.renameSelectedNode" class="text-gray-500 hover:text-yellow-500 transition-colors" title="Rename" data-i18n-title="nav.renameNode"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button data-action="call" data-call="core.fileSystem.deleteSelectedNode" class="btn-explorer-delete text-gray-500 hover:text-red-500 transition-colors" title="Delete" data-i18n-title="nav.deleteNode"><i class="fa-solid fa-trash-can"></i></button>
+                    <button data-action="call" data-call="core.fileSystem.exportZip" class="text-gray-500 hover:text-green-500 transition-colors" title="Export ZIP" data-i18n-title="nav.exportZip"><i class="fa-solid fa-file-zipper"></i></button>
+                </div>
+            </div>
+            <div id="file-tree" class="flex-grow overflow-y-auto p-2 text-sm text-gray-700 dark:text-gray-300 hide-scrollbar select-none">
+                <!-- Tree nodes will be injected here -->
+            </div>
+        </div>
+        
+        <!-- Resizer -->
+        <div id="sidebar-resizer" class="w-1 cursor-col-resize bg-gray-200 dark:bg-gray-700 hover:bg-blue-500 transition-colors flex-shrink-0 relative z-10"></div>
+
+        <div id="editor-container" class="flex-grow flex flex-col min-w-0 h-full transition-all duration-300" style="min-width:200px">
+            <div class="flex-grow relative w-full"><textarea id="code-editor"></textarea></div>
+            
+            <div id="ide-panel" class="hidden h-[250px] flex-shrink-0 flex-col term-bg border-t border-gray-700 font-mono text-sm shadow-[0_-4px_15px_rgba(0,0,0,0.15)] z-20">
+                <div class="flex items-center bg-[#252526] text-gray-400 border-b border-gray-700 px-2">
+                    <button data-action="call" data-call="features.panel.switchTab" data-args='["problems"]' id="tab-problems" class="px-4 py-2 border-b-2 border-blue-500 text-white hover:text-gray-200 transition-colors flex items-center gap-2">
+                        <span data-i18n="panel.probTab"></span> <span id="problem-count" class="bg-blue-600/30 text-blue-400 px-1.5 py-0.5 rounded-full text-xs">0</span>
+                    </button>
+                    <button data-action="call" data-call="features.panel.switchTab" data-args='["console"]' id="tab-console" class="px-4 py-2 border-b-2 border-transparent hover:text-gray-200 transition-colors flex items-center gap-2" data-i18n="panel.consoleTab"></button>
+                    <div class="flex-grow"></div>
+                    <button data-action="call" data-call="features.panel.clearConsole" class="px-3 py-2 hover:bg-white/10 transition-colors" title="Clear" data-i18n-title="panel.clearConsole"><i class="fa-solid fa-eraser"></i></button>
+                    <button data-action="call" data-call="features.panel.closePanel" class="px-3 py-2 hover:bg-white/10 transition-colors" title="Close" data-i18n-title="panel.closePanel"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="flex-grow overflow-y-auto relative">
+                    <div id="panel-problems" class="absolute inset-0 p-3 overflow-y-auto"></div>
+                    <div id="panel-console" class="hidden absolute inset-0 p-3 overflow-y-auto whitespace-pre-wrap font-mono"></div>
+                </div>
+            </div>
+
+            <div class="flex-shrink-0 flex items-center justify-between px-2 sm:px-3 py-1 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
+                <div class="flex gap-2 sm:gap-4"><span id="cursor-pos">Ln 1, Col 1</span><span id="file-size" class="hidden sm:inline">0 Bytes</span></div>
+                <div class="flex gap-2 sm:gap-4">
+                    <button id="eol-toggle" data-action="call" data-call="features.format.toggleEOL" class="hover:text-blue-500 dark:hover:text-blue-400 transition-colors font-medium">LF</button>
+                    <select id="encoding-select" data-change-call="features.format.changeEncoding" class="bg-transparent border-none outline-none cursor-pointer hover:text-blue-500 dark:hover:text-blue-400 transition-colors text-inherit font-inherit appearance-none">
+                        <option value="utf-8">UTF-8</option>
+                        <option value="windows-1252">Windows-1252</option>
+                        <option value="shift-jis">Shift-JIS</option>
+                        <option value="big5">Big5</option>
+                    </select>
+                    <span id="language-mode" class="font-bold sm:font-normal text-blue-500 sm:text-gray-500">HTML</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Split-view resizer -->
+        <div id="split-resizer" class="hidden w-1.5 cursor-col-resize bg-gray-300 dark:bg-gray-600 hover:bg-blue-500 dark:hover:bg-blue-500 transition-colors flex-shrink-0 relative z-10"></div>
+
+        <div id="visual-container" class="hidden flex-col bg-white dark:bg-gray-900 transition-all duration-300" style="min-width:200px; overflow:hidden">
+            <div class="flex items-center p-1.5 sm:p-2 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm flex-shrink-0 overflow-x-auto whitespace-nowrap hide-scrollbar">
+                <button data-action="call" data-call="features.visual.execCmd" data-args='["bold"]' class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 hover:text-violet-600 rounded transition-colors" title="Bold"><i class="fa-solid fa-bold"></i></button>
+                <button data-action="call" data-call="features.visual.execCmd" data-args='["italic"]' class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 hover:text-violet-600 rounded transition-colors" title="Italic"><i class="fa-solid fa-italic"></i></button>
+                <button data-action="call" data-call="features.visual.execCmd" data-args='["underline"]' class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 hover:text-violet-600 rounded transition-colors" title="Underline"><i class="fa-solid fa-underline"></i></button>
+                <button data-action="call" data-call="features.visual.execCmd" data-args='["strikeThrough"]' class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 hover:text-violet-600 rounded transition-colors" title="Strikethrough"><i class="fa-solid fa-strikethrough"></i></button>
+                
+                <div class="w-px h-5 sm:h-6 bg-gray-300 dark:bg-gray-600 mx-1 flex-shrink-0"></div>
+                
+                <button data-action="call" data-call="features.visual.execCmd" data-args='["justifyLeft"]' class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Align Left"><i class="fa-solid fa-align-left"></i></button>
+                <button data-action="call" data-call="features.visual.execCmd" data-args='["justifyCenter"]' class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Align Center"><i class="fa-solid fa-align-center"></i></button>
+                
+                <div class="w-px h-5 sm:h-6 bg-gray-300 dark:bg-gray-600 mx-1 flex-shrink-0"></div>
+                
+                <button data-action="call" data-call="features.visual.execCmd" data-args='["formatBlock", "H1"]' class="p-1 sm:p-2 flex-shrink-0 font-bold text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="H1">H1</button>
+                <button data-action="call" data-call="features.visual.execCmd" data-args='["formatBlock", "H2"]' class="p-1 sm:p-2 flex-shrink-0 font-bold text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="H2">H2</button>
+                <button data-action="call" data-call="features.visual.execCmd" data-args='["formatBlock", "BLOCKQUOTE"]' class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors" title="Quote"><i class="fa-solid fa-quote-left"></i></button>
+                
+                <div class="w-px h-5 sm:h-6 bg-gray-300 dark:bg-gray-600 mx-1 flex-shrink-0"></div>
+                
+                <button data-action="call" data-call="features.visual.insertImagePrompt" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-600 rounded transition-colors" title="Insert Image"><i class="fa-regular fa-image"></i></button>
+                <button data-action="call" data-call="features.visual.insertLinkPrompt" class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 rounded transition-colors" title="Insert Link"><i class="fa-solid fa-link"></i></button>
+                
+                <div class="w-px h-5 sm:h-6 bg-gray-300 dark:bg-gray-600 mx-1 flex-shrink-0"></div>
+                
+                <button data-action="call" data-call="features.visual.insertTablePrompt" class="py-1 px-2 flex-shrink-0 flex items-center gap-1 text-[11px] font-medium bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors shadow-sm" title="Table"><i class="fa-solid fa-table"></i> <span class="hidden sm:inline">Table</span></button>
+                <div class="flex items-center text-[10px] sm:text-xs font-bold text-gray-600 dark:text-gray-300 gap-0.5 ms-1 bg-gray-100 dark:bg-gray-800 p-0.5 rounded border border-gray-200 dark:border-gray-700 flex-shrink-0">
+                    <button data-action="call" data-call="features.visual.addTableRow" class="px-1.5 py-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded" title="+Row">+R</button>
+                    <button data-action="call" data-call="features.visual.addTableColumn" class="px-1.5 py-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded" title="+Col">+C</button>
+                    <button data-action="call" data-call="features.visual.removeTableRow" class="px-1.5 py-1 hover:bg-red-100 text-red-500 rounded" title="-Row">-R</button>
+                </div>
+            </div>
+            <iframe id="visual-frame" class="w-full flex-grow bg-white border-none"></iframe>
+        </div>
+
+        <div id="merge-container" class="hidden w-full h-full flex-col">
+            <div class="flex justify-between items-center bg-gray-100 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700 px-4 py-2 text-sm flex-shrink-0">
+                <span class="font-bold text-gray-700 dark:text-gray-300"><i class="fa-solid fa-code-compare"></i> <span data-i18n="nav.compareTitle">Compare Mode</span></span>
+                <button data-action="call" data-call="features.compare.exit" class="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-xs transition-colors shadow-sm" data-i18n="messages.exitCompare">Exit Compare</button>
+            </div>
+            <div id="merge-view-wrapper" class="flex-grow w-full relative overflow-hidden"></div>
+        </div>
+
+        <!-- Spreadsheet Container (CSV / XLSX) -->
+        <div id="spreadsheet-container" class="hidden flex-col w-full h-full overflow-hidden bg-white dark:bg-gray-900">
+            <div class="flex flex-wrap items-center gap-1 px-3 py-2 bg-gray-100 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700 flex-shrink-0">
+                <span class="text-xs font-bold text-gray-500 dark:text-gray-400 mr-2"><i class="fa-solid fa-table"></i> Spreadsheet</span>
+                <button data-action="call" data-call="tools.spreadsheet.addRow" class="px-2 py-1 text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 rounded hover:bg-blue-100 transition">+Row</button>
+                <button data-action="call" data-call="tools.spreadsheet.deleteRow" class="px-2 py-1 text-xs bg-red-50 dark:bg-red-900/30 text-red-500 border border-red-200 dark:border-red-800 rounded hover:bg-red-100 transition">-Row</button>
+                <button data-action="call" data-call="tools.spreadsheet.addCol" class="px-2 py-1 text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 rounded hover:bg-blue-100 transition">+Col</button>
+                <button data-action="call" data-call="tools.spreadsheet.deleteCol" class="px-2 py-1 text-xs bg-red-50 dark:bg-red-900/30 text-red-500 border border-red-200 dark:border-red-800 rounded hover:bg-red-100 transition">-Col</button>
+                <div class="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                <button data-action="call" data-call="tools.spreadsheet.sort" data-args='["asc"]' class="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded transition" title="Sort A-Z"><i class="fa-solid fa-arrow-down-a-z"></i></button>
+                <button data-action="call" data-call="tools.spreadsheet.sort" data-args='["desc"]' class="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded transition" title="Sort Z-A"><i class="fa-solid fa-arrow-up-z-a"></i></button>
+                <button data-action="call" data-call="tools.spreadsheet.math" data-args='["sum"]' class="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded transition font-bold" title="Sum">∑</button>
+                <button data-action="call" data-call="tools.spreadsheet.math" data-args='["avg"]' class="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded transition font-bold" title="Average">Avg</button>
+                <div class="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                <button data-action="call" data-call="tools.spreadsheet.export" data-args='["csv"]' class="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition shadow-sm"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+                <button data-action="call" data-call="tools.spreadsheet.export" data-args='["xlsx"]' class="px-2 py-1 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700 transition shadow-sm"><i class="fa-solid fa-file-excel"></i> Export XLSX</button>
+                <button data-action="call" data-call="tools.spreadsheet.export" data-args='["pdf"]' class="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition shadow-sm"><i class="fa-solid fa-file-pdf"></i> Export PDF</button>
+            </div>
+            <div id="spreadsheet-wrapper" class="flex-grow overflow-auto p-2"></div>
+        </div>
+
+        <!-- PDF Container -->
+        <div id="pdf-container" class="hidden flex-col w-full h-full overflow-hidden bg-gray-200 dark:bg-gray-900">
+            <div class="flex flex-wrap items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700 flex-shrink-0">
+                <span class="text-xs font-bold text-gray-500 dark:text-gray-400 mr-2"><i class="fa-regular fa-file-pdf text-red-500"></i> PDF Viewer</span>
+                <button data-action="call" data-call="tools.pdf.exportText" class="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition shadow-sm"><i class="fa-solid fa-pen-to-square"></i> Extract & Edit Text</button>
+                <button data-action="call" data-call="tools.pdf.exportOcrText" class="px-3 py-1 text-xs bg-purple-600 text-white rounded hover:bg-purple-700 transition shadow-sm" title="Warning: May take a while"><i class="fa-solid fa-language"></i> Extract via OCR</button>
+            </div>
+            <div id="pdf-pages" class="flex-grow overflow-auto flex flex-col items-center gap-4 p-4"></div>
+        </div>
+    </main>
+
+    <div id="drop-overlay" class="hidden absolute inset-0 flex items-center justify-center flex-col text-white">
+        <i class="fa-solid fa-file-arrow-up text-6xl mb-4 animate-bounce"></i>
+        <h2 class="text-3xl font-bold" data-i18n="messages.dropText"></h2>
+    </div>
+
+    <div id="custom-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden transform transition-all scale-95 opacity-0" id="custom-modal-content">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700"><h3 class="text-lg font-semibold text-gray-900 dark:text-white" id="custom-modal-title"></h3></div>
+            <div class="px-6 py-4">
+                <p class="text-sm text-gray-600 dark:text-gray-300 mb-3" id="custom-modal-message"></p>
+                <input type="text" id="custom-modal-input" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm" autocomplete="off">
+            </div>
+            <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex justify-end gap-3 rounded-b-lg">
+                <button id="custom-modal-cancel" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 transition-colors" data-i18n="messages.cancel"></button>
+                <button id="custom-modal-confirm" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 shadow-sm transition-colors" data-i18n="messages.confirm"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Open chooser: 開啟「檔案」或「資料夾」 -->
+    <div id="open-chooser-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2">
+                <i class="fa-regular fa-folder-open text-blue-500"></i>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white" data-i18n="nav.openChooserTitle">請選擇要開啟的內容</h3>
+            </div>
+            <div class="px-6 py-5 grid grid-cols-2 gap-3">
+                <button id="open-chooser-file" class="flex flex-col items-center gap-2 px-4 py-5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:border-blue-400 transition">
+                    <i class="fa-regular fa-file text-3xl text-blue-500"></i>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-200" data-i18n="nav.openChooserFile">開啟檔案</span>
+                </button>
+                <button id="open-chooser-folder" class="flex flex-col items-center gap-2 px-4 py-5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-yellow-50 dark:hover:bg-yellow-900/30 hover:border-yellow-400 transition">
+                    <i class="fa-solid fa-folder text-3xl text-yellow-500"></i>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-200" data-i18n="nav.openChooserFolder">開啟資料夾</span>
+                </button>
+            </div>
+            <div class="px-6 py-3 bg-gray-50 dark:bg-gray-700/50 flex justify-end rounded-b-lg">
+                <button id="open-chooser-cancel" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 transition-colors" data-i18n="messages.cancel">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Dialog with extension chooser -->
+    <div id="save-dialog" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div class="modal-box bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden transform transition-all duration-150 scale-95 opacity-0">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2">
+                <i class="fa-solid fa-floppy-disk text-blue-500"></i>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white" data-i18n="messages.savePrompt">Save As</h3>
+            </div>
+            <div class="px-6 py-5 space-y-4">
+                <!-- File name + extension row -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">File Name</label>
+                    <div class="flex gap-2 items-stretch">
+                        <input type="text" id="save-dialog-name"
+                            class="flex-grow px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-l-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
+                            autocomplete="off" placeholder="filename">
+                        <select id="save-dialog-ext"
+                            class="px-2 py-2 border border-l-0 border-gray-300 dark:border-gray-600 rounded-r-md bg-gray-50 dark:bg-gray-700 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer min-w-[90px]">
+                        </select>
+                    </div>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1.5">Select an extension or just type a name and choose the format.</p>
+                </div>
+                <!-- Quick extension chips -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">Common Formats</label>
+                    <div class="flex flex-wrap gap-1.5" id="save-ext-chips">
+                        <button data-action="set-value" data-target="#save-dialog-ext" data-value="html" class="px-2 py-0.5 text-xs rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 border border-orange-200 hover:bg-orange-200 transition">.html</button>
+                        <button data-action="set-value" data-target="#save-dialog-ext" data-value="css" class="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 hover:bg-blue-200 transition">.css</button>
+                        <button data-action="set-value" data-target="#save-dialog-ext" data-value="js" class="px-2 py-0.5 text-xs rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 border border-yellow-200 hover:bg-yellow-200 transition">.js</button>
+                        <button data-action="set-value" data-target="#save-dialog-ext" data-value="py" class="px-2 py-0.5 text-xs rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 border border-indigo-200 hover:bg-indigo-200 transition">.py</button>
+                        <button data-action="set-value" data-target="#save-dialog-ext" data-value="json" class="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border border-green-200 hover:bg-green-200 transition">.json</button>
+                        <button data-action="set-value" data-target="#save-dialog-ext" data-value="md" class="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 border border-gray-200 hover:bg-gray-200 transition">.md</button>
+                        <button data-action="set-value" data-target="#save-dialog-ext" data-value="txt" class="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 border border-gray-200 hover:bg-gray-200 transition">.txt</button>
+                        <button data-action="set-value" data-target="#save-dialog-ext" data-value="csv" class="px-2 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 border border-emerald-200 hover:bg-emerald-200 transition">.csv</button>
+                        <button data-action="set-value" data-target="#save-dialog-ext" data-value="xlsx" class="px-2 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 border border-emerald-200 hover:bg-emerald-200 transition">.xlsx</button>
+                        <button data-action="set-value" data-target="#save-dialog-ext" data-value="docx" class="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 hover:bg-blue-200 transition">.docx</button>
+                        <button data-action="set-value" data-target="#save-dialog-ext" data-value="pdf" class="px-2 py-0.5 text-xs rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 border border-red-200 hover:bg-red-200 transition">.pdf</button>
+                        <button data-action="set-value" data-target="#save-dialog-ext" data-value="sql" class="px-2 py-0.5 text-xs rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border border-purple-200 hover:bg-purple-200 transition">.sql</button>
+                        <button data-action="set-value" data-target="#save-dialog-ext" data-value="svg" class="px-2 py-0.5 text-xs rounded-full bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300 border border-pink-200 hover:bg-pink-200 transition">.svg</button>
+                    </div>
+
+                </div>
+            </div>
+            <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex justify-end gap-3 rounded-b-xl">
+                <button id="save-dialog-cancel" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 transition-colors" data-i18n="messages.cancel">Cancel</button>
+                <button id="save-dialog-ok" class="px-5 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 shadow-sm transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-floppy-disk"></i> <span data-i18n="messages.savePrompt">Save</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="compare-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden transform transition-all scale-95 opacity-0" id="compare-modal-content">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700"><h3 class="text-lg font-semibold text-gray-900 dark:text-white" data-i18n="nav.compareTitle"></h3></div>
+            <div class="px-6 py-4">
+                <p class="text-sm text-gray-600 dark:text-gray-300 mb-3" data-i18n="messages.selectCompareTab">Select a tab to compare with:</p>
+                <select id="compare-tab-select" class="custom-select w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm appearance-none">
+                </select>
+            </div>
+            <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex justify-end gap-3 rounded-b-lg">
+                <button data-action="call" data-call="features.compare.closeModal" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 transition-colors" data-i18n="messages.cancel"></button>
+                <button data-action="call" data-call="features.compare.execute" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 shadow-sm transition-colors" data-i18n="messages.confirm"></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="absolute bottom-10 end-4 flex flex-col gap-2 z-50"></div>
+
+    <!-- Image Action Modal: OCR or QR Code -->
+    <div id="image-action-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden">
+            <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2">
+                <i class="fa-solid fa-image text-violet-500"></i>
+                <h3 class="text-base font-semibold text-gray-900 dark:text-white">圖片操作</h3>
+            </div>
+            <div class="p-4 flex justify-center">
+                <img id="image-action-preview" src="" alt="preview" class="max-h-40 rounded-lg border border-gray-200 dark:border-gray-700 object-contain shadow">
+            </div>
+            <div class="px-5 pb-5 flex flex-col gap-2">
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-1 text-center">請選擇要對此圖片執行的動作：</p>
+                <button id="image-action-ocr" class="w-full py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition">
+                    <i class="fa-solid fa-language"></i> OCR 文字辨識（支援中文）
+                </button>
+                <button id="image-action-qr" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition">
+                    <i class="fa-solid fa-qrcode"></i> QR Code 解碼
+                </button>
+                <button id="image-action-cancel" class="w-full py-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-sm transition">
+                    取消
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR / OCR tools -->
+    <div id="qr-modal" class="hidden fixed inset-0 z-[300] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col max-h-[90vh]">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-qrcode text-emerald-500 text-xl"></i>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">QR Code 工具</h3>
+                </div>
+                <button data-action="call" data-call="tools.qr.closeModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="flex border-b border-gray-200 dark:border-gray-700">
+                <button data-action="call" data-call="features.format.switchQrTab" data-args='["generate"]' id="qr-tab-generate" class="flex-1 py-3 text-sm font-bold border-b-2 border-emerald-500 text-emerald-600 transition-colors">產生器</button>
+                <button data-action="call" data-call="features.format.switchQrTab" data-args='["scan"]' id="qr-tab-scan" class="flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">解碼器 / 掃描</button>
+                <button data-action="call" data-call="features.format.switchQrTab" data-args='["ocr"]' id="qr-tab-ocr" class="flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-violet-600 dark:text-gray-400 dark:hover:text-violet-400 transition-colors"><i class="fa-solid fa-language mr-1"></i>OCR 辨識</button>
+            </div>
+
+            <div id="qr-panel-generate" class="p-6 overflow-y-auto">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">QR Code 內容</label>
+                        <textarea id="qr-gen-input" class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-sm focus:ring-2 focus:ring-emerald-500 outline-none transition resize-none" rows="3" placeholder="輸入文字、網址或點擊下方按鈕匯入內容..."></textarea>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button data-action="call" data-call="features.format.qrImportContent" data-args='["current"]' class="px-3 py-1.5 text-xs bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 rounded-lg hover:bg-emerald-100 transition">匯入目前內容</button>
+                        <button data-action="call" data-call="features.format.qrImportContent" data-args='["link"]' class="px-3 py-1.5 text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 rounded-lg hover:bg-blue-100 transition">匯入目前網址</button>
+                    </div>
+                    <div class="flex justify-center p-4 bg-gray-50 dark:bg-gray-900 rounded-2xl min-h-[220px] items-center relative group">
+                        <div id="qr-output" class="p-4 bg-white rounded-lg shadow-sm"></div>
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-2xl cursor-pointer" data-action="call" data-call="tools.qr.download">
+                            <span class="bg-white text-gray-900 px-4 py-2 rounded-full text-sm font-bold shadow-lg flex items-center gap-2">
+                                <i class="fa-solid fa-download"></i> 下載圖片
+                            </span>
+                        </div>
+                    </div>
+                    <button data-action="call" data-call="tools.qr.generate" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-lg shadow-emerald-600/20 transition-all active:scale-95">產生 QR Code</button>
+                </div>
+            </div>
+
+            <div id="qr-panel-scan" class="hidden p-6 overflow-y-auto">
+                <div class="space-y-6">
+                    <div class="grid grid-cols-3 gap-3">
+                        <button data-action="call" data-call="tools.qr.startCamera" class="flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-violet-500 dark:hover:border-violet-500 hover:bg-violet-50 dark:hover:bg-violet-900/10 transition-all group">
+                            <i class="fa-solid fa-camera text-2xl text-gray-400 group-hover:text-violet-500"></i>
+                            <span class="text-xs font-medium text-gray-600 dark:text-gray-400 group-hover:text-violet-600 text-center">開啟相機</span>
+                        </button>
+                        <button data-action="call" data-call="tools.qr.triggerFileUpload" class="flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-emerald-500 dark:hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/10 transition-all group">
+                            <i class="fa-solid fa-file-image text-2xl text-gray-400 group-hover:text-emerald-500"></i>
+                            <span class="text-xs font-medium text-gray-600 dark:text-gray-400 group-hover:text-emerald-600 text-center">上傳圖片</span>
+                            <input type="file" id="qr-file-input" class="hidden" accept="image/*" data-change-call="tools.qr.handleFileUpload" data-pass-event="true">
+                        </button>
+                        <button data-action="call" data-call="tools.qr.triggerPaste" class="flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all group">
+                            <i class="fa-solid fa-clipboard text-2xl text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="text-xs font-medium text-gray-600 dark:text-gray-400 group-hover:text-blue-600 text-center">貼上圖片</span>
+                        </button>
+                    </div>
+                    
+                    <div id="qr-camera-container" class="hidden flex flex-col items-center gap-3">
+                        <div class="relative w-full max-w-[300px] aspect-square rounded-xl overflow-hidden bg-black shadow-inner border border-gray-200 dark:border-gray-700">
+                            <video id="qr-video" class="w-full h-full object-cover" playsinline></video>
+                            <div class="absolute inset-0 border-4 border-white/30"></div>
+                            <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[70%] border-2 border-emerald-400 rounded-lg shadow-[0_0_0_1000px_rgba(0,0,0,0.5)]"></div>
+                        </div>
+                        <button data-action="call" data-call="tools.qr.stopCamera" class="px-4 py-2 text-sm bg-red-100 text-red-600 hover:bg-red-200 rounded-lg font-bold transition">關閉相機</button>
+                    </div>
+                    
+                    
+                    <div id="qr-scan-result-container" class="hidden space-y-3">
+                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">解碼結果</label>
+                        <div class="p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl relative">
+                            <p id="qr-scan-result" class="text-sm text-gray-800 dark:text-gray-200 break-all pr-10"></p>
+                            <button data-action="call" data-call="tools.qr.copyResult" class="absolute right-3 top-3 text-emerald-600 hover:text-emerald-800 transition" title="複製">
+                                <i class="fa-regular fa-copy"></i>
+                            </button>
+                        </div>
+                        <div class="flex gap-2">
+                            <button data-action="call" data-call="tools.qr.openResultAsTab" class="flex-1 py-2 text-xs bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition">開啟為新分頁</button>
+                            <button id="qr-result-link-btn" class="hidden flex-1 py-2 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">造訪網址</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OCR Panel -->
+            <div id="qr-panel-ocr" class="hidden p-6 overflow-y-auto space-y-4">
+                <div class="rounded-2xl border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-900/20 p-5 text-center space-y-3">
+                    <div class="w-12 h-12 mx-auto rounded-2xl bg-violet-600 text-white flex items-center justify-center shadow-lg shadow-violet-600/20">
+                        <i class="fa-solid fa-language text-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-gray-800 dark:text-gray-100">高準確 OCR 已獨立成完整工具</h4>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">支援圖片強化、黑白文件模式、多次辨識挑選最佳結果，適合中文、英文、日文與韓文圖片。</p>
+                    </div>
+                    <button data-action="sequence" data-sequence='["tools.qr.closeModal","tools.ocr.openModal"]' class="w-full py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-bold shadow-lg shadow-violet-600/30 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> 開啟高準確 OCR
+                    </button>
+                </div>
+            </div>
+
+            <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 text-center">
+                <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Powered by qrcode.js & jsQR</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- OCR Tool Modal (Redesigned) -->
+    <div id="ocr-modal" class="hidden fixed inset-0 z-[300] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col max-h-[90vh]">
+            <!-- Header -->
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between bg-violet-500 text-white">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-language text-xl text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold">智能 OCR 文字辨識</h3>
+                        <p class="text-[10px] text-violet-100 opacity-80 uppercase tracking-widest">AI Vision Studio</p>
+                    </div>
+                </div>
+                <button data-action="call" data-call="tools.ocr.closeModal" class="w-8 h-8 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-0 flex flex-col md:flex-row">
+                <!-- Sidebar / Settings -->
+                <div class="w-full md:w-64 bg-gray-50 dark:bg-gray-900/50 p-6 border-r border-gray-200 dark:border-gray-700 space-y-6">
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">辨識語言設定</label>
+                        <select id="ocr-lang-select" class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-violet-500 outline-none transition">
+                            <option value="chi_tra+eng" selected>繁體中文 + English（推薦）</option>
+                            <option value="chi_tra">純繁體中文（中文文件優先）</option>
+                            <option value="chi_tra_vert">繁體中文直排</option>
+                            <option value="chi_sim+eng">簡體中文 + English</option>
+                            <option value="eng">English Only</option>
+                            <option value="jpn+eng">日本語 + English</option>
+                            <option value="jpn_vert">日本語直排</option>
+                            <option value="kor+eng">한국어 + English</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">辨識品質</label>
+                        <select id="ocr-quality-select" class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-violet-500 outline-none transition">
+                            <option value="fast">快速：速度優先</option>
+                            <option value="balanced" selected>均衡：高準確語言包 + 中文強化</option>
+                            <option value="accurate">高準確：多版本比對（較慢）</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">文字版面</label>
+                        <select id="ocr-psm-select" class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-violet-500 outline-none transition">
+                            <option value="auto" selected>自動判斷</option>
+                            <option value="block">整頁 / 文件段落</option>
+                            <option value="sparse">零散文字 / 截圖</option>
+                            <option value="line">單行文字</option>
+                            <option value="vertical">直排中文 / 日文</option>
+                        </select>
+                        <p class="text-[10px] leading-relaxed text-gray-400">繁中預設會使用免費高準確語言包；圖片模糊、反光、小字或截圖文字分散時，建議改用「高準確」。</p>
+                    </div>
+
+                    <div class="space-y-3">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">輸入來源</label>
+                        <button data-action="call" data-call="tools.ocr.startCamera" class="w-full flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-violet-500 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition group">
+                            <i class="fa-solid fa-camera text-gray-400 group-hover:text-violet-500"></i>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">相機拍照</span>
+                        </button>
+                        <button data-action="call" data-call="tools.ocr.triggerFileUpload" class="w-full flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition group">
+                            <i class="fa-solid fa-file-image text-gray-400 group-hover:text-emerald-500"></i>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">上傳檔案</span>
+                        </button>
+                        <button data-action="call" data-call="tools.ocr.triggerPaste" class="w-full flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition group">
+                            <i class="fa-solid fa-clipboard text-gray-400 group-hover:text-blue-500"></i>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">貼上圖片</span>
+                        </button>
+                        <input type="file" id="ocr-file-input" class="hidden" accept="image/*" data-change-call="tools.ocr.handleFileUpload" data-pass-event="true">
+                    </div>
+                </div>
+
+                <!-- Main Content Area -->
+                <div class="flex-1 p-6 flex flex-col min-h-[300px] relative">
+                    <!-- Step 1: Drop/Preview Area -->
+                    <div id="ocr-view-initial" class="flex-1 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl flex flex-col items-center justify-center p-8 text-center bg-gray-50/50 dark:bg-gray-800/30 transition duration-200" data-drop-zone="ocr">
+                        <i class="fa-solid fa-cloud-arrow-up text-5xl text-gray-200 dark:text-gray-700 mb-4"></i>
+                        <h4 class="text-sm font-bold text-gray-600 dark:text-gray-400">尚未選取圖片</h4>
+                        <p class="text-xs text-gray-400 mt-2">請從左側選擇來源，或直接拖曳圖片到此處</p>
+                    </div>
+
+                    <!-- Step 2: Image Preview -->
+                    <div id="ocr-view-preview" class="hidden flex-1 flex flex-col gap-4">
+                        <div class="relative flex-1 bg-black rounded-xl overflow-hidden shadow-inner border border-gray-200 dark:border-gray-700">
+                            <img id="ocr-preview-img" class="w-full h-full object-contain">
+                            <div id="ocr-scan-line" class="hidden absolute top-0 left-0 w-full h-0.5 bg-violet-400 shadow-[0_0_15px_rgba(167,139,250,0.8)] z-10 animate-scan"></div>
+                        </div>
+                        <button id="ocr-start-btn" data-action="call" data-call="tools.ocr.startRecognition" class="w-full py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-bold shadow-lg shadow-violet-600/30 transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-magnifying-glass"></i> 開始辨識文字
+                        </button>
+                    </div>
+
+                    <!-- Step 3: Result View -->
+                    <div id="ocr-view-result" class="hidden flex-1 flex flex-col gap-4">
+                        <div class="flex-1 grid grid-cols-1 gap-4 overflow-hidden">
+                            <div class="h-1/3 bg-gray-100 dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+                                <img id="ocr-result-img" class="w-full h-full object-contain">
+                            </div>
+                            <div class="h-2/3 flex flex-col">
+                                <div class="flex items-center justify-between mb-1">
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">辨識結果 (可直接編輯修正)</label>
+                                    <span id="ocr-result-meta" class="text-[10px] text-gray-400"></span>
+                                </div>
+                                <textarea id="ocr-result-text" class="flex-1 w-full p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-mono focus:ring-2 focus:ring-violet-500 outline-none resize-none"></textarea>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button data-action="call" data-call="tools.ocr.reset" class="flex-1 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold transition">重新開始</button>
+                            <button data-action="call" data-call="tools.ocr.copyResult" class="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition">複製</button>
+                            <button data-action="call" data-call="tools.ocr.saveResult" class="flex-[2] py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-lg shadow-emerald-600/30 transition">儲存為新檔案</button>
+                        </div>
+                    </div>
+
+                    <!-- Camera View -->
+                    <div id="ocr-camera-container" class="hidden flex-1 flex flex-col gap-4">
+                        <div class="relative flex-1 bg-black rounded-xl overflow-hidden shadow-inner border border-gray-200 dark:border-gray-700">
+                            <video id="ocr-video" class="w-full h-full object-cover" playsinline></video>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <div class="flex gap-2">
+                                <button data-action="call" data-call="tools.ocr.stopCamera" class="flex-1 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold transition">取消</button>
+                                <button data-action="call" data-call="tools.ocr.takePhoto" class="flex-[2] py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-bold shadow-lg shadow-violet-600/30 transition flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-camera"></i> 拍照預覽
+                                </button>
+                            </div>
+                            <button data-action="call" data-call="tools.ocr.takePhoto" data-args='[true]' class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-lg shadow-emerald-600/30 transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-file-export"></i> 拍照並立即辨識
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Loading State Overlay -->
+                    <div id="ocr-loading" class="hidden absolute inset-0 z-20 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm flex-col items-center justify-center p-6 text-center">
+                        <div class="relative w-20 h-20 mb-4">
+                            <i class="fa-solid fa-circle-notch fa-spin text-5xl text-violet-500"></i>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <i class="fa-solid fa-brain text-xl text-violet-400"></i>
+                            </div>
+                        </div>
+                        <p class="text-sm font-black text-gray-900 dark:text-white" id="ocr-progress-label">正在分析圖片文字...</p>
+                        <div class="w-48 h-1 bg-gray-200 dark:bg-gray-700 rounded-full mt-4 overflow-hidden">
+                            <div id="ocr-progress-bar" class="w-0 h-full bg-violet-500 transition-all"></div>
+                        </div>
+                        <p class="text-[10px] text-gray-400 mt-2 uppercase tracking-tighter">本機瀏覽器 OCR 處理中，圖片不需上傳伺服器</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="px-6 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                <p class="text-[9px] text-gray-400 font-bold">OCR Powered by Tesseract.js + 免費高準確語言包</p>
+                <p class="text-[9px] text-gray-400 font-bold">WebPad++ Visual Intelligence v2.0</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Access Modal -->
+    <div id="recent-modal" class="hidden fixed inset-0 z-[300] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col max-h-[90vh]">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-blue-500 text-xl"></i>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">最近存取 (Recent Projects)</h3>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button data-action="call" data-call="recent.clear" class="px-3 py-1 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition" title="清除紀錄">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                    <button data-action="call" data-call="recent.closeModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-6 overflow-y-auto bg-gray-50 dark:bg-gray-900/50">
+                <div id="recent-list-container" class="space-y-2">
+                    <!-- Dynamic list items will be injected here -->
+                    <div class="text-center text-gray-500 dark:text-gray-400 py-8 text-sm">
+                        <i class="fa-solid fa-folder-open text-3xl mb-3 text-gray-300 dark:text-gray-600 block"></i>
+                        目前沒有最近存取的紀錄。<br>當您開啟資料夾或儲存檔案時，會自動記錄於此。
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SEO Tools Modal -->
+    <div id="seo-modal" class="hidden fixed inset-0 z-[300] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-3xl mx-4 overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col max-h-[90vh]">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex-shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center"><i class="fa-solid fa-globe text-lg"></i></div>
+                    <div><div class="font-bold text-base">網站 SEO 專家工具</div><div class="text-[10px] opacity-70 uppercase tracking-widest">WebPad++ SEO Expert v2.0</div></div>
+                </div>
+                <button data-action="call" data-call="tools.seo.closeModal" class="w-8 h-8 flex items-center justify-center bg-white/10 hover:bg-white/25 rounded-full transition"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div class="flex border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+                <button data-action="call" data-call="tools.seo.switchTab" data-args='["sitemap"]' id="seo-tab-sitemap" class="flex-1 py-3 text-sm font-bold border-b-2 border-blue-500 text-blue-600 transition-colors"><i class="fa-solid fa-map mr-1"></i>Sitemap</button>
+                <button data-action="call" data-call="tools.seo.switchTab" data-args='["robots"]'  id="seo-tab-robots"  class="flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"><i class="fa-solid fa-robot mr-1"></i>Robots.txt</button>
+                <button data-action="call" data-call="tools.seo.switchTab" data-args='["audit"]'   id="seo-tab-audit"   class="flex-1 py-3 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"><i class="fa-solid fa-magnifying-glass-chart mr-1"></i>診斷</button>
+            </div>
+
+            <div class="p-5 overflow-y-auto flex-1 space-y-4 bg-gray-50 dark:bg-gray-900/40">
+
+                <!-- ═══ SITEMAP TAB ═══ -->
+                <div id="seo-content-sitemap" class="space-y-4">
+                    <!-- Mode Switch -->
+                    <div class="flex rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 text-sm font-bold">
+                        <button id="sitemap-mode-local"    data-action="call" data-call="tools.sitemap.switchMode" data-args='["local"]'    class="flex-1 py-2.5 flex items-center justify-center gap-2 bg-blue-600 text-white shadow transition">
+                            <i class="fa-solid fa-folder-open"></i> 本機工作區
+                        </button>
+                        <button id="sitemap-mode-external" data-action="call" data-call="tools.sitemap.switchMode" data-args='["external"]' class="flex-1 py-2.5 flex items-center justify-center gap-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                            <i class="fa-solid fa-globe"></i> 外部網站
+                        </button>
+                    </div>
+
+                    <!-- Base URL (shared) -->
+                    <div class="space-y-1">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">網站基本路徑 (Base URL)</label>
+                        <input type="text" id="sitemap-base-url" placeholder="https://example.com" class="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+
+                    <!-- LOCAL panel -->
+                    <div id="sitemap-local-panel" class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">工作區 HTML 檔案</span>
+                            <div class="flex items-center gap-2">
+                                <span id="sitemap-local-count" class="text-xs text-gray-400"></span>
+                                <button data-action="call" data-call="tools.sitemap.scanLocalWorkspace" class="px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition shadow-sm flex items-center gap-1">
+                                    <i class="fa-solid fa-radar"></i> 掃描工作區
+                                </button>
+                            </div>
+                        </div>
+                        <div id="sitemap-local-files" class="min-h-[60px] max-h-[130px] overflow-y-auto p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 text-xs text-gray-400 italic">
+                            點擊「掃描工作區」以列出 HTML 檔案
+                        </div>
+                    </div>
+
+                    <!-- EXTERNAL panel -->
+                    <div id="sitemap-external-panel" class="hidden space-y-3">
+                        <div class="space-y-1">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">目標網站 URL</label>
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <input type="text" id="sitemap-external-url" placeholder="https://example.com" class="flex-1 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                <button id="btn-fetch-external" data-action="call" data-call="tools.sitemap.fetchExternalSitemap" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition shadow-sm whitespace-nowrap flex items-center justify-center gap-1">
+                                    <i class="fa-solid fa-file-import"></i> 匯入既有 Sitemap
+                                </button>
+                                <button id="btn-crawl-external" data-action="call" data-call="tools.sitemap.crawlExternalWebsite" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition shadow-sm whitespace-nowrap flex items-center justify-center gap-1">
+                                    <i class="fa-solid fa-spider"></i> 爬取網站
+                                </button>
+                            </div>
+                            <p id="external-fetch-status" class="text-xs text-gray-400 mt-1">提示：純前端工具會受 CORS 影響；若自動爬取失敗，仍可手動貼入 URL 後產生檔案。</p>
+                        </div>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 bg-white/70 dark:bg-gray-800/70 border border-gray-200 dark:border-gray-700 rounded-xl">
+                            <div class="space-y-1">
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider">最多頁數</label>
+                                <input type="number" id="sitemap-max-pages" value="50" min="1" max="500" class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider">爬取深度</label>
+                                <input type="number" id="sitemap-max-depth" value="2" min="0" max="8" class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+                            </div>
+                            <label class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300 pt-6">
+                                <input id="sitemap-strip-query" type="checkbox" checked class="accent-blue-600"> 移除 query
+                            </label>
+                            <label class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300 pt-6">
+                                <input id="sitemap-use-canonical" type="checkbox" checked class="accent-blue-600"> 採用 canonical
+                            </label>
+                            <label class="col-span-2 sm:col-span-4 flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
+                                <input id="sitemap-include-subdomains" type="checkbox" class="accent-blue-600"> 允許同主網域的子網域（例如 blog.example.com）
+                            </label>
+                        </div>
+
+                        <div class="space-y-1">
+                            <div class="flex items-center justify-between">
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">URL 列表（每行一個，可手動貼入或編輯）</label>
+                                <span id="sitemap-external-count" class="text-xs text-gray-400"></span>
+                            </div>
+                            <textarea id="sitemap-external-urls" rows="7" placeholder="https://example.com/&#10;https://example.com/about/&#10;https://example.com/contact/" class="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none resize-y"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Freq + Priority -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">更新頻率</label>
+                            <select id="sitemap-changefreq" class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                <option value="always">Always</option>
+                                <option value="hourly">Hourly</option>
+                                <option value="daily">Daily</option>
+                                <option value="weekly" selected>Weekly</option>
+                                <option value="monthly">Monthly</option>
+                                <option value="yearly">Yearly</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">優先權 (Priority)</label>
+                            <input type="number" id="sitemap-priority" value="0.8" step="0.1" min="0" max="1.0" class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-gray-600 dark:text-gray-300">
+                        <label class="flex items-center gap-2"><input id="sitemap-include-lastmod" type="checkbox" checked class="accent-blue-600"> 加入 lastmod</label>
+                        <label class="flex items-center gap-2"><input id="sitemap-include-changefreq" type="checkbox" checked class="accent-blue-600"> 加入 changefreq</label>
+                        <label class="flex items-center gap-2"><input id="sitemap-include-priority" type="checkbox" checked class="accent-blue-600"> 加入 priority</label>
+                    </div>
+
+                    <div id="sitemap-url-preview" class="max-h-28 overflow-y-auto p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 text-xs">
+                        <span class="text-gray-400 italic">產生後會在這裡預覽 URL 清單</span>
+                    </div>
+
+                    <button data-action="call" data-call="tools.sitemap.generateSitemap" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-download"></i> 產生並下載 sitemap.xml
+                    </button>
+                </div>
+
+                <!-- ═══ ROBOTS TAB ═══ -->
+                <div id="seo-content-robots" class="hidden space-y-4">
+                    <div class="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <div>
+                            <div class="font-bold text-gray-900 dark:text-white text-sm">全面開放 (Allow All)</div>
+                            <div class="text-xs text-gray-500">允許所有搜尋引擎爬蟲存取您的網站</div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="robots-allow-all" checked class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        </label>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">禁止爬取的路徑 (每行一個)</label>
+                        <textarea id="robots-disallow" rows="3" placeholder="/admin/&#10;/private/&#10;/tmp/" class="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none resize-y"></textarea>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Sitemap URL（選填，自動填入）</label>
+                        <input type="text" id="robots-sitemap-url" placeholder="https://example.com/sitemap.xml" class="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">額外規則（進階，選填）</label>
+                        <textarea id="robots-extra" rows="2" placeholder="User-agent: Googlebot&#10;Allow: /" class="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none resize-y"></textarea>
+                    </div>
+                    <button data-action="call" data-call="tools.sitemap.generateRobotsTxt" class="w-full py-3 bg-gray-900 dark:bg-indigo-600 hover:bg-black dark:hover:bg-indigo-700 text-white rounded-xl font-bold shadow-lg transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-robot"></i> 產生 robots.txt
+                    </button>
+                </div>
+
+                <!-- ═══ AUDIT TAB ═══ -->
+                <div id="seo-content-audit" class="hidden space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm font-bold text-gray-700 dark:text-gray-300">頁面診斷報告 (Current Page Audit)</div>
+                        <div class="flex gap-2">
+                            <button data-action="call" data-call="tools.seo.exportReport" class="px-3 py-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-xs font-bold rounded-lg transition flex items-center gap-1">
+                                <i class="fa-solid fa-download"></i> 匯出報告
+                            </button>
+                            <button data-action="call" data-call="tools.seo.runAudit" class="px-3 py-1 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-lg transition shadow-sm flex items-center gap-1">
+                                <i class="fa-solid fa-rotate"></i> 重新分析
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 flex items-center gap-5 shadow-sm">
+                        <div class="relative w-20 h-20 flex-shrink-0">
+                            <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                                <path class="text-gray-100 dark:text-gray-700 stroke-current" stroke-width="3" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                <path id="seo-score-circle" class="text-emerald-500 stroke-current transition-all duration-1000" stroke-dasharray="0, 100" stroke-width="3" stroke-linecap="round" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center"><span id="seo-score-text" class="text-2xl font-black text-gray-900 dark:text-white">--</span></div>
+                        </div>
+                        <div>
+                            <div id="seo-score-label" class="text-base font-bold text-gray-900 dark:text-white">尚未分析</div>
+                            <div class="text-xs text-gray-500 mt-1">點擊「重新分析」獲取優化建議</div>
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">搜尋結果預覽 (Google SERP)</label>
+                        <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                            <div id="preview-google-url" class="text-[13px] text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-1"><i class="fa-solid fa-globe text-[11px]"></i> example.com › page</div>
+                            <div id="preview-google-title" class="text-[18px] text-blue-700 dark:text-blue-400 font-medium mb-1 hover:underline cursor-pointer leading-snug">Page Title will appear here</div>
+                            <div id="preview-google-desc" class="text-[13px] text-gray-600 dark:text-gray-300 leading-normal line-clamp-2">這裡會顯示 Meta Description 的內容。良好的描述可大幅提升點擊率。</div>
+                        </div>
+                    </div>
+                    <div class="space-y-2" id="seo-audit-results"></div>
+                </div>
+
+            </div>
+
+            <div class="px-5 py-3 bg-gray-50 dark:bg-gray-800/80 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center flex-shrink-0">
+                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">WebPad++ SEO Expert v2.0</span>
+                <div class="flex items-center gap-2"><span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span><span class="text-[10px] text-emerald-600 font-bold">Active</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Core Modules (Phase 1) ── -->
+    <script src="js/core/app.js"></script>
+    <script src="js/core/loader.js"></script>
+    <script src="js/core/tabs.js"></script>
+    <script src="js/core/ui.js"></script>
+    <script src="js/core/save.js"></script>
+    <script src="js/core/fileio/constants.js"></script>
+    <script src="js/core/fileio/open.js"></script>
+    <script src="js/core/fileio/templates.js"></script>
+    <script src="js/core/fileio/dnd.js"></script>
+    <!-- ── Feature Modules (Phase 1) ── -->
+    <script src="js/features/visual.js"></script>
+    <script src="js/features/panel.js"></script>
+    <script src="js/features/compare.js"></script>
+    <script src="js/features/format.js"></script>
+    <!-- ── SEO / existing modules ── -->
+    <script src="js/tools/seo-core.js"></script>
+    <script src="js/tools/sitemap-utils.js"></script>
+    <script src="js/tools/sitemap-crawler.js"></script>
+    <script src="js/tools/sitemap.js"></script>
+    <script src="js/tools/seo-audit.js"></script>
+    <script src="js/recent.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/core/filesystem.js"></script>
+    <script src="js/features/sidebar.js"></script>
+
+    <!-- ── Tool modules (load order matters!) ── -->
+    <!-- Load order: docutils → spreadsheet → docx → pdf → image-actions → qr → ocr-engine → ocr -->
+    <!-- ⚠️  docutils.js MUST be first — it defines _triggerDownload, _xmlEscape, _hideAllPanels -->
+    <script src="js/tools/docutils.js"></script>
+    <!-- ⚠️  spreadsheet.js MUST come before docx/pdf — it defines colLetterToIndex etc. -->
+    <script src="js/tools/spreadsheet.js"></script>
+    <script src="js/tools/docx.js"></script>
+    <script src="js/tools/pdf.js"></script>
+    <script src="js/tools/image-actions.js"></script>
+    <script src="js/tools/qr.js"></script>
+    <script src="js/tools/ocr-engine.js"></script>
+    <script src="js/tools/ocr.js"></script>
+
+    <!-- ── Main entry point ── -->
+    <script src="js/editor.js"></script>
+    <!-- ── Centralized UI event bindings (Step 2) ── -->
+    <script src="js/core/events.js"></script>
+
+</body>
+
+</html>
