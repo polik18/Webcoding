@@ -1,6 +1,6 @@
 {
   "name": "Webcoding offline release",
-  "generatedAt": "2026-05-19T23:20:48.282Z",
+  "generatedAt": "2026-05-20T02:50:25.821Z",
   "outputFolder": "dist/offline",
   "analytics": {
     "googleAnalytics": "removed",
@@ -197,6 +197,7 @@
     "The offline index removes analytics, Tailwind CDN, Font Awesome CDN, and inline CDN fallback handlers.",
     "js/core/loader.js still contains CDN URLs for the normal web build, but offline mode disables remote fallback at runtime.",
     "Run npm run vendor:fetch in a network-enabled environment before building a full local-first package.",
+    "service-worker.js and offline-assets.json are included so HTTPS/localhost deployments can prepare a browser cache after the first online visit.",
     "Run npm run offline:audit:strict after building when you need every optional vendor asset bundled."
   ]
 }

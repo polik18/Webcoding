@@ -63,7 +63,17 @@ class TabManager {
                 if (activeTab.mode === 'spreadsheet' && typeof window._syncAndSaveSheetToTab === 'function') {
                     window._syncAndSaveSheetToTab(activeTab);
                 }
+                if (activeTab.fsId && window.fileSystem && typeof window.fileSystem.getNode === 'function') {
+                    const node = window.fileSystem.getNode(activeTab.fsId);
+                    if (node && node.type === 'file') {
+                        node.content = activeTab.content;
+                        node.updatedAt = Date.now();
+                        if (activeTab.docType) node.docType = activeTab.docType;
+                        if (activeTab.isTodoNote) node.isTodoNote = true;
+                    }
+                }
             }
+            if (window.fileSystem && typeof window.fileSystem.save === 'function') window.fileSystem.save();
         }
         try {
             await localforage.setItem(this.storageKey, {
@@ -98,6 +108,7 @@ class TabManager {
             }
         }
 
+        const isTodoNote = /data-webpad-note\s*=\s*["']true["']/i.test(content || '');
         const newTab = {
             id,
             fsId: resolvedFsId,
@@ -106,7 +117,9 @@ class TabManager {
             content: content,
             eol: '\n',
             encoding: 'utf-8',
-            mode: 'code',
+            mode: isTodoNote ? 'visual' : 'code',
+            docType: isTodoNote ? 'note' : undefined,
+            isTodoNote: isTodoNote,
             isUnsaved: !isDefault,
             history: null,
             scrollInfo: null,
@@ -115,6 +128,7 @@ class TabManager {
         };
         this.tabs.push(newTab);
         this.switchToTab(id);
+        return newTab;
     }
 
     getActiveTab() {

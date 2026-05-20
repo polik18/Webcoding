@@ -47,6 +47,24 @@ npm run offline:audit:strict
 npm run offline:audit:analytics:strict
 ```
 
+
+## Browser PWA cache mode
+
+The normal web build now includes a Service Worker path for users who visit the app from HTTPS or localhost. After the first successful online visit, the browser can cache the app shell and listed assets from `offline-assets.json`. This is different from cookies: cookies only store small state values, while the Service Worker and Cache Storage keep app resources. User-created files remain in IndexedDB/localForage.
+
+Included files:
+
+- `service-worker.js`: cache-first asset handling, navigation fallback, and message-based cache preparation.
+- `offline-assets.json`: generated local asset list plus OCR language-data URLs that can be cached when the network and CORS policy allow it.
+- `manifest.webmanifest`: install metadata for supported browsers.
+- `js/core/offline.js`: status pill, preparation panel, and background cache warm-up.
+
+Important limits:
+
+- Service Worker is not available from `file://`; use HTTPS or a localhost server.
+- Browser storage can be cleared by the user, browser policy, or low-device-storage cleanup.
+- OCR language data is large. The app attempts background preparation on good connections and also exposes a manual "完整準備" action.
+
 ## OCR language data
 
 Tesseract language data is large and is not bundled automatically. For OCR in a strict offline release, download the needed language folders into:

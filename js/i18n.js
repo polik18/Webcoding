@@ -152,6 +152,32 @@ const _FALLBACKS = {
     "ocr.camera": "Take Photo",
     "ocr.upload": "Upload Image",
     "ocr.paste": "Paste Image",
+    "notes.newBtn": "Notes",
+    "notes.newTitle": "Create a todo note tab",
+    "notes.newMenu": "Todo Note",
+    "notes.toolbarTitle": "Todo Note",
+    "notes.toolbarHint": "Checked items save automatically",
+    "notes.inputPlaceholder": "Enter a todo item...",
+    "notes.addBtn": "Add",
+    "notes.clearBtn": "Clear done",
+    "notes.clearTitle": "Remove completed todo items",
+    "notes.fileBase": "Todo_Note",
+    "notes.title": "Todo Note",
+    "notes.kicker": "Todo Checklist",
+    "notes.subtitle": "Write tasks, tick completed items, and keep everything in this local HTML note.",
+    "notes.quickHint": "Tip: Use the input bar above the preview to add new tasks quickly.",
+    "notes.initialOne": "Type your first task here",
+    "notes.initialTwo": "Click the checkbox when it is done",
+    "notes.initialThree": "Add more items from the toolbar above",
+    "notes.freeTitle": "Notes",
+    "notes.freePlaceholder": "Write additional details here...",
+    "notes.itemPlaceholder": "New todo item",
+    "notes.toastCreated": "Todo note created.",
+    "notes.toastAdded": "Todo item added.",
+    "notes.toastNeedText": "Please enter a todo item first.",
+    "notes.toastCleared": "Completed items removed.",
+    "notes.toastNothingClear": "No completed items to clear.",
+    "notes.toastCreateFailed": "Todo note is not ready yet.",
     "recent.title": "Recent Access",
     "recent.clear": "Clear History",
     "recent.empty": "No recent records found.",
@@ -229,6 +255,10 @@ function updateLanguageUI() {
     
     document.querySelectorAll('[data-i18n-title]').forEach(el => {
         el.title = window.t(el.getAttribute('data-i18n-title'));
+    });
+
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        el.placeholder = window.t(el.getAttribute('data-i18n-placeholder'));
     });
     
     const nameEl = document.getElementById('file-name');

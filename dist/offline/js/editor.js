@@ -61,6 +61,8 @@ window.onLanguageChanged = () => {
         setTimeout(() => { if (editor) editor.performLint && editor.performLint(); }, 100);
     }
     if (window.fileSystem) fileSystem.renderTree();
+    const notesApi = window.WebcodingApp?.namespace?.resolve('features.notes') || window.notesFeature;
+    if (notesApi && typeof notesApi.updateToolbarLocale === 'function') notesApi.updateToolbarLocale();
 };
 
 // ─── DOM Ready ────────────────────────────────────────────────────────────────

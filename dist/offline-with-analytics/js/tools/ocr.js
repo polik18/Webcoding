@@ -39,6 +39,59 @@ function _setOcrCameraStatus(message) {
     if (status && message) status.textContent = message;
 }
 
+function _setOcrCameraFullscreen(enabled) {
+    const modal = _ocrEl('ocr-modal');
+    if (modal) modal.classList.toggle('ocr-camera-fullscreen', !!enabled);
+    if (document.body) document.body.classList.toggle('ocr-camera-live', !!enabled);
+}
+
+function _formatOcrFileTimestamp(date = new Date()) {
+    const pad = value => String(value).padStart(2, '0');
+    return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}_${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`;
+}
+
+function _openOcrResultAsEditableFile(text, metaText = '') {
+    const finalText = typeof text === 'string' ? text : '';
+    const fileName = `OCR_${_formatOcrFileTimestamp()}.txt`;
+
+    if (typeof tabManager !== 'undefined' && typeof tabManager.createNewTab === 'function') {
+        tabManager.createNewTab(fileName, finalText, false);
+        const activeTab = tabManager.getActiveTab && tabManager.getActiveTab();
+        if (activeTab) {
+            activeTab.mode = 'code';
+            activeTab.encoding = 'utf-8';
+            activeTab.eol = '\n';
+            activeTab.isUnsaved = true;
+        }
+        if (window.fileSystem && activeTab && activeTab.fsId) {
+            const node = window.fileSystem.getNode && window.fileSystem.getNode(activeTab.fsId);
+            if (node) {
+                node.content = finalText;
+                node.mime = 'text/plain';
+                node.name = fileName;
+                window.fileSystem.selectedNodeId = node.id;
+                if (typeof window.fileSystem.save === 'function') window.fileSystem.save();
+                if (typeof window.fileSystem.renderTree === 'function') window.fileSystem.renderTree();
+            }
+        }
+        if (typeof tabManager.renderTabs === 'function') tabManager.renderTabs();
+        if (typeof tabManager.saveToStorage === 'function') tabManager.saveToStorage();
+        if (typeof updateUI === 'function') updateUI();
+        if (window.editor && typeof window.editor.focus === 'function') setTimeout(() => window.editor.focus(), 0);
+        window.closeOcrModal();
+        showToast(finalText.trim() ? `已建立 ${fileName}，可直接編輯` : `已建立 ${fileName}，但沒有辨識到明顯文字`, finalText.trim() ? 'success' : 'info');
+        return true;
+    }
+
+    const resultText = _ocrEl('ocr-result-text');
+    const meta = _ocrEl('ocr-result-meta');
+    if (resultText) resultText.value = finalText;
+    if (meta) meta.textContent = metaText;
+    _switchOcrView('result');
+    showToast('已顯示辨識結果，但目前無法建立新分頁', 'info');
+    return false;
+}
+
 function _getOcrSettings() {
     return {
         lang: (_ocrEl('ocr-lang-select') || {}).value || 'chi_tra+eng',
@@ -178,7 +231,7 @@ function _startOcrCameraStatusNudge() {
             _ocrCameraStatusTimer = null;
             return;
         }
-        _setOcrCameraStatus('小提醒：webcam 對焦慢時，請先停住 1～2 秒；文字清楚後再按「拍照預覽」或「拍照並立即辨識」。');
+        _setOcrCameraStatus('小提醒：webcam 對焦慢時，請先停住 1～2 秒；文字清楚後按「拍照並匯入 TXT」。');
     }, 9000);
 }
 
@@ -188,6 +241,7 @@ function _stopOcrCameraStatusNudge() {
 }
 
 window.openOcrModal = function() {
+    _setOcrCameraFullscreen(false);
     const qrModal = _ocrEl('qr-modal');
     if (qrModal) qrModal.classList.add('hidden');
     const modal = _ocrEl('ocr-modal');
@@ -198,6 +252,7 @@ window.openOcrModal = function() {
 };
 
 window.closeOcrModal = function() {
+    _setOcrCameraFullscreen(false);
     window.stopOcrCamera({ keepView: true });
     _showOcrLoading(false);
     const modal = _ocrEl('ocr-modal');
@@ -206,6 +261,7 @@ window.closeOcrModal = function() {
 
 window.resetOcr = function() {
     if (_ocrBusy) return;
+    _setOcrCameraFullscreen(false);
     _ocrPendingDataUrl = null;
     _ocrLastResult = null;
     window.stopOcrCamera({ keepView: true });
@@ -238,7 +294,8 @@ window.startOcrCamera = async function() {
     _scheduleOcrAssetWarmup('start-camera');
     const video = _ocrEl('ocr-video');
     _switchOcrView('camera');
-    _setOcrCameraStatus('正在開啟相機與套用對焦設定...');
+    _setOcrCameraFullscreen(true);
+    _setOcrCameraStatus('正在開啟全螢幕相機與套用對焦設定...');
     try {
         _ocrVideoStream = await navigator.mediaDevices.getUserMedia(OCR_CAMERA_CONSTRAINTS);
         await _applyOcrCameraOptimizations(_ocrVideoStream);
@@ -253,12 +310,14 @@ window.startOcrCamera = async function() {
         }
         _startOcrCameraStatusNudge();
     } catch (err) {
+        _setOcrCameraFullscreen(false);
         showToast('無法存取相機: ' + err.message, 'error');
         window.resetOcr();
     }
 };
 
 window.stopOcrCamera = function(options = {}) {
+    _setOcrCameraFullscreen(false);
     _stopOcrCameraStatusNudge();
     _ocrTorchOn = false;
     if (_ocrVideoStream) {
@@ -404,14 +463,14 @@ window.startPerformingOcr = async function() {
         const meta = _ocrEl('ocr-result-meta');
         if (resultText) resultText.value = cleanedText;
         if (resultImg) resultImg.src = result.processedImageDataUrl || _ocrPendingDataUrl;
+        let metaText = '';
         if (meta) {
             const confidence = Number.isFinite(result.confidence) ? Math.round(result.confidence) : 0;
             const dataLabel = result.dataLabel || (result.dataMode === 'best' ? '高準確語言包' : '標準語言包');
-            meta.textContent = `語言資料：${dataLabel} / 最佳模式：${result.variant || '自動'} / 版面：${result.psm || settings.psm} / 信心值：約 ${confidence}%`;
+            metaText = `語言資料：${dataLabel} / 最佳模式：${result.variant || '自動'} / 版面：${result.psm || settings.psm} / 信心值：約 ${confidence}%`;
+            meta.textContent = metaText;
         }
-        _switchOcrView('result');
-        if (cleanedText.trim()) showToast('✅ OCR 辨識完成，可先檢查再儲存', 'success');
-        else showToast('找不到明顯文字，建議改用「高準確」或重新拍攝較清楚的圖片', 'info');
+        _openOcrResultAsEditableFile(cleanedText, metaText);
     } catch (err) {
         console.error('[OCR] failed:', err);
         showToast('OCR 辨識失敗: ' + err.message, 'error');
@@ -448,16 +507,8 @@ window.copyOcrResult = async function() {
 
 window.saveOcrResult = function() {
     const text = (_ocrEl('ocr-result-text') || {}).value || '';
-    if (!text.trim()) {
-        showToast('沒有文字可儲存', 'info');
-        return;
-    }
-    const dateStr = new Date().toISOString().replace(/T/, '_').replace(/:/g, '').split('.')[0];
-    if (typeof tabManager !== 'undefined') {
-        tabManager.createNewTab(`OCR_Result_${dateStr}.txt`, text, false);
-        window.closeOcrModal();
-        showToast('已儲存為新檔案', 'success');
-    }
+    const metaText = (_ocrEl('ocr-result-meta') || {}).textContent || '';
+    _openOcrResultAsEditableFile(text, metaText);
 };
 
 // Start warming the OCR engine after the editor is usable, and preload more

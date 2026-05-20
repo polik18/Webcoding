@@ -355,6 +355,10 @@ function testOfflineRuntimePolicy() {
 function testOfflineReleaseTooling() {
   const requiredFiles = [
     'css/offline-fallback.css',
+    'service-worker.js',
+    'manifest.webmanifest',
+    'offline-assets.json',
+    'js/core/offline.js',
     'scripts/build-offline-release.js',
     'scripts/audit-offline-release.js',
     'docs/OFFLINE_RELEASE.md'
@@ -369,6 +373,10 @@ function testOfflineReleaseTooling() {
   const css = read('css/offline-fallback.css');
   assert(css.length > 5000, 'offline fallback CSS 異常過小');
   assert(/\.flex\{display:flex\}/.test(css), 'offline fallback CSS 缺少常用 utility');
+  const pwaManifest = JSON.parse(read('manifest.webmanifest'));
+  assert(pwaManifest.start_url && pwaManifest.display, 'manifest.webmanifest 欄位不足');
+  const offlineAssets = JSON.parse(read('offline-assets.json'));
+  assert(Array.isArray(offlineAssets.core) && offlineAssets.core.includes('index.html'), 'offline-assets.json 缺少核心資源清單');
 
   pass('offline release tooling ok');
 }

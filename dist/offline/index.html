@@ -5,6 +5,8 @@
 <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebPad++</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#2563eb">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <!--
     ╔══════════════════════════════════════════════════════════════════════╗
@@ -176,6 +178,7 @@
                             <button data-action="call" data-call="core.fileio.newFileFromTemplate" data-args='["md"]'   class="new-file-item"><i class="fa-brands fa-markdown text-gray-600"></i> Markdown</button>
                             <button data-action="call" data-call="core.fileio.newFileFromTemplate" data-args='["json"]' class="new-file-item"><i class="fa-solid fa-brackets-curly text-green-600"></i> JSON</button>
                             <button data-action="call" data-call="core.fileio.newFileFromTemplate" data-args='["txt"]'  class="new-file-item"><i class="fa-regular fa-file-lines text-gray-500"></i> Text</button>
+                            <button data-action="call" data-call="features.notes.create" class="new-file-item"><i class="fa-regular fa-square-check text-amber-500"></i> <span data-i18n="notes.newMenu">Todo Note</span></button>
                             <div class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
                             <button data-action="call" data-call="core.fileio.newFileFromTemplate" data-args='["xlsx"]' class="new-file-item"><i class="fa-solid fa-table text-emerald-600"></i> Spreadsheet</button>
                             <div class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
@@ -183,6 +186,9 @@
                             <button data-action="call" data-call="core.fileio.openCameraToText" class="new-file-item"><i class="fa-solid fa-camera text-violet-500"></i> Camera to Text</button>
                         </div>
                     </div>
+                    <button data-action="call" data-call="features.notes.create" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 hover:text-amber-600 rounded transition" title="Todo Note" data-i18n-title="notes.newTitle">
+                        <i class="fa-regular fa-square-check text-amber-500"></i> <span class="hidden sm:inline" data-i18n="notes.newBtn">記事</span>
+                    </button>
                     <!-- 開啟檔案或資料夾：原 fa-folder-open 圖示，按下會詢問要開檔案還是資料夾 -->
                     <button data-action="call" data-call="core.fileio.openFileOrFolder" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition" title="開啟檔案或資料夾" data-i18n-title="nav.openTitle">
                         <i class="fa-regular fa-folder-open"></i>
@@ -233,8 +239,8 @@
                     <button id="btn-seo" data-action="call" data-call="tools.seo.openModal" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded transition" title="SEO 工具 (Sitemap & Robots.txt)">
                         <i class="fa-solid fa-globe text-blue-500"></i> <span class="hidden sm:inline">SEO</span>
                     </button>
-                    <button id="btn-qr" data-action="call" data-call="features.format.openQrModal" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded transition" title="辨識工具：QR Code 與 OCR 文字辨識">
-                        <i class="fa-solid fa-wand-magic-sparkles text-violet-500"></i> <span class="hidden sm:inline">辨識工具</span>
+                    <button id="btn-qr" data-action="call" data-call="features.format.openQrModal" class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded transition" title="掃描辨識：QR Code 與 OCR 文字辨識">
+                        <i class="fa-solid fa-eye text-violet-500"></i> <span class="hidden sm:inline">掃描辨識</span>
                     </button>
                     <button data-action="call" data-call="tools.docx.exportDocx" data-optional="true" id="btn-export-docx" class="hidden px-2 sm:px-3 py-1.5 text-xs sm:text-sm bg-indigo-600 hover:bg-indigo-700 text-white rounded transition shadow-sm" title="Export DOCX" data-i18n-title="nav.exportDocxTitle">
                         <i class="fa-solid fa-file-word"></i> <span class="hidden sm:inline">Export DOCX</span>
@@ -247,6 +253,11 @@
         </div>
 
         <div class="flex items-center gap-2 sm:gap-3">
+            <button id="offline-status-button" data-action="call" data-call="core.offline.togglePanel" class="offline-status-button hidden sm:flex items-center gap-2 px-2.5 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/60 text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition" title="離線功能狀態">
+                <span id="offline-status-dot" class="offline-status-dot offline-status-idle"></span>
+                <i id="offline-status-icon" class="fa-solid fa-cloud text-gray-400"></i>
+                <span id="offline-status-label">離線待啟用</span>
+            </button>
 
             <div data-action="call" data-call="features.format.renameFile" class="group flex items-center gap-1 sm:gap-2 px-1 sm:px-2 py-1 rounded cursor-pointer border border-transparent hover:border-blue-300 hover:bg-blue-50 dark:hover:border-blue-700 dark:hover:bg-blue-900/30 transition-all" title="Rename" data-i18n-title="nav.renameTitle">
                 <span id="file-name" data-is-default="true" class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 max-w-[100px] sm:max-w-[150px] truncate group-hover:text-blue-600 dark:group-hover:text-blue-400"></span>
@@ -385,6 +396,19 @@
         <div id="split-resizer" class="hidden w-1.5 cursor-col-resize bg-gray-300 dark:bg-gray-600 hover:bg-blue-500 dark:hover:bg-blue-500 transition-colors flex-shrink-0 relative z-10"></div>
 
         <div id="visual-container" class="hidden flex-col bg-white dark:bg-gray-900 transition-all duration-300" style="min-width:200px; overflow:hidden">
+            <div id="note-toolbar" class="hidden flex-shrink-0 items-center gap-2 p-2 sm:px-3 bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-900/50">
+                <div class="hidden md:flex flex-col leading-tight min-w-[120px]">
+                    <span class="text-xs font-bold text-amber-700 dark:text-amber-300" data-i18n="notes.toolbarTitle">待辦記事</span>
+                    <span class="text-[10px] text-amber-600/80 dark:text-amber-300/70" data-i18n="notes.toolbarHint">勾選會自動儲存</span>
+                </div>
+                <input id="note-new-item-input" type="text" class="flex-grow min-w-[120px] px-3 py-2 text-sm rounded-xl border border-amber-200 dark:border-amber-800 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 outline-none focus:ring-2 focus:ring-amber-400" placeholder="輸入待辦事項..." data-i18n-placeholder="notes.inputPlaceholder">
+                <button data-action="call" data-call="features.notes.addTodoFromInput" class="px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-sm transition">
+                    <i class="fa-solid fa-plus"></i> <span class="hidden sm:inline" data-i18n="notes.addBtn">新增</span>
+                </button>
+                <button data-action="call" data-call="features.notes.clearCompleted" class="px-3 py-2 rounded-xl bg-white dark:bg-gray-800 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-xs font-bold transition" data-i18n-title="notes.clearTitle" title="清除已完成">
+                    <i class="fa-solid fa-broom"></i> <span class="hidden sm:inline" data-i18n="notes.clearBtn">清除完成</span>
+                </button>
+            </div>
             <div class="flex items-center p-1.5 sm:p-2 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm flex-shrink-0 overflow-x-auto whitespace-nowrap hide-scrollbar">
                 <button data-action="call" data-call="features.visual.execCmd" data-args='["bold"]' class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 hover:text-violet-600 rounded transition-colors" title="Bold"><i class="fa-solid fa-bold"></i></button>
                 <button data-action="call" data-call="features.visual.execCmd" data-args='["italic"]' class="p-1 sm:p-2 flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 hover:text-violet-600 rounded transition-colors" title="Italic"><i class="fa-solid fa-italic"></i></button>
@@ -599,7 +623,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col max-h-[90vh]">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-wand-magic-sparkles text-violet-500 text-xl"></i>
+                    <i class="fa-solid fa-eye text-violet-500 text-xl"></i>
                     <div>
                         <h3 class="text-lg font-bold text-gray-900 dark:text-white">辨識工具</h3>
                         <p class="text-[10px] text-gray-400">QR Code 產生、QR 掃描、OCR 文字辨識</p>
@@ -699,7 +723,7 @@
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">支援圖片強化、黑白文件模式、多次辨識挑選最佳結果，適合中文、英文、日文與韓文圖片。</p>
                     </div>
                     <button data-action="sequence" data-sequence='["tools.qr.closeModal","tools.ocr.openModal"]' class="w-full py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-bold shadow-lg shadow-violet-600/30 transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i> 開啟高準確 OCR
+                        <i class="fa-solid fa-language"></i> 開啟高準確 OCR
                     </button>
                 </div>
             </div>
@@ -712,7 +736,7 @@
 
     <!-- OCR Tool Modal (Redesigned) -->
     <div id="ocr-modal" class="hidden fixed inset-0 z-[300] flex items-center justify-center bg-black/60 backdrop-blur-sm">
-        <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-6xl mx-2 sm:mx-4 overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col max-h-[94vh]">
+        <div class="ocr-modal-shell bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-6xl mx-2 sm:mx-4 overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col max-h-[94vh]">
             <!-- Header -->
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between bg-violet-500 text-white">
                 <div class="flex items-center gap-3">
@@ -772,7 +796,7 @@
                         <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">輸入來源</label>
                         <button data-action="call" data-call="tools.ocr.startCamera" class="w-full flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-violet-500 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition group">
                             <i class="fa-solid fa-camera text-gray-400 group-hover:text-violet-500"></i>
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">相機拍照</span>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">全螢幕相機掃描</span>
                         </button>
                         <button data-action="call" data-call="tools.ocr.triggerFileUpload" class="w-full flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition group">
                             <i class="fa-solid fa-file-image text-gray-400 group-hover:text-emerald-500"></i>
@@ -791,8 +815,8 @@
                     <!-- Step 1: Drop/Preview Area -->
                     <div id="ocr-view-initial" class="flex-1 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl flex flex-col items-center justify-center p-8 text-center bg-gray-50/50 dark:bg-gray-800/30 transition duration-200" data-drop-zone="ocr">
                         <i class="fa-solid fa-cloud-arrow-up text-5xl text-gray-200 dark:text-gray-700 mb-4"></i>
-                        <h4 class="text-sm font-bold text-gray-600 dark:text-gray-400">尚未選取圖片</h4>
-                        <p class="text-xs text-gray-400 mt-2">請從左側選擇來源，或直接拖曳圖片到此處</p>
+                        <h4 class="text-sm font-bold text-gray-600 dark:text-gray-400">尚未選取圖片或開啟相機</h4>
+                        <p class="text-xs text-gray-400 mt-2">請從左側選擇來源；相機會以全螢幕開啟，辨識後會自動建立 TXT 新分頁</p>
                     </div>
 
                     <!-- Step 2: Image Preview -->
@@ -802,7 +826,7 @@
                             <div id="ocr-scan-line" class="hidden absolute top-0 left-0 w-full h-0.5 bg-violet-400 shadow-[0_0_15px_rgba(167,139,250,0.8)] z-10 animate-scan"></div>
                         </div>
                         <button id="ocr-start-btn" data-action="call" data-call="tools.ocr.startRecognition" class="w-full py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-bold shadow-lg shadow-violet-600/30 transition flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-magnifying-glass"></i> 開始辨識文字
+                            <i class="fa-solid fa-file-import"></i> 辨識並匯入 TXT 新分頁
                         </button>
                     </div>
 
@@ -810,8 +834,8 @@
                     <div id="ocr-view-result" class="hidden flex-1 flex flex-col gap-4 min-h-[520px]">
                         <div class="flex items-start justify-between gap-3">
                             <div>
-                                <h4 class="text-base font-black text-gray-900 dark:text-white">辨識結果</h4>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">左側保留處理後圖片，右側是可編輯文字區，方便直接檢查修正。</p>
+                                <h4 class="text-base font-black text-gray-900 dark:text-white">辨識結果備份</h4>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">正常流程會自動建立 TXT 新分頁；若停留在此畫面，可直接編輯或重新匯入。</p>
                             </div>
                             <span id="ocr-result-meta" class="text-[10px] text-gray-400 leading-relaxed text-right max-w-[45%]"></span>
                         </div>
@@ -823,23 +847,23 @@
                                 </div>
                             </div>
                             <div class="min-h-[360px] flex flex-col">
-                                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">辨識結果，可直接編輯修正</label>
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">辨識結果備份，可直接編輯修正</label>
                                 <textarea id="ocr-result-text" class="flex-1 min-h-[340px] w-full p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 text-sm leading-relaxed font-mono focus:ring-2 focus:ring-violet-500 outline-none resize-none"></textarea>
                             </div>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
                             <button data-action="call" data-call="tools.ocr.reset" class="py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold transition">重新開始</button>
                             <button data-action="call" data-call="tools.ocr.copyResult" class="py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition">複製</button>
-                            <button data-action="call" data-call="tools.ocr.saveResult" class="sm:col-span-2 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-lg shadow-emerald-600/30 transition">儲存為新檔案</button>
+                            <button data-action="call" data-call="tools.ocr.saveResult" class="sm:col-span-2 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-lg shadow-emerald-600/30 transition">匯入 TXT 新分頁</button>
                         </div>
                     </div>
 
                     <!-- Camera View -->
-                    <div id="ocr-camera-container" class="hidden flex-1 flex flex-col gap-4 min-h-[520px]">
+                    <div id="ocr-camera-container" class="hidden flex-1 flex-col gap-4 min-h-[520px]">
                         <div class="flex items-start justify-between gap-3">
                             <div>
-                                <h4 class="text-base font-black text-gray-900 dark:text-white">相機拍照辨識</h4>
-                                <p id="ocr-camera-status" class="text-xs leading-relaxed text-gray-500 dark:text-gray-400">正在準備相機...</p>
+                                <h4 class="text-base font-black text-gray-900 dark:text-white">全螢幕相機掃描</h4>
+                                <p id="ocr-camera-status" class="text-xs leading-relaxed text-gray-500 dark:text-gray-400">正在準備全螢幕相機...</p>
                             </div>
                             <button id="ocr-torch-btn" data-action="call" data-call="tools.ocr.toggleTorch" class="hidden px-3 py-2 text-xs bg-amber-100 text-amber-700 rounded-lg font-bold transition">
                                 <i class="fa-solid fa-bolt"></i> 補光
@@ -853,10 +877,10 @@
                         <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
                             <button data-action="call" data-call="tools.ocr.stopCamera" class="py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold transition">取消</button>
                             <button data-action="call" data-call="tools.ocr.takePhoto" class="sm:col-span-1 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-bold shadow-lg shadow-violet-600/30 transition flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-camera"></i> 拍照預覽
+                                <i class="fa-solid fa-camera"></i> 拍照
                             </button>
                             <button data-action="call" data-call="tools.ocr.takePhoto" data-args='[true]' class="sm:col-span-2 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-lg shadow-emerald-600/30 transition flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-file-export"></i> 拍照並立即辨識
+                                <i class="fa-solid fa-file-export"></i> 拍照並匯入 TXT
                             </button>
                         </div>
                     </div>
@@ -1122,9 +1146,46 @@
         </div>
     </div>
 
+    <!-- ── Offline / PWA Status Panel ── -->
+    <div id="offline-panel" class="hidden fixed top-16 right-3 sm:right-5 z-[260] w-[calc(100vw-1.5rem)] max-w-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl overflow-hidden">
+        <div class="px-4 py-3 bg-gradient-to-r from-blue-600 to-emerald-500 text-white flex items-center justify-between">
+            <div class="flex items-center gap-2 font-black text-sm">
+                <i class="fa-solid fa-cloud-arrow-down"></i>
+                <span>離線功能</span>
+            </div>
+            <button data-action="call" data-call="core.offline.closePanel" class="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition" title="關閉">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="p-4 space-y-3 text-sm">
+            <p class="text-xs leading-relaxed text-gray-500 dark:text-gray-400">第一次有網路時會快取核心程式與辨識資源；之後只要瀏覽器沒有清除網站資料，就能在無網路時開啟已快取的功能。</p>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+                <div class="offline-detail-card"><span>支援狀態</span><strong id="offline-detail-support">檢查中</strong></div>
+                <div class="offline-detail-card"><span>網路狀態</span><strong id="offline-detail-network">檢查中</strong></div>
+                <div class="offline-detail-card"><span>核心資源</span><strong id="offline-detail-core">尚未檢查</strong></div>
+                <div class="offline-detail-card"><span>OCR 資源</span><strong id="offline-detail-ocr">尚未檢查</strong></div>
+            </div>
+            <div>
+                <div class="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div id="offline-progress-bar" class="h-full bg-blue-500 rounded-full transition-all duration-300" style="width:0%"></div>
+                </div>
+                <div class="mt-1 flex justify-between text-[10px] text-gray-400">
+                    <span id="offline-progress-text">尚未開始</span>
+                    <span id="offline-detail-version">尚未啟用</span>
+                </div>
+            </div>
+            <p id="offline-detail-note" class="text-xs leading-relaxed text-amber-600 dark:text-amber-300">正在檢查離線功能狀態。</p>
+            <div class="grid grid-cols-2 gap-2">
+                <button data-action="call" data-call="core.offline.prepareCore" class="py-2 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-bold transition">只準備核心</button>
+                <button data-action="call" data-call="core.offline.prepareAll" class="py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-lg shadow-blue-600/20 transition">完整準備</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ── Core Modules (Phase 1) ── -->
     <script src="js/core/app.js"></script>
     <script src="js/core/loader.js"></script>
+    <script src="js/core/offline.js"></script>
     <script src="js/core/tabs.js"></script>
     <script src="js/core/ui.js"></script>
     <script src="js/core/save.js"></script>
@@ -1134,6 +1195,7 @@
     <script src="js/core/fileio/dnd.js"></script>
     <!-- ── Feature Modules (Phase 1) ── -->
     <script src="js/features/visual.js"></script>
+    <script src="js/features/notes.js"></script>
     <script src="js/features/panel.js"></script>
     <script src="js/features/compare.js"></script>
     <script src="js/features/format.js"></script>

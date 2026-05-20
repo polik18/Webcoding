@@ -106,6 +106,8 @@ function updateUI() {
     }
 
     updateStatus();
+    const notesApi = window.WebcodingApp?.namespace?.resolve('features.notes') || window.notesFeature;
+    if (notesApi && typeof notesApi.updateToolbarVisibility === 'function') notesApi.updateToolbarVisibility();
 }
 
 // ─── Status Bar ──────────────────────────────────────────────────────────────

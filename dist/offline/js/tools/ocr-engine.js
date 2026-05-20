@@ -420,6 +420,17 @@
         const dataProfile = _selectTessdata(profile || 'balanced', lang || 'chi_tra+eng');
         const urls = _langParts(lang).map(part => _tessdataUrl(part, dataProfile));
         urls.forEach(url => _prefetchUrl(url, 'fetch'));
+
+        // If the PWA Service Worker is active, also place language data into
+        // Cache Storage so the next OCR run can survive temporary network loss.
+        try {
+            const offline = window.WebcodingApp && window.WebcodingApp.namespace && window.WebcodingApp.namespace.get('core.offline');
+            if (offline && typeof offline.cacheUrls === 'function') {
+                offline.cacheUrls(urls, { reason: 'ocr-language-prefetch' }).catch(err => console.warn('[OCR] offline cache language data failed:', err));
+            }
+        } catch (err) {
+            console.warn('[OCR] offline language cache hook failed:', err);
+        }
         return urls;
     }
 

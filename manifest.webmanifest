@@ -1,0 +1,18 @@
+{
+  "name": "WebPad++ Local-first Editor",
+  "short_name": "WebPad++",
+  "description": "瀏覽器中的本機優先程式碼與文件工具，支援快取後離線開啟。",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f9fafb",
+  "theme_color": "#2563eb",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}

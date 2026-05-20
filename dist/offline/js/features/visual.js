@@ -17,12 +17,34 @@ function _hideAllPanels() {
     const sp = document.getElementById('split-resizer'); if (sp) sp.classList.add('hidden');
 }
 
+function _notesApi() {
+    return window.WebcodingApp?.namespace?.resolve('features.notes') || window.notesFeature || null;
+}
+function _updateNoteToolbarVisibility() {
+    const api = _notesApi();
+    if (api && typeof api.updateToolbarVisibility === 'function') api.updateToolbarVisibility();
+}
+function _noteVisualCss(opts = {}) {
+    const isDark = !!opts.isDark;
+    const fg = opts.fg || (isDark ? '#e2e8f0' : '#1e293b');
+    const border = opts.border || (isDark ? '#334155' : '#e2e8f0');
+    const headerBg = isDark ? '#1f2937' : '#fffbeb';
+    const kicker = isDark ? '#fbbf24' : '#b45309';
+    const muted = isDark ? '#cbd5e1' : '#6b7280';
+    const hintBg = isDark ? 'rgba(245,158,11,.12)' : 'rgba(245,158,11,.14)';
+    const hintFg = isDark ? '#fcd34d' : '#92400e';
+    const itemBg = isDark ? '#111827' : '#ffffff';
+    const freeBg = isDark ? 'rgba(15,23,42,.65)' : 'rgba(248,250,252,.9)';
+    return `.todo-note{max-width:880px;margin:0 auto;padding:12px 0 48px;}.todo-note-header{border:1px solid ${border};background:${headerBg};border-radius:24px;padding:28px 30px;margin-bottom:24px;box-shadow:0 18px 40px rgba(15,23,42,.08);}.todo-note-kicker{margin:0 0 10px!important;color:${kicker};font-weight:800;font-size:13px;letter-spacing:.08em;text-transform:uppercase;}.todo-note h1{margin:0 0 10px!important;font-size:34px;line-height:1.15;color:${fg};border:0!important;padding:0!important;}.todo-note-subtitle{margin:0!important;color:${muted};}.todo-note-hint{margin:14px 0 0!important;padding:10px 12px;border-radius:14px;background:${hintBg};color:${hintFg};font-size:14px;}.todo-list{list-style:none!important;padding:0!important;margin:0 0 24px!important;display:flex;flex-direction:column;gap:12px;}.todo-item{list-style:none!important;margin:0!important;padding:0!important;}.todo-item label{display:flex;align-items:flex-start;gap:12px;border:1px solid ${border};border-radius:18px;background:${itemBg};padding:16px 18px;box-shadow:0 10px 28px rgba(15,23,42,.06);cursor:text;}.todo-item input[type="checkbox"]{width:20px;height:20px;margin-top:3px;accent-color:#f59e0b;flex:0 0 auto;cursor:pointer;}.todo-item [data-note-text]{display:block;min-height:1.6em;outline:none;flex:1;}.todo-item.is-done [data-note-text],.todo-item[data-done="true"] [data-note-text]{text-decoration:line-through;opacity:.55;}.todo-note-freeform{border:1px dashed ${border};border-radius:20px;padding:20px;background:${freeBg};}.todo-note-freeform h2{margin-top:0!important;border:0!important;padding:0!important;}.todo-note-freeform p{min-height:80px;margin-bottom:0!important;}`;
+}
+
 // ─── Mode Switches ────────────────────────────────────────────────────────────
 function switchToCode() {
     if (getActive()) getActive().mode = 'code'; _setActiveBtn('mode-code-btn'); _hideAllPanels();
     const ec = document.getElementById('editor-container'); const vc = document.getElementById('visual-container');
     ec.style.width = ''; ec.style.flexGrow = '1'; ec.style.flexShrink = '1'; vc.style.width = ''; vc.style.flexGrow = '0'; vc.style.flexShrink = '1';
     ec.classList.remove('hidden'); ec.classList.add('flex'); vc.classList.add('hidden'); vc.classList.remove('flex');
+    _updateNoteToolbarVisibility();
     setTimeout(() => editor.refresh(), 10);
 }
 function switchToVisual() {
@@ -31,18 +53,20 @@ function switchToVisual() {
     ec.style.width = ''; ec.style.flexGrow = '0'; ec.style.flexShrink = '1'; vc.style.width = ''; vc.style.flexGrow = '1'; vc.style.flexShrink = '1';
     ec.classList.add('hidden'); ec.classList.remove('flex'); vc.classList.remove('hidden'); vc.classList.add('flex');
     syncCodeToVisual();
+    _updateNoteToolbarVisibility();
 }
 function switchToSplit() {
     if (getActive()) getActive().mode = 'split'; _setActiveBtn('mode-split-btn'); _hideAllPanels();
     const ec = document.getElementById('editor-container'); const vc = document.getElementById('visual-container'); const sp = document.getElementById('split-resizer');
     ec.style.width = '50%'; ec.style.flexGrow = '0'; ec.style.flexShrink = '0'; vc.style.width = '50%'; vc.style.flexGrow = '0'; vc.style.flexShrink = '0';
     ec.classList.remove('hidden'); ec.classList.add('flex'); vc.classList.remove('hidden'); vc.classList.add('flex');
-    if (sp) sp.classList.remove('hidden'); syncCodeToVisual(); setTimeout(() => editor.refresh(), 10);
+    if (sp) sp.classList.remove('hidden'); syncCodeToVisual(); _updateNoteToolbarVisibility(); setTimeout(() => editor.refresh(), 10);
 }
 function switchToSpreadsheet() {
     if (getActive()) getActive().mode = 'spreadsheet'; _setActiveBtn('mode-code-btn'); _hideAllPanels();
     const sc = document.getElementById('spreadsheet-container');
     if (sc) { sc.style.flexGrow = '1'; sc.classList.remove('hidden'); sc.classList.add('flex'); }
+    _updateNoteToolbarVisibility();
 }
 
 // ─── Visual Frame ─────────────────────────────────────────────────────────────
@@ -53,6 +77,8 @@ function _bindVisualFrameInput(doc) {
     if (doc.__visualSelectionHandler) doc.removeEventListener('selectionchange', doc.__visualSelectionHandler);
     doc.__visualSelectionHandler = () => { const mode = getActive().mode; if (mode === 'split' && typeof syncSelectionToCode === 'function') syncSelectionToCode(); };
     doc.addEventListener('selectionchange', doc.__visualSelectionHandler);
+    const notes = _notesApi();
+    if (notes && typeof notes.bindFrame === 'function') notes.bindFrame(doc);
 }
 function initVisualFrame() {
     const frame = document.getElementById('visual-frame');
@@ -88,7 +114,9 @@ function syncCodeToVisual() {
     const isDark = document.documentElement.classList.contains('dark');
     let content = editor.getValue(); const tab = getActive();
     const bg = isDark ? '#0f172a' : '#fff'; const fg = isDark ? '#e2e8f0' : '#1e293b'; const codeBg = isDark ? '#1e293b' : '#f1f5f9'; const border = isDark ? '#334155' : '#e2e8f0';
-    const themeCss = `body{font-family:-apple-system,sans-serif;line-height:1.7;color:${fg};background:${bg};padding:40px;max-width:900px;margin:0 auto;}h1,h2,h3,h4{font-weight:700;margin-top:2em;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid ${border};padding:10px;}code{background:${codeBg};padding:0.2em 0.4em;border-radius:4px;}pre{background:${codeBg};padding:1.5rem;border-radius:8px;overflow-x:auto;}blockquote{border-left:4px solid ${border};margin:1em 0;padding:0.5em 1rem;}`;
+    const baseThemeCss = `body{font-family:-apple-system,sans-serif;line-height:1.7;color:${fg};background:${bg};padding:40px;max-width:900px;margin:0 auto;}h1,h2,h3,h4{font-weight:700;margin-top:2em;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid ${border};padding:10px;}code{background:${codeBg};padding:0.2em 0.4em;border-radius:4px;}pre{background:${codeBg};padding:1.5rem;border-radius:8px;overflow-x:auto;}blockquote{border-left:4px solid ${border};margin:1em 0;padding:0.5em 1rem;}`;
+    const noteCss = _noteVisualCss({ isDark, fg, border });
+    const themeCss = `${baseThemeCss}${noteCss}`;
     const isMarkdown = tab && (tab.name.toLowerCase().endsWith('.md') || tab.docType === 'md');
     let isHtml = tab && (tab.name.toLowerCase().endsWith('.html') || tab.name.toLowerCase().endsWith('.htm') || ['docx','odt','pdf-text'].includes(tab.docType));
     if (!isMarkdown && !isHtml && content.trim().startsWith('<') && /<(html|body|div|p|h[1-6]|section)[\>\s]/i.test(content)) isHtml = true;

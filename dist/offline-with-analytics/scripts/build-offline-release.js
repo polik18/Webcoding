@@ -126,6 +126,7 @@ function writeManifest(outDir) {
         : 'The offline index removes analytics, Tailwind CDN, Font Awesome CDN, and inline CDN fallback handlers.',
       'js/core/loader.js still contains CDN URLs for the normal web build, but offline mode disables remote fallback at runtime.',
       'Run npm run vendor:fetch in a network-enabled environment before building a full local-first package.',
+      'service-worker.js and offline-assets.json are included so HTTPS/localhost deployments can prepare a browser cache after the first online visit.',
       'Run npm run offline:audit:strict after building when you need every optional vendor asset bundled.'
     ]
   };
@@ -144,6 +145,7 @@ function writeManifest(outDir) {
     '- Font Awesome CDN is removed. Icon spacing is preserved; exact icons require bundling Font Awesome webfonts separately.',
     '- HTML `onerror` CDN fallbacks are removed from `index.html`.',
     '- `window.WEBCODING_OFFLINE = true` and `window.WEBCODING_DISABLE_REMOTE_FALLBACKS = true` disable dependency-manager CDN fallback.',
+    '- `service-worker.js`, `manifest.webmanifest`, and `offline-assets.json` are included for HTTPS/localhost browser cache preparation.',
     '',
   ];
   if (KEEP_ANALYTICS) {

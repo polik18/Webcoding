@@ -283,7 +283,13 @@ class FileSystem {
             return;
         }
         
-        tabManager.createNewTab(node.name, node.content || "", false, nodeId);
+        const tab = tabManager.createNewTab(node.name, node.content || "", false, nodeId);
+        if (tab && (node.docType === 'note' || /data-webpad-note\s*=\s*["']true["']/i.test(node.content || ''))) {
+            tab.docType = 'note';
+            tab.isTodoNote = true;
+            tab.mode = 'visual';
+            if (typeof window.switchToVisual === 'function') window.switchToVisual();
+        }
     }
 
     async exportZip() {

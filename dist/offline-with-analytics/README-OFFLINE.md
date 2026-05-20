@@ -9,6 +9,7 @@ Runtime changes in this build:
 - Font Awesome CDN is removed. Icon spacing is preserved; exact icons require bundling Font Awesome webfonts separately.
 - HTML `onerror` CDN fallbacks are removed from `index.html`.
 - `window.WEBCODING_OFFLINE = true` and `window.WEBCODING_DISABLE_REMOTE_FALLBACKS = true` disable dependency-manager CDN fallback.
+- `service-worker.js`, `manifest.webmanifest`, and `offline-assets.json` are included for HTTPS/localhost browser cache preparation.
 
 Important analytics note:
 
