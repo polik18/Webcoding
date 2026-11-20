@@ -919,7 +919,7 @@
                     <!-- Step 2: Image Preview -->
                     <div id="ocr-view-preview" class="hidden flex-1 flex flex-col gap-4">
                         <div class="relative flex-1 bg-black rounded-xl overflow-hidden shadow-inner border border-gray-200 dark:border-gray-700">
-                            <img id="ocr-preview-img" class="w-full h-full object-contain">
+                            <img id="ocr-preview-img" alt="OCR 待辨識圖片預覽" class="w-full h-full object-contain">
                             <div id="ocr-scan-line" class="hidden absolute top-0 left-0 w-full h-0.5 bg-violet-400 shadow-[0_0_15px_rgba(167,139,250,0.8)] z-10 animate-scan"></div>
                         </div>
                         <button id="ocr-start-btn" data-action="call" data-call="tools.ocr.startRecognition" class="w-full py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-bold shadow-lg shadow-violet-600/30 transition flex items-center justify-center gap-2">
@@ -940,7 +940,7 @@
                             <div class="min-h-[240px] lg:min-h-0 bg-gray-100 dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col">
                                 <div class="px-3 py-2 text-[10px] font-bold text-gray-400 border-b border-gray-200 dark:border-gray-700">處理後圖片預覽</div>
                                 <div class="flex-1 min-h-0 flex items-center justify-center bg-black/90">
-                                    <img id="ocr-result-img" class="w-full h-full object-contain">
+                                    <img id="ocr-result-img" alt="OCR 辨識結果圖片" class="w-full h-full object-contain">
                                 </div>
                             </div>
                             <div class="min-h-[360px] flex flex-col">
