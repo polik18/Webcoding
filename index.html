@@ -159,6 +159,19 @@
 
     <!-- Custom Style -->
     <link rel="stylesheet" href="css/style.css">
+    <script src="https://polik18.github.io/assets/polik-shell.js" data-cat="education" data-accent="#38bdf8" data-accent2="#2dd4bf" defer></script>
+    <style id="polik-skin">
+        /* Polik Neo-Lab 外觀：編輯器外框品牌化（不影響編輯區） */
+        body > nav:first-of-type { position: relative; backdrop-filter: blur(14px) saturate(150%); }
+        body > nav:first-of-type::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: linear-gradient(90deg, #38bdf8, #818cf8 45%, #2dd4bf); background-size: 200% 100%; animation: wp-beam 8s linear infinite; opacity: .85; pointer-events: none; }
+        @keyframes wp-beam { to { background-position: 200% 0; } }
+        body > nav:first-of-type h1 { font-family: "Space Grotesk", Inter, sans-serif; letter-spacing: -.01em; background-image: linear-gradient(100deg, #38bdf8, #818cf8 50%, #2dd4bf) !important; filter: drop-shadow(0 0 12px rgba(56, 189, 248, .35)); }
+        body > nav:first-of-type h1 i { -webkit-text-fill-color: #38bdf8; }
+        html.dark body > nav:first-of-type { background: rgba(10, 15, 28, .92) !important; }
+        [data-call="features.panel.runCode"] { background: linear-gradient(110deg, #0ea5e9, #6366f1) !important; box-shadow: 0 6px 18px -6px rgba(14, 165, 233, .8) !important; font-weight: 700; }
+        [data-call="features.panel.runCode"]:hover { filter: brightness(1.12); }
+        @media (prefers-reduced-motion: reduce) { body > nav:first-of-type::after { animation: none; } }
+    </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 h-screen flex flex-col overflow-hidden transition-colors duration-200">
     <a data-polik-category-return href="https://polik18.github.io/education.html" aria-label="回到教學現場分類" style="position:fixed;left:14px;bottom:14px;z-index:2147483647;display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border:1px solid rgba(23,79,60,.3);border-radius:999px;background:rgba(255,253,248,.94);color:#0d3528;font:700 13px/1 system-ui,-apple-system,sans-serif;text-decoration:none;box-shadow:0 8px 24px rgba(0,0,0,.2);backdrop-filter:blur(10px)">← 回教學現場分類</a>
